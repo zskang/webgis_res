@@ -1,0 +1,233 @@
+package com.cabletech.res.action.publicmgr;
+
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.action.BaseAction;
+import com.cabletech.res.entity.publicmgr.WlanEntity;
+import com.cabletech.res.entity.publicmgr.ZdxxEntity;
+import com.cabletech.res.service.publicmgr.WlanService;
+import com.cabletech.res.service.publicmgr.ZdxxService;
+
+/**
+ * 公共资源-Wlan信息管理
+ * 
+ * @author 周刚 2012-07-17
+ */
+@SuppressWarnings("serial")
+@Namespace("/res/publicmgr")
+@Results({
+		@Result(name = "input", location = "/res/publicmgr/wlan/wlan_input.jsp"),
+		@Result(name = "input4nbsp", location = "/res/publicmgr/wlan/wlan_input_nbsp.jsp"),
+		@Result(name = "view", location = "/res/publicmgr/wlan/wlan_view.jsp"),
+		@Result(name = "list", location = "/res/publicmgr/wlan/wlan_list_dwzh.jsp") })
+@Action("wlan")
+public class WlanAction extends BaseAction {
+	private WlanEntity entity;
+	private WlanEntity queryentity = new WlanEntity();
+	@Resource(name = "wlanServiceImpl")
+	private WlanService wlanService;
+	@Resource(name = "zdxxServiceImpl")
+	private ZdxxService zdxxService;
+
+	@Override
+	public String execute() {
+		return "frame";
+	}
+
+	public String view() {
+		String id = getParameterValue("id");
+		entity = wlanService.getbyid(id);
+		request.setAttribute("entity", entity);
+		return "view";
+	}
+
+	public String input() {
+		String id = getParameterValue("id");
+		String zymc = "";
+		if (!StringUtils.isBlank(id)) {
+			entity = wlanService.getbyid(id);
+			if (entity != null) {
+				if (entity.getSiteId() != null
+						&& !"".equals(entity.getSiteId())) {
+					ZdxxEntity zdxx = zdxxService.getbyid(entity.getSiteId());
+					zymc = zdxx.getZymc();
+					entity.setSiteId(zymc);
+
+				}
+			}
+		}
+		request.setAttribute("entity", entity);
+		return "input";
+	}
+
+	/** 代维系统使用的表单
+	 * @return input4nbsp
+	 */
+	public String input4nbsp() {
+		String id = getParameterValue("id");
+		String zymc = "";
+		if (!StringUtils.isBlank(id)) {
+			entity = wlanService.getbyid(id);
+			if (entity != null) {
+				if (entity.getSiteId() != null
+						&& !"".equals(entity.getSiteId())) {
+					ZdxxEntity zdxx = zdxxService.getbyid(entity.getSiteId());
+					zymc = zdxx.getZymc();
+					entity.setSiteId(zymc);
+
+				}
+			}
+		}
+		request.setAttribute("entity", entity);
+		return "input4nbsp";
+	}
+
+	/**
+	 * 资源保存
+	 * 
+	 * @return String
+	 */
+	public String save() {
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getId())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		if (wlanService.saveOrUpdate(entity)) {
+			setInfoMessage("保存成功!", toPage);
+		} else {
+			setInfoMessage("保存失败!", toPage);
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+
+	public String save4nbsp() {
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getId())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		if (wlanService.saveOrUpdate4nbsp(entity)) {
+			setInfoMessage("保存成功!", toPage);
+		} else {
+			setInfoMessage("保存失败!", toPage);
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+
+	/**
+	 * 列表数据
+	 */
+	public void listData() {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");// 获取当前用户
+		String condition = queryentity.getSerializeQueryCondition();
+		if (StringUtils.isBlank(condition)) {
+			condition = request.getQueryString();
+		}
+		Map<String, Object> conditionMap = new HashMap<String, Object>();
+		try {
+			conditionMap = super.getDecodeCondtionMap(condition, user);
+			Map<String, Object> map = wlanService.queryPageMap("queryWlanList",
+					conditionMap, super.getPage(), super.getLimit());
+			convertpagemaptojson(map);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		request.setAttribute("condition", condition);
+	}
+
+	public String list() {
+		return LIST;
+	}
+
+	/**
+	 * 删除信息
+	 * 
+	 * @return String
+	 */
+	public String delete() throws Exception {
+		String Id = entity.getId();
+		if (wlanService.delete(Id)) {
+			super.outmessage("删除成功！");
+		} else {
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String Id = request.getParameter("Id");
+		if (StringUtils.isNotBlank(Id)) {
+			entity = wlanService.getbyid(Id);
+			request.setAttribute("entity", entity);
+		} else {
+			entity = new WlanEntity();
+		}
+	}
+
+	/**
+	 * 站点的批量逻辑删除
+	 */
+	public String batchDelete() {
+		String Ids = request.getParameter("Ids");
+		if (wlanService.batchDelete(Ids)) {
+			super.outmessage("删除成功！");
+		} else {
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+
+	/**
+	 * 转向批量编辑页面
+	 * 
+	 * @return
+	 */
+	public String toBatchEditPage() {
+		String ids = request.getParameter("Ids");
+		request.setAttribute("ids", ids);
+		return "edit";
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		if (entity == null) {
+			entity = new WlanEntity();
+		}
+	}
+
+	@Override
+	public WlanEntity getModel() {
+		if (entity == null) {
+			entity = new WlanEntity();
+		}
+		return entity;
+	}
+
+	/**
+	 * 设置提示信息
+	 * 
+	 * @param info
+	 *            提示信息
+	 * @param toPage
+	 *            页面
+	 */
+	public void setInfoMessage(String info, String toPage) {
+		if (toPage.equals("input")) {
+			entity = new WlanEntity();
+		}
+		entity.setActionMessage(info);
+	}
+}

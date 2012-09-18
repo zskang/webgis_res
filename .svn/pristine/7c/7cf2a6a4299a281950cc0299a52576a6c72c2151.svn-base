@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.opticcablemgr.GldlyMapper">
+	
+	<update id="deleteCDXX" parameterType="hashmap">
+		<if test="zylx == 'AA001'">
+			update res_odf_conn set connecttype='',to_classid='',to_id='',to_firstunit='',dzzt='AD204' where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			update res_gjjx_conn set connecttype='',to_classid='',to_id='',to_firstunit='',dzzt='AD204' where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			update res_gfxx_conn set connecttype='',to_classid='',to_id='',to_firstunit='',dzzt='AD204' where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			update res_gzdh_conn set connecttype='',to_classid='',to_id='',to_firstunit='',dzzt='AD204' where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+	</update>
+	
+	<delete id="deleteRQXX" parameterType="hashmap">
+		delete from res_sb_conn where to_id=#{xtbh,jdbcType=VARCHAR} or from_id=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+		<!-- 根据光端机光分纤箱查询所有的光缆段信息(任贺 2012/7/31添加) -->
+	<select id="getGldlyByIds" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select xtbh,zymc,xxs,ADSBLX,ADSBMC,ZDSBLX,ZDSBMC from res_gld_ly 
+			where status is null and ADSBMC in
+			<foreach collection="ids" item="id" open="("
+				separator="," close=")">
+				#{id}
+			</foreach>
+			or
+			ZDSBMC in
+			<foreach collection="ids" item="id" open="("
+				separator="," close=")">
+				#{id}
+			</foreach>
+
+	</select>
+	<!-- 根据设备id和类型查询所有A端或Z端是该设备的路由端(吕仁钊 2012/7/2添加) -->
+	<select id="getByIdByType" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select xtbh,zymc,xxs,ADSBLX,ADSBMC,ZDSBLX,ZDSBMC from res_gld_ly 
+			where ((adsblx = #{zylx,jdbcType=VARCHAR} and adsbmc = #{xtbh,jdbcType=VARCHAR} ) 
+			or (zdsblx = #{zylx,jdbcType=VARCHAR} and zdsbmc = #{xtbh,jdbcType=VARCHAR} ) )
+			and (status is null or status != '9')
+	</select>
+
+	<!-- 插入光缆段路由 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.opticcablemgr.GldlyEntity">
+		INSERT INTO res_gld_ly(
+		objectid,xtbh,zymc,gldbh,ssgl,xxs,cd,fsfs,sszt,adsblx,adsbmc,zdsblx,zdsbmc,
+		sccj,qxlx,gcmc,sgdw,sydw,cqxz,whfs,yt,syqr,regionid,orgid
+		)
+		VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{gldbh,jdbcType=VARCHAR},
+		#{ssgl,jdbcType=VARCHAR},#{xxs,jdbcType=VARCHAR},
+		#{cd,jdbcType=VARCHAR},#{fsfs,jdbcType=VARCHAR},
+		#{sszt,jdbcType=VARCHAR},#{adsblx,jdbcType=VARCHAR},
+		#{adsbmc,jdbcType=VARCHAR},#{zdsblx,jdbcType=VARCHAR},
+		#{zdsbmc,jdbcType=VARCHAR},#{sccj,jdbcType=VARCHAR},
+		#{qxlx,jdbcType=VARCHAR},#{gcmc,jdbcType=VARCHAR},
+		#{sgdw,jdbcType=VARCHAR},#{sydw,jdbcType=VARCHAR},
+		#{cqxz,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+		#{yt,jdbcType=VARCHAR},#{syqr,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 更新光缆段路由 -->
+	<update id="update" parameterType="com.cabletech.res.entity.opticcablemgr.GldlyEntity">
+		UPDATE res_gld_ly SET
+		zymc=#{zymc,jdbcType=VARCHAR},gldbh=#{gldbh,jdbcType=VARCHAR},ssgl=#{ssgl,jdbcType=VARCHAR},
+		xxs=#{xxs,jdbcType=VARCHAR},cd=#{cd,jdbcType=VARCHAR},fsfs=#{fsfs,jdbcType=VARCHAR},
+		sszt=#{sszt,jdbcType=VARCHAR},adsblx=#{adsblx,jdbcType=VARCHAR},adsbmc=#{adsbmc,jdbcType=VARCHAR},
+		zdsblx=#{zdsblx,jdbcType=VARCHAR},zdsbmc=#{zdsbmc,jdbcType=VARCHAR},sccj=#{sccj,jdbcType=VARCHAR},
+		qxlx=#{qxlx,jdbcType=VARCHAR},gcmc=#{gcmc,jdbcType=VARCHAR},sgdw=#{sgdw,jdbcType=VARCHAR},
+		sydw=#{sydw,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		yt=#{yt,jdbcType=VARCHAR},syqr=#{syqr,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR},orgid=#{orgid,jdbcType=VARCHAR}
+		WHERE XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 查看光缆段路由 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.opticcablemgr.GldlyEntity"
+		parameterType="string" flushCache="true">
+		select * from res_gld_ly where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询光缆段路由 条件 名称 产权性质 维护方式 区域 -->
+	<select id="queryGldly" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select * from res_gld_ly
+		where ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="fsfs != null and fsfs != ''">
+			and fsfs = #{fsfs,jdbcType=VARCHAR}
+		</if>		
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 逻辑删除光缆段路由 -->
+	<update id="deleteGldly" parameterType="String">
+		UPDATE res_gld_ly SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取光缆段关联树中 odf  -->
+	<select id="getOdfByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		<!-- select o.zymc,o.xtbh from res_gld_ly l,res_odf o  where l.adsbmc=o.xtbh and l.adsblx='AD702' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union
+		select o.zymc,o.xtbh from res_gld_ly l,res_odf o  where l.zdsbmc=o.xtbh and l.zdsblx='AD702' and l.xtbh=#{xtbh,jdbcType=VARCHAR}-->
+		select * from res_odf where (xtbh in (select zdsbmc from res_gld_ly where xtbh=#{xtbh,jdbcType=VARCHAR})
+        or xtbh in (select adsbmc from res_gld_ly where xtbh=#{xtbh,jdbcType=VARCHAR})) and (status!='9' or status is null)
+	</select>
+	<!-- 获取光缆段关联树中 光终端盒  -->
+	<select id="getGzdhByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gld_ly l,res_gzdh g where l.adsbmc=g.xtbh and l.adsblx='AA006' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union 
+		select g.zymc,g.xtbh from res_gld_ly l,res_gzdh g where l.zdsbmc=g.xtbh and l.zdsblx='AA006' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>	
+	
+	<!-- 获取光缆段关联树中 光分纤箱  -->
+	<select id="getGfxxByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gld_ly l,res_gfxx g where l.adsbmc=g.xtbh and l.adsblx='AA004' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+		union 
+		select g.zymc,g.xtbh from res_gld_ly l,res_gfxx g where l.zdsbmc=g.xtbh and l.zdsblx='AA004' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>	
+	
+	<!-- 获取光缆段关联树中 光交接箱  -->
+	<select id="getGjjxByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gld_ly l,res_gjjx g where l.adsbmc=g.xtbh and l.adsblx='AA003' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+		union 
+		select g.zymc,g.xtbh from res_gld_ly l,res_gjjx g where l.zdsbmc=g.xtbh and l.zdsblx='AA003' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取光缆段关联树中 纤芯  -->
+	<select id="getQXByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		select * from res_gld_ly l where (l.adsblx='AA003' and l.adsbmc=#{xtbh,jdbcType=VARCHAR}) or (l.zdsblx='AA003' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})
+	</select>	
+	
+	<!-- 获取光缆段关联树中 光缆盘留  -->
+	<select id="getGlplByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		<!-- select g.zymc,g.xtbh from res_gld_ly l,res_glpl g where l.adsbmc=g.xtbh and (l.adsblx='A20' or l.adsblx='A21') and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union 
+		select g.zymc,g.xtbh from res_gld_ly l,res_glpl g where l.zdsbmc=g.xtbh and (l.zdsblx='A20' or l.zdsblx='A21') and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union
+		select g.zymc,g.xtbh from res_glpl g ,res_relate_jgdwss d where g.szsslx=d.restype   and g.szssmc=d.resid and d.gldid=#{xtbh,jdbcType=VARCHAR} -->
+		select g.zymc,g.xtbh from res_glpl g where ssgld=#{xtbh,jdbcType=VARCHAR} and (status!='9' or status is null)
+	</select>
+	<!-- 获取光缆段关联树中 光接头  -->
+	<select id="getGjtByGldly" parameterType="string" resultType="hashmap" flushCache="true">
+		select j.zymc,j.xtbh from res_gld_ly l,res_gjt j where l.adsbmc=j.xtbh and l.adsblx='AA005' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union 
+		select j.zymc,j.xtbh from res_gld_ly l,res_gjt j where l.zdsbmc=j.xtbh and l.zdsblx='AA005' and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union
+		select j.zymc,j.xtbh from res_gld_ly l,res_relate_jgdwss r,res_gjt j where j.sssslx=r.restype and j.ssssmc=r.resid and l.xtbh=r.gldid and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+			union
+		select j.zymc,j.xtbh from res_gld_ly l,res_gjt j where (j.sssslx=l.adsblx and j.ssssmc=l.adsbmc) or (j.sssslx=l.zdsblx and j.ssssmc=l.zdsbmc) and l.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 获取盘留对应的光缆段 -->
+	<select id="getGldlyByglplbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.xtbh,l.zymc from res_glpl p, res_gld_ly l 
+		where (l.status!='9' or l.status is null) and p.ssgld=l.xtbh and p.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>			
+</mapper>

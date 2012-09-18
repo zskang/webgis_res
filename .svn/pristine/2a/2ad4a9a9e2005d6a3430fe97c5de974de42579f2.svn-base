@@ -1,0 +1,304 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<script type="text/javascript">
+	In
+			.add(
+					'ctcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom_nbsp.css'
+					});
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'autocompleteJs',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'autocompleteCss' ]
+					});
+	In
+			.add(
+					'autocompleteCss',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+</script>
+<script type="text/javascript">
+	In
+			.ready(
+					'ctcss',
+					'jqgridcss',
+					'ztreecss',
+					'jggridjs',
+					'jggridlocalejs',
+					'autocompleteJs',
+					'commonjs',
+					'wresize',
+					function() {
+						jQuery(function() {
+							//使用层布局
+							var jqgrid = $("#groupcustomergrid")
+									.jqGrid(
+											{
+												url : "${ctx}/res/publicmgr/groupcustomer!listdata.action",
+												datatype : "json",
+												mtype : 'GET',
+												rownumbers : true,
+												colNames : [ '客户编号', '客户名称',
+														'客户地址', '客户级别',
+														'客户服务等级', '客户行业',
+														'客户联系人', '客户联系电话',
+														'客户经理', '客户经理联系电话',
+														'区域', '代维公司', '操作' ],
+												colModel : [ {
+													name : 'GROUPID',
+													id : 'GROUPID',
+													sortable : false
+												}, {
+													name : 'GROUPNAME',
+													id : 'GROUPNAME',
+													sortable : false
+												}, {
+													name : 'GROUPADDR',
+													id : 'GROUPADDR',
+													sortable : false
+												}, {
+													name : 'KHJB',
+													id : 'KHJB',
+													sortable : false
+												}, {
+													name : 'GRADEOFSERVICE',
+													id : 'GRADEOFSERVICE',
+													sortable : false
+												}, {
+													name : 'INDUSTRY',
+													id : 'INDUSTRY',
+													sortable : false
+												}, {
+													name : 'LINKMAN',
+													id : 'LINKMAN',
+													sortable : false
+												}, {
+													name : 'PHONE',
+													id : 'PHONE',
+													sortable : false
+												}, {
+													name : 'KHJL',
+													id : 'KHJL',
+													sortable : false
+												}, {
+													name : 'KHJLDH',
+													id : 'KHJLDH',
+													sortable : false
+												}, {
+													name : 'REGIONNAME',
+													id : 'REGIONNAME',
+													sortable : false
+												}, {
+													name : 'CONTRACTORNAME',
+													id : 'CONTRACTORNAME',
+													sortable : false
+												}, {
+													name : 'XTBH',
+													id : 'XTBH',
+													sortable : false,
+													formatter : operateFmatter
+												} ],
+												rowNum : 15,
+												autowidth : true,
+												rowList : [ 15, 30, 50 ],
+												pager : '#groupcustomerpager',
+												shrinkToFit : true,
+												viewrecords : true,
+												hidegrid : false,
+												prmNames : {
+													page : "pageNo",
+													rows : "rows",
+													sort : "sidx",
+													order : "sord"
+												},
+												jsonReader : {
+													root : "root", // 数据行（默认为：rows） 
+													page : "pageNo", // 当前页 
+													total : "totalPages", // 总页数 
+													records : "total", // 总记录数 
+													repeatitems : false,
+													id : "XTBH"
+												}
+											}).navGrid('#btssitepager', {
+										edit : false,
+										add : false,
+										del : false,
+										search : false,
+										sortable : false
+									});
+							In
+									.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+							In
+									.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+							initRegionTree_001();
+							$(window).wresize(function() {
+								grid_resize(jqgrid);
+							});
+							grid_resize(jqgrid);
+						});
+					});
+	var regionCallBackId = function(id) {
+		$('#regionid').val(id);
+	}
+	//操作按钮
+	function operateFmatter(cellvalue, options, rowObjec) {
+		var view = '<a href="#" style="color: blue;text-decoration: underline;" onclick="view(\''
+				+ rowObjec.XTBH + '\')">查看</a>';
+		view += '&nbsp;&nbsp;<a href="#" style="color: blue;text-decoration: underline;" onclick="deleteit(\''
+				+ rowObjec.XTBH + '\')">删除</a>';
+		return view;
+	}
+
+	//编辑
+	function view(xtbh) {
+		window.parent.openResourcetreediv('查看集客',
+				'${ctx}/res/publicmgr/groupcustomer.action?xtbh=' + xtbh);
+	}
+	//删除
+	function deleteit(xtbh) {
+		window.location.href = '${ctx}/res/publicmgr/groupcustomer!delete.action?xtbh='
+				+ xtbh;
+	}
+	//查询
+	function query() {
+		jQuery("#groupcustomergrid").jqGrid().setGridParam({
+			postData : {
+				regionid : jQuery("#regionid").val(),
+				orgid : jQuery("#orgid").val(),
+				patrolgroupid : jQuery("#patrolgroupid").val(),
+				groupid : jQuery("#groupid").val(),
+				groupname : jQuery("#groupname").val(),
+				industy : jQuery("#industy").val(),
+				groupaddr : jQuery("#groupaddr").val(),
+				khjb : jQuery("#khjb").val(),
+				gradeofservice : jQuery("#gradeofservice").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+
+	function add() {
+		window.location.href = '${ctx}/res/publicmgr/groupcustomer!input4nbsp.action';
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">代维公司:</span> <input id="orgid"
+					name="orgid" style="width: 198px" class="ui-form-input" /> <span
+					class="ui-form-input-title">维护组:</span> <input id="patrolgroupid"
+					name="patrolgroupid" style="width: 198px" class="ui-form-input" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">客户编号:</span> <input id="groupid"
+					name="groupid" class="ui-form-input" type="text" /> <span
+					class="ui-form-input-title">所属区域：</span>
+				<baseinfo:regiontree widgetId="001" width="220" height="120"
+					defaultValue="${searchCondition.regionid}" cls="ui-form-input"
+					callBackId="regionCallBackId" regionId="${user.regionId}"></baseinfo:regiontree>
+				<input type="hidden" class="required" name="regionid"
+					value="${searchCondition.regionid}">
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">客户名称:</span> <input id="groupname"
+					name="groupname" class="ui-form-input" type="text" /> <span
+					class="ui-form-input-title">客户行业:</span>
+				<baseinfo:dicselector name="industy" columntype="INDUSTRY"
+					type="select" isQuery="query"></baseinfo:dicselector>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">客户地址:</span> <input type="text"
+					class="ui-form-input" name="groupaddr" id="groupaddr" /><span
+					class="ui-form-input-title">客户服务等级:</span>
+				<baseinfo:dicselector name="gradeofservice" columntype="JTKHJB"
+					type="select" isQuery="query"></baseinfo:dicselector>
+
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">客户级别:</span>
+				<baseinfo:dicselector name="khjb" columntype="GROUP_LEVEL"
+					type="select" isQuery="query"></baseinfo:dicselector>
+			 	<span
+					class="ui-form-input-title">&nbsp; &nbsp; </span><input type="button"
+					value="新增" onclick="add();" style="width: 80px;" /> <input
+					type="button" value="查询" style="width: 80px;" onclick="query();">
+					<baseinfo:expexcel cls="exprotButton"
+						businessId="groupcustomerlist" name="导出excel"></baseinfo:expexcel>
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="groupcustomergrid"></table>
+		<div id="groupcustomerpager"></div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.core.mapper.BaseMapper">
+	
+	<!-- 获取业务表空间注册编号 -->
+	<select id="getObjectID" parameterType="hashmap" resultType="Integer" flushCache="true">
+		select sde.version_user_ddl.next_row_id(#{tablespacename,jdbcType=VARCHAR},
+		(SELECT REGISTRATION_ID regid FROM sde.TABLE_REGISTRY WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{tablespacename,jdbcType=VARCHAR})
+		) id from dual
+	</select>
+	
+	<!-- 获取业务表空间生成字段所需的参数srid -->
+	<select id="getSRID" parameterType="hashmap" resultType="String" flushCache="true">
+		SELECT srid FROM sde.st_geometry_columns 
+		WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{tablespacename,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getPointXY" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select lon,lat from ${tablename} where xtbh=${xtbh}
+	</select>
+</mapper>

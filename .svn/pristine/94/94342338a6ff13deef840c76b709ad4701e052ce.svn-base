@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.groupcustomsmgr.YytMapper">
+
+	<!-- 单个营业厅查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.groupcustomsmgr.YytEntity"
+		parameterType="string" flushCache="true">
+		select y.objectid,y.xtbh,y.yytbh,y.zymc,y.yytdz,y.lxr,y.lxdh,y.sjgxzt,y.sjgxxx,y.regionid,
+		y.sbgs,y.status,round(y.x,6) lon,round(y.y,6) lat,
+		y.shape.minx projectx,y.shape.miny projecty from res_yyt y where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<update id="update" parameterType="com.cabletech.res.entity.groupcustomsmgr.YytEntity">
+		UPDATE res_yyt SET
+			zymc=#{zymc,jdbcType=VARCHAR},yytbh=#{yytbh,jdbcType=VARCHAR},yytdz=#{yytdz,jdbcType=VARCHAR},
+			lxr=#{lxr,jdbcType=VARCHAR},
+			lxdh=#{lxdh,jdbcType=VARCHAR},sjgxzt=#{sjgxzt,jdbcType=VARCHAR},
+			sjgxxx=#{sjgxxx,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},sbgs=#{sbgs,jdbcType=VARCHAR}
+		WHERE
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<insert id="save" parameterType="com.cabletech.res.entity.groupcustomsmgr.YytEntity" flushCache="true">
+		insert into res_yyt(
+		objectid,xtbh,zymc,yytbh,yytdz,lxr,lxdh,sjgxzt,lon,lat,sjgxxx,
+		regionid,sbgs,orgid,shape
+		) values(
+			#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+			#{zymc,jdbcType=VARCHAR},#{yytbh,jdbcType=VARCHAR},#{yytdz,jdbcType=VARCHAR},
+			#{lxr,jdbcType=VARCHAR},#{lxdh,jdbcType=VARCHAR},#{sjgxzt,jdbcType=VARCHAR},
+			#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},
+			#{sjgxxx,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},#{sbgs,jdbcType=VARCHAR},
+			#{orgid,jdbcType=VARCHAR},
+			sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	<select id="queryYyt" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select y.objectid,y.xtbh,y.yytbh,y.zymc,y.yytdz,y.lxr,y.lxdh,y.sjgxzt,y.sjgxxx,y.regionid,
+		y.sbgs,y.status,round(y.x,6) lon,round(y.y,6) lat from res_yyt y
+		where  ( status is null or status != '9' )
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>	
+	
+	<update id="delete" parameterType="String">
+		UPDATE res_yyt SET status='9' where id=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.contractor.mapper.carinfo.CarApplyDispatchMapper">
+	<select id="getCarApplyById" parameterType="string" resultType="com.cabletech.contractor.entity.carinfo.CarApplyDispatchEntity">
+        <![CDATA[
+			select * from car_apply_dispatch where car_no=#{id,jdbcType=VARCHAR} and disp_state='1'
+			]]>
+	</select>
+	<select id="getCarHistoryTaskList" parameterType="string" resultType="hashmap">
+        <![CDATA[
+			select cap.APPLICANT,cap.USE_START_DATE,cap.USE_END_DATE,(select max(h.DISTANCE)-min(h.DISTANCE)
+			from HISTORYPOSITION_CAR h where to_char(h.GPSTIME,'yyyy-mm-dd HH24:mi:ss')<=
+			to_char(cap.USE_END_DATE,'yyyy-mm-dd HH24:mi:ss') and  to_char(h.GPSTIME,'yyyy-mm-dd HH24:mi:ss') 
+			>=to_char(cap.USE_START_DATE,'yyyy-mm-dd HH24:mi:ss') and h.simid=(select simid from car_info car where id=#{id,jdbcType=VARCHAR})) 
+			as distance from car_apply_dispatch cap where car_no=(select carno from car_info where id=#{id,jdbcType=VARCHAR}) 
+			and  to_char(cap.USE_START_DATE,'yyyy-mm-dd HH24:mi:ss')>=to_char(trunc(sysdate),'yyyy-mm-dd HH24:mi:ss') 
+			and to_char(cap.USE_END_DATE,'yyyy-mm-dd HH24:mi:ss')<=to_char(sysdate,'yyyy-mm-dd HH24:mi:ss')
+			]]>
+	</select>
+</mapper>

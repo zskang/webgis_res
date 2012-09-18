@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jee="http://www.springframework.org/schema/jee"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd 
+						http://www.springframework.org/schema/tx 
+						http://www.springframework.org/schema/tx/spring-tx-3.0.xsd 
+						http://www.springframework.org/schema/jee 
+						http://www.springframework.org/schema/jee/spring-jee-3.0.xsd 
+						http://www.springframework.org/schema/aop 
+						http://www.springframework.org/schema/aop/spring-aop.xsd 
+						http://www.springframework.org/schema/context 
+						http://www.springframework.org/schema/context/spring-context-3.0.xsd"
+	default-lazy-init="true">
+	<description>资源图层对应资源显示配置</description>
+	<bean id="resourceViewConfig" class="com.cabletech.core.entity.config.ResourceViewConfig">
+		<property name="viewconfig">
+			<list>
+				<map>
+					<entry key="LAYERNAME">
+						<value>非基站机房</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/publicmgr/zdxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>非VIP</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/publicmgr/zdxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>VIP基站</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/publicmgr/zdxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>VVIP基站</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/publicmgr/zdxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>超级站点 </value>
+					</entry>
+					<entry key="URL">
+						<value>/res/publicmgr/zdxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>管井</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/gjxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>管道段</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/gdd!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>电杆</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/dgxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>杆路段</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/gld!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>标石</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/bsxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>直埋段</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/bsd!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>挂墙</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/gqxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>挂墙段</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/gqd!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>引上</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/basemgr/ys!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光交接箱</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/cableequipmgr/gjjx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光分纤箱</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/cableequipmgr/gfxx!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光终端盒</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/cableequipmgr/gzdh!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光接头</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/cableequipmgr/gjt!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光缆段</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/opticcablemgr/gldly!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>光缆盘留</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/opticcablemgr/glpl!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>集团客户</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/groupcustomsmgr/groupcustoms!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>校园网</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/groupcustomsmgr/campus!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>宽带小区</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/groupcustomsmgr/broadband!view.action</value>
+					</entry>
+				</map>
+				<map>
+					<entry key="LAYERNAME">
+						<value>营业厅</value>
+					</entry>
+					<entry key="URL">
+						<value>/res/groupcustomsmgr/yyt!view.action</value>
+					</entry>
+				</map>
+			</list>
+		</property>
+	</bean>
+</beans>

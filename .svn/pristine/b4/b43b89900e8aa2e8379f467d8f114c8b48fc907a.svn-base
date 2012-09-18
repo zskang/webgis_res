@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.JfxxMapper">
+
+
+	<!-- 查询机房信息列表 周刚 2012 8 8 修改 -->
+	<select id="getJfListYD" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select t.XTBH,
+      g.regionname REGIONNAME,
+       t.ZYMC,
+       t.JFBM,
+       t.YMC,
+       t.REGIONID,
+       d.zymc sszd,
+       FN_GETNAMEBYCODE(t.JFLX, 'JFLX') JFLX_NAME,
+       t.JFLX,
+       t.SZJZW,
+       t.LCH,
+       t.FJH,
+       FN_GETNAMEBYCODE(t.CQXZ, 'property_right') CQXZ,
+       to_char(t.CJSJ, 'yyyy-MM-dd HH24:mi:ss') CJSJ,
+       t.SX,
+       t.BM,
+       t.CD,
+       t.GD,
+       t.KD,
+       t.GDZCBH,
+       t.BZ,
+       t.COUNTYID,
+       FN_GETNAMEBYCODE(t.YWJB, 'CABLETYPE') YWJB,
+       t.PRECINCT,
+       t.STATUS,
+       t.WHFS,
+       t.EWM
+  from res_jf t  
+ left join res_zdxx d on t.sszd = d.xtbh 
+  left join res_maintenance m on d.xtbh = m.rs_id
+                             and m.rs_type = 'C31'
+  left join view_org o on m.maintenance_id = o.ID
+  left join view_patrolgroup p on p.ID = m.patrol_group_id
+  left join view_region g on d.regionid = g.regionid
+ where 1 = 1
+ and (t.status is null or t.status != '9')
+		<if test="jflx != null and jflx != ''">
+			and t.jflx=#{jflx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and t.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if> 
+		<if test="zymc != null and zymc != ''">
+			and t.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="jfbm != null and jfbm != ''">
+			and t.jfbm like '%' || #{jfbm,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="precinct != null and precinct != ''">
+			and t.precinct like '%' || #{precinct,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(t.cjsj,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(t.cjsj,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="regionids != null">
+			and t.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="orgids != null">
+			and m.maintenance_id in
+			<foreach collection="orgids" item="orgid" open="(" separator=","
+				close=")">
+				#{orgid,jdbcType=VARCHAR}
+			</foreach>
+			and m.rs_id=n.site_id and m.rs_type='C31'
+		</if>
+		<if test="patrolgroupid != null and patrolgroupid != ''">
+			and m.patrol_group_id =
+			#{patrolgroupid,jdbcType=VARCHAR}
+		</if>
+		ORDER BY t.cjsj desc
+	</select>
+	<!-- 查询机房信息列表 周刚 2012 8 8 修改 -->
+	<select id="getJfListDW" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+			select t.XTBH,
+      g.regionname REGIONNAME,
+       t.ZYMC,
+       t.JFBM,
+       t.YMC,
+       t.REGIONID,
+       d.zymc sszd,
+       FN_GETNAMEBYCODE(t.JFLX, 'JFLX') JFLX_NAME,
+       t.JFLX,
+       t.SZJZW,
+       t.LCH,
+       t.FJH,
+       FN_GETNAMEBYCODE(t.CQXZ, 'property_right') CQXZ,
+       to_char(t.CJSJ, 'yyyy-MM-dd HH24:mi:ss') CJSJ,
+       t.SX,
+       t.BM,
+       t.CD,
+       t.GD,
+       t.KD,
+       t.GDZCBH,
+       t.BZ,
+       t.COUNTYID,
+       FN_GETNAMEBYCODE(t.YWJB, 'CABLETYPE') YWJB,
+       t.PRECINCT,
+       t.STATUS,
+       t.WHFS,
+       t.EWM
+  from res_jf t  
+ left join res_zdxx d on t.sszd = d.xtbh 
+  left join res_maintenance m on d.xtbh = m.rs_id
+                             and m.rs_type = 'C31'
+  left join view_org o on m.maintenance_id = o.ID
+  left join view_patrolgroup p on p.ID = m.patrol_group_id
+  left join view_region g on d.regionid = g.regionid
+ where 1 = 1
+ and (t.status is null or t.status != '9')
+		<if test="jflx != null and jflx != ''">
+			and t.jflx=#{jflx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and t.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and t.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="jfbm != null and jfbm != ''">
+			and t.jfbm like '%' || #{jfbm,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="precinct != null and precinct != ''">
+			and t.precinct like '%' || #{precinct,jdbcType=VARCHAR}||'%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(t.cjsj,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(t.cjsj,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="regionids != null">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="orgids != null">
+			and m.maintenance_id in
+			<foreach collection="orgids" item="orgid" open="(" separator=","
+				close=")">
+				#{orgid,jdbcType=VARCHAR}
+			</foreach>
+			and m.rs_id=n.site_id and m.rs_type='C31'
+		</if>
+		<if test="patrolgroupid != null and patrolgroupid != ''">
+			and m.patrol_group_id =
+			#{patrolgroupid,jdbcType=VARCHAR}
+		</if>
+		<if test="orgids != null and orgids != ''">
+			and exists (select 1 from res_maintenance r where
+			r.maintenance_id in
+			<foreach collection="orgids" item="orgid" open="(" separator=","
+				close=")">
+				#{orgid,jdbcType=VARCHAR}
+			</foreach>
+			and r.rs_id=xtbh)
+
+		</if>
+		ORDER BY cjsj desc
+	</select>
+
+	<!-- 机房 资源树 -->
+	<select id="getResTree" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select xtbh,'AA001' zylx from res_odf where ssjf =
+		#{ssjf,jdbcType=VARCHAR} and (status is null or status !='9')
+		union
+		select xtbh,'AA004' zylx from res_gfxx
+		where ssjf =
+		#{ssjf,jdbcType=VARCHAR} and (status is null or status !='9')
+		union
+		select xtbh,'AA006' zylx
+		from res_gzdh where ssjf =
+		#{ssjf,jdbcType=VARCHAR} and (status is null or status !='9')
+	</select>
+	<!-- 单个机房查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.JfxxEntity"
+		parameterType="string" flushCache="true">
+		select * from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR} and ( status is null or status != '9' )
+	</select>
+
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.JfxxEntity">
+		UPDATE res_jf SET
+		zymc=#{zymc,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+		jflx=#{jflx,jdbcType=VARCHAR},sx=#{sx,jdbcType=VARCHAR},gdzcbh=#{gdzcbh,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},jfbm=#{jfbm,jdbcType=VARCHAR},szjzw=#{szjzw,jdbcType=VARCHAR},
+		lch=#{lch,jdbcType=VARCHAR},fjh=#{fjh,jdbcType=VARCHAR},cd=#{cd,jdbcType=VARCHAR},
+		gd=#{gd,jdbcType=VARCHAR},kd=#{kd,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},precinct=#{precinct,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR},
+		bz=#{bz,jdbcType=VARCHAR},sszd=#{sszd,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.JfxxEntity"
+		flushCache="true">
+		insert into
+		res_jf(xtbh,zymc,ymc,regionid,jflx,sx,gdzcbh,cqxz,jfbm,szjzw,lch,fjh,cd,gd,kd,ywjb,whfs,precinct,ewm,bz,cjsj,sszd)
+		values(#{xtbh,jdbcType=VARCHAR}
+		,#{zymc,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR}
+		,#{regionid,jdbcType=VARCHAR},#{jflx,jdbcType=VARCHAR},#{sx,jdbcType=VARCHAR}
+		,#{gdzcbh,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{jfbm,jdbcType=VARCHAR}
+		,#{szjzw,jdbcType=VARCHAR},#{lch,jdbcType=VARCHAR},#{fjh,jdbcType=VARCHAR},#{cd,jdbcType=VARCHAR}
+		,#{gd,jdbcType=VARCHAR},#{kd,jdbcType=VARCHAR},#{ywjb,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR}
+		,#{precinct,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR},#{bz,jdbcType=VARCHAR},sysdate,#{sszd,jdbcType=VARCHAR})
+	</insert>
+	<select id="queryJfxxList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select s.xtbh,
+       r.regionname REGIONNAME,
+       s.zymc,
+       s.jfbm,
+       s.ymc,
+       s.regionid,
+       z.zymc sszd,
+       FN_GETNAMEBYCODE(s.jflx, 'JFLX') JFLX_NAME,
+       s.jflx,
+       s.szjzw,
+       s.lch,
+       s.fjh,
+       FN_GETNAMEBYCODE(s.cqxz, 'property_right') CQXZ,
+       to_char(s.cjsj, 'yyyy-MM-dd HH24:mi:ss') CJSJ,
+       s.sx,
+       s.bm,
+      s.cd,
+       s.gd,
+      s.kd,
+       s.gdzcbh,
+      s.bz,
+      s.countyid,
+       s.ywjb,
+       FN_GETNAMEBYCODE(s.ywjb, 'CABLETYPE') ywjb_name,
+      s.precinct,
+       s.whfs,
+       s.ewm
+  from res_jf s
+  left join res_zdxx z on sszd = z.xtbh
+  left join view_region r on  r.regionid=s.regionid
+ where (status is null or status != '9')
+		<if test="jflx != null and jflx != ''">
+			and  s.jflx=#{jflx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and  s.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and  s.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and  s.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="jfbm != null and jfbm != ''">
+			and  s.jfbm like '%' || #{jfbm,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="precinct != null and precinct != ''">
+			and  s.precinct like '%' || #{precinct,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(s.cjsj,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(s.cjsj,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		 ORDER BY s.xtbh desc
+	</select>
+	<select id="queryJfxxListWithSimid" parameterType="hashmap"
+		resultType="hashmap" flushCache="true">
+		select d.*,r.deviceid from res_jf d,res_gprs_record r
+		where
+		r.resid=d.xtbh and r.restype='AD701' and ( d.status is null or
+		d.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.simid = #{simid,jdbcType=VARCHAR}
+		</if>
+		<if test="jflx != null and jflx != ''">
+			and d.jflx=#{jflx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and d.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and d.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="jfbm != null and jfbm != ''">
+			and d.jfbm like '%' || #{jfbm,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="precinct != null and precinct != ''">
+			and d.precinct like '%' || #{precinct,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(d.cjsj,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(d.cjsj,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		ORDER BY d.cjsj desc
+	</select>
+	<update id="delete" parameterType="String">
+		UPDATE res_jf SET status='9'
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 逻辑删除机房根据站点编号 -->
+	<update id="deleteJFxxByZdxxXtbh" parameterType="string"
+		flushCache="true">
+		update res_jf SET status='9' where
+		sszd=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 获取机房关联树中 odf -->
+	<select id="getOdfByJf" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select o.zymc,o.xtbh from res_odf o where
+		o.ssjf=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 获取机房关联树中 站点 -->
+	<select id="getZdxxByJf" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select z.xtbh,z.zymc from res_zdxx z,res_jf j where
+		z.xtbh=j.sszd and j.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 获取机房关联树中 光缆段 -->
+	<select id="getGldlyByJf" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		<!-- select l.zymc,l.xtbh from res_odf o,res_jf j,res_gld_ly l where o.ssjf=j.xtbh 
+			and (l.adsblx='AD702' and l.adsbmc=o.xtbh and j.xtbh =#{xtbh,jdbcType=VARCHAR}) 
+			union select l.zymc,l.xtbh from res_odf o,res_jf j,res_gld_ly l where o.ssjf=j.xtbh 
+			and (l.zdsblx='AD702' and l.zdsbmc=o.xtbh and j.xtbh =#{xtbh,jdbcType=VARCHAR}) -->
+		select l.zymc,l.xtbh from res_gld_ly l where ((l.adsbmc in
+		(select
+		o.xtbh from res_odf o where o.ssjf=(select xtbh from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR}) and (o.status !='9' or o.status is
+		null)))
+		or (l.zdsbmc in
+		(select o.xtbh from res_odf o where
+		o.ssjf=(select xtbh from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR})
+		and (o.status !='9' or o.status is
+		null))))
+		and (l.status !='9' or
+		l.status is null)
+		union
+		select l.zymc,l.xtbh from res_gld_ly l where
+		((l.adsbmc in
+		(select o.xtbh from res_gzdh o where o.ssjf=(select xtbh
+		from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR}) and (o.status !='9' or
+		o.status is
+		null)))
+		or (l.zdsbmc in
+		(select o.xtbh from res_gzdh o where
+		o.ssjf=(select xtbh from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR})
+		and (o.status !='9' or o.status is
+		null))))
+		and (l.status !='9' or
+		l.status is null)
+		union
+		select l.zymc,l.xtbh from res_gld_ly l where
+		((l.adsbmc in
+		(select o.xtbh from res_gfxx o where o.ssjf=(select xtbh
+		from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR}) and (o.status !='9' or
+		o.status is
+		null)))
+		or (l.zdsbmc in
+		(select o.xtbh from res_gfxx o where
+		o.ssjf=(select xtbh from res_jf where
+		xtbh=#{xtbh,jdbcType=VARCHAR})
+		and (o.status !='9' or o.status is
+		null))))
+		and (l.status !='9' or
+		l.status is null)
+	</select>
+
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_jf set
+		jflx=#{jflx,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in
+		<foreach collection="xtbhlist" item="xtbh" open="(" separator=","
+			close=")">
+			#{xtbh,jdbcType=VARCHAR}
+		</foreach>
+	</update>
+</mapper>

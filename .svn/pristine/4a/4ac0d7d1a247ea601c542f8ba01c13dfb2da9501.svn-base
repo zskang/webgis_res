@@ -1,0 +1,308 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.baseinfo.excel.ExportSupport;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.publicmgr.ZdxxEntity;
+import com.cabletech.res.mapper.opticcablemgr.GldlyMapper;
+import com.cabletech.res.mapper.publicmgr.JfxxMapper;
+import com.cabletech.res.mapper.publicmgr.OdfMapper;
+import com.cabletech.res.mapper.publicmgr.OdmMapper;
+import com.cabletech.res.mapper.publicmgr.ZdxxMapper;
+
+/**
+ * 站点信息管理Service实现
+ * 
+ * @author 杨隽 2011-05-22 创建
+ * 
+ */
+@Transactional
+@Service
+public class ZdxxServiceImpl extends BaseServiceImpl implements ZdxxService,ExportSupport {
+	@Resource(name = "zdxxMapper")
+	private ZdxxMapper zdxxmapper;
+
+	@Resource(name = "jfxxMapper")
+	private JfxxMapper jfxxmapper;
+
+	@Resource(name = "odfMapper")
+	private OdfMapper odfmapper;
+
+	@Resource(name = "odmMapper")
+	private OdmMapper odmmapper;
+	
+	@Resource(name = "gldlyMapper")
+	private GldlyMapper gldlyMapper;
+	private Map<String, Object> exportconditionmap = new HashMap<String, Object>();
+	
+	@Override
+	public void setExportconditionmap(Map<String, Object> map){
+		exportconditionmap = map;
+	}
+
+	
+	/**
+	 * 保存
+	 * 
+	 * @param entity
+	 *            ZdxxEntity 站点实体
+	 */
+	@Transactional
+	public  boolean saveOrUpdate4nbsp(ZdxxEntity entity) {
+		try {
+			entity.setCreateDate(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date().getTime()));
+			if(StringUtils.isBlank(entity.getXtbh())){
+				entity.setLon(entity.getPointX());
+				entity.setLat(entity.getPointY());
+				entity.setXtbh(super.getXTBH());
+			}
+			zdxxmapper.save(entity);
+			return true;
+		} catch (Exception e) {
+			logger.error("新增或更新站点信息：", e);
+		}
+		return false;
+	}
+	
+	/**
+	 * 保存
+	 * 
+	 * @param entity
+	 *            ZdxxEntity 站点实体
+	 */
+	@SuppressWarnings("static-access")
+	@Transactional
+	public boolean saveOrUpdate(ZdxxEntity entity) {
+		try {
+			entity.setCreateDate(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(new Date().getTime()));
+			EsriRestEntity esrientity = new EsriRestEntity();
+			esrientity.setAttrobj(entity);
+			esrientity.setRestype(super.restservice.POINT);
+			esrientity.setRescode("A29");
+			esrientity.setX(entity.getProjectx());
+			esrientity.setY(entity.getProjecty());
+			if(StringUtils.isBlank(entity.getXtbh())){
+				entity.setLon(entity.getPointX());
+				entity.setLat(entity.getPointY());
+				entity.setXtbh(super.getXTBH());
+			}
+			if(restservice.restPost(esrientity)){
+				return true;
+			}else{
+				return false;
+			}			
+		} catch (Exception e) {
+			logger.error("新增或更新站点信息：", e);
+			return false;
+		}
+	}
+
+	/**
+	 * 查看
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 * @return ZdxxEntity 站点实体
+	 */
+	public ZdxxEntity getbyid(String xtbh) {
+		return zdxxmapper.getbyid(xtbh);
+	}
+
+	/**
+	 * 删除
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 */
+	@Transactional
+	public boolean delete(String xtbh) {
+		try {
+			odfmapper.deleteOdfDzByZdxxXtbh(xtbh);
+			odfmapper.deleteOdfConnByZdxxXtbh(xtbh);
+			odmmapper.deleteOdmByZdxxXtbh(xtbh);
+			odfmapper.deleteOdfByZdxxXtbh(xtbh);
+			jfxxmapper.deleteJFxxByZdxxXtbh(xtbh);
+			zdxxmapper.delete(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除站点：", e);
+			return false;
+		}
+	}
+
+	/**
+	 * 获取Ztree的结构数据
+	 * 
+	 * @param entity
+	 *            站点实体
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Override
+	public String getTreeNodes(ZdxxEntity entity) {
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> jfxxlist = zdxxmapper.getJfxxByZd(entity
+				.getXtbh());
+		List<Map<String, Object>> gldlylist = zdxxmapper.getGldlyByZd(entity
+				.getXtbh());
+		/*List<Map<String, Object>> dxjxslist = zdxxmapper.getDxjxsByZd(entity
+				.getXtbh());*/
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(), 28));
+		nodes.append(super.getNode(entity.getXtbh(), "27", restype, jfxxlist));
+		
+		//nodes.append(super.getNode(entity.getXtbh(), "31", restype, dxjxslist));
+		List gldList=new ArrayList();
+		nodes.append(getFourthNodes(jfxxlist, "18", "res_gzdh", "光终端盒",gldList));
+		nodes.append(getFourthNodes(jfxxlist, "20", "res_gfxx", "光分纤箱",gldList));
+		nodes.append(getFourthNodes(jfxxlist, "30", "res_odf", "ODF",gldList));
+		
+		if(gldList.size()>0)
+		{
+			Map idsMap=new HashMap<String,Object>();
+			idsMap.put("ids", gldList);
+			List<Map<String, Object>> list=gldlyMapper.getGldlyByIds(idsMap);
+			if(list.size()>0)
+			{
+				restype.remove("15");
+				restype.put("15","光缆段（"+list.size()+"）");
+				nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+				StringBuilder sb=new StringBuilder();
+				
+				for (Map<String, Object> map : list) 
+				{
+					sb.append(",{\"id\":\"" + map.get("XTBH")
+							+ "\",\"pId\":\"" + 15
+							+ "\",\"name\":\""
+							+ map.get("ZYMC") + "\"}");
+					
+				}
+				nodes.append(sb.toString());
+			}
+			else
+			{
+				restype.remove("15");
+				restype.put("15","光缆段（0）");
+				nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+			}
+		}
+		else{
+			restype.remove("15");
+			restype.put("15","光缆段（0）");
+			nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		}
+		
+		return nodes.toString();
+	}
+	
+
+	/**
+	 * 关联树组织3级-4级菜单
+	 * 
+	 * @param Plist
+	 *            3级菜单的list
+	 * @param key
+	 *            4级菜单的对应的类型
+	 * @param table
+	 *            表名称
+	 * @param ThirdType
+	 *            三级菜单的名称
+	 * @return
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public String getFourthNodes(List<Map<String, Object>> Plist, String key,
+			String table, String ThirdType,List gldList) {
+		StringBuffer node = new StringBuffer();
+		if (Plist != null && Plist.size() > 0) {  
+			
+			for (Map<String, Object> Pmap : Plist) {
+				
+				Map<String, Object> tablemap = new HashMap<String, Object>();
+				tablemap.put("table", table);
+				tablemap.put("xtbh", Pmap.get("XTBH"));
+				List<Map<String, Object>> list = zdxxmapper
+						.getOdfByZd(tablemap);
+				String uuid=UUID.randomUUID().toString();
+				node.append(",{\"id\":\"" + (uuid)
+						+ "\",\"pId\":\"" + Pmap.get("XTBH") + "\",\"name\":\""
+						+ ThirdType + "（" + list.size()
+						+ "）\",\"open\":\"true\"}");
+				for (Map<String, Object> map : list) {
+					node.append(",{\"id\":\"" + map.get("XTBH")
+							+ "\",\"pId\":\"" + (uuid)
+							+ "\",\"parentKey\":\"" + key + "\",\"name\":\""
+							+ map.get("ZYMC") + "\"}");
+					gldList.add(map.get("XTBH"));
+				}
+			}
+		}
+		return node.toString();
+	}
+
+	@Override
+	@Transactional
+	public boolean batchDelete(String xtbhs) {
+		String[] xtbh = xtbhs.split(",");
+		try {
+			for (int i = 0; i < xtbh.length; i++) {
+				//odfmapper.deleteOdfDzByZdxxXtbh(xtbh[i]);
+				odfmapper.deleteOdfConnByZdxxXtbh(xtbh[i]);
+				odmmapper.deleteOdmByZdxxXtbh(xtbh[i]);
+				odfmapper.deleteOdfByZdxxXtbh(xtbh[i]);
+				jfxxmapper.deleteJFxxByZdxxXtbh(xtbh[i]);
+				zdxxmapper.delete(xtbh[i]);
+			}
+			return true;
+		} catch (Exception e) {
+			logger.error("删除光分纤箱：", e);
+			return false;
+		}
+	}
+
+	@Override
+	public boolean batchEdit(Map<String, Object> map) {
+		try {
+			zdxxmapper.batchEdit(map);
+			return true;
+		} catch (Exception e) {
+			logger.error("编辑光分纤箱：", e);
+			return false;
+		}
+	}
+
+	/*
+	 * 查询站点列表信息
+	 * 
+	 * @see
+	 * com.cabletech.res.service.publicmgr.ZdxxService#getList(com.cabletech
+	 * .res.entity.publicmgr.ZdxxEntity)
+	 * 
+	 * @author 周刚
+	 */
+	@Transactional(readOnly = true)
+	public List<Map<String, Object>> getZdList(Map<String, Object> map) throws Exception{ 
+		return zdxxmapper.getZdList(map);
+	}
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List getExportDatas(Map<String, Object> paramet) {
+		if (exportconditionmap.containsKey("simid")
+				&& StringUtils.isNotBlank(exportconditionmap.get("simid").toString())) {
+			return zdxxmapper.queryZdxxListNoSimid(exportconditionmap);
+		}else{
+			return zdxxmapper.queryZdxxList(exportconditionmap);
+		}
+	}
+}

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.groupcustomsmgr.GroupCustomsMapper">
+
+	<!-- 单个集团客户查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.groupcustomsmgr.GroupCustomsEntity"
+		parameterType="string" flushCache="true">
+		select d.objectid,d.xtbh,d.groupid,d.zymc,d.ymc,d.groupaddr,d.grouptype,d.regionid,d.countyid,
+		d.jkblxr,d.jkblxdh,d.khjl,d.khjldh,d.jrfs,d.czywxx,d.gsjrdmc,d.sbgs,d.zyjb,d.khlb,d.remark,d.status,
+		round(d.x,6) lon,round(d.y,6) lat,d.shape.minx projectx,d.shape.miny projecty  
+		from res_groupcustomer d where xtbh=#{xtbh,jdbcType=VARCHAR} and ( status is null or status != '9' )
+	</select>
+
+	<update id="update" parameterType="com.cabletech.res.entity.groupcustomsmgr.GroupCustomsEntity">
+		UPDATE res_groupcustomer SET
+			groupid=#{groupid,jdbcType=VARCHAR},zymc=#{zymc,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},
+			groupaddr=#{groupaddr,jdbcType=VARCHAR},grouptype=#{grouptype,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+			jkblxr=#{jkblxr,jdbcType=VARCHAR},jkblxdh=#{jkblxdh,jdbcType=VARCHAR},
+			khjl=#{khjl,jdbcType=VARCHAR},khjldh=#{khjldh,jdbcType=VARCHAR},jrfs=#{jrfs,jdbcType=VARCHAR},czywxx=#{czywxx,jdbcType=VARCHAR},
+			khlb=#{khlb,jdbcType=VARCHAR},zyjb=#{zyjb,jdbcType=VARCHAR},remark=#{remark,jdbcType=VARCHAR},
+			sbgs=#{sbgs,jdbcType=VARCHAR},gsjrdmc=#{gsjrdmc,jdbcType=VARCHAR}
+		WHERE
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<insert id="save" parameterType="com.cabletech.res.entity.groupcustomsmgr.GroupCustomsEntity" flushCache="true">
+		insert into res_groupcustomer(objectid,xtbh,groupid,zymc,ymc,groupaddr,grouptype,regionid,x,y,jkblxr,
+		jkblxdh,khjl,khjldh,sbgs,gsjrdmc,createtime,jrfs,czywxx,khlb,zyjb,shape) 
+		values(#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR}
+		,#{groupid,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR}
+		,#{ymc,jdbcType=VARCHAR},#{groupaddr,jdbcType=VARCHAR}
+		,#{grouptype,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR}
+		,#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR}
+		,#{jkblxr,jdbcType=VARCHAR},#{jkblxdh,jdbcType=VARCHAR}
+		,#{khjl,jdbcType=VARCHAR},#{khjldh,jdbcType=VARCHAR}
+		,#{khjl,jdbcType=VARCHAR},#{khjldh,jdbcType=VARCHAR}
+		,sysdate,#{jrfs,jdbcType=VARCHAR}
+		,#{sbgs,jdbcType=VARCHAR},#{gsjrdmc,jdbcType=VARCHAR}
+		,#{zyjb,jdbcType=VARCHAR},sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	<select id="queryGroupCustomsList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select d.objectid,d.xtbh,d.groupid,d.zymc,d.ymc,d.groupaddr,d.grouptype,d.regionid,d.countyid,
+		d.jkblxr,d.jkblxdh,d.khjl,d.khjldh,d.jrfs,d.czywxx,d.gsjrdmc,d.sbgs,d.zyjb,d.khlb,d.remark,d.status,
+		round(d.x,6) lon,round(d.y,6) lat from res_groupcustomer d
+		where 1=1 and ( status is null or status != '9' )
+		<if test="khlb != null and khlb != ''">
+			and khlb=#{khlb,jdbcType=VARCHAR}
+		</if>
+		<if test="zyjb != null and zyjb != ''">
+			and zyjb=#{zyjb,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>	
+	<select id="queryGroupCustomsListWithSimid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select  d.objectid,d.xtbh,d.groupid,d.zymc,d.ymc,d.groupaddr,d.grouptype,d.regionid,d.countyid,
+		d.jkblxr,d.jkblxdh,d.khjl,d.khjldh,d.jrfs,d.czywxx,d.gsjrdmc,d.sbgs,d.zyjb,d.khlb,d.remark,d.status,
+		round(d.x,6) lon,round(d.y,6) lat ,r.deviceid from res_groupcustomer d,res_gprs_record r
+		where r.resid=d.xtbh and r.restype='AA315' and ( d.status is null or d.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.deviceid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="khlb != null and khlb != ''">
+			and d.khlb=#{khlb,jdbcType=VARCHAR}
+		</if>
+		<if test="zyjb != null and zyjb != ''">
+			and d.zyjb=#{zyjb,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and d.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(d.createtime,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(d.createtime,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>
+	<update id="delete" parameterType="String">
+		UPDATE res_groupcustomer SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+</mapper>

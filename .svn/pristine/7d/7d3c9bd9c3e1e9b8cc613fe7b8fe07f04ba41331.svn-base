@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.GqdxtMapper">
+
+	<!-- 获取单条挂墙段系统信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GqdxtEntity"
+		parameterType="java.lang.String" flushCache="true">
+		select xtbh,zymc,ywjb,whfs,remark,regionid,cqxz,jsdw,to_char(jgsj,'yyyy/mm/dd HH24:mi:ss') jgsj,
+		zcd,gqsl,status,sszt,orgid from res_gqd_xt
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 更新杆路段系统修改 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GqdxtEntity"
+		flushCache="true">
+		update res_gqd_xt set
+		zymc = #{zymc,jdbcType=VARCHAR},zcd=#{zcd,jdbcType=VARCHAR},gqsl=#{gqsl,jdbcType=VARCHAR},
+		sszt=#{sszt,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		jsdw=#{jsdw,jdbcType=VARCHAR},jgsj=to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),
+		regionid=#{regionid,jdbcType=VARCHAR},remark=#{remark,jdbcType=VARCHAR}
+		where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 挂墙段系统查询 条件 名称 维护方式 设施状态 产权性质 区域 -->
+	<select id="queryGqdxtList" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select * from res_gqd_xt where (status != '9' or status is null)
+
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="whfs != null and whfs != ''">
+			and whfs=#{whfs,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>
+    <!-- 逻辑删除挂墙段系统 -->
+	<update id="deleteGqxt" parameterType="String">
+		UPDATE res_gqd_xt SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增挂墙段系统 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.GqdxtEntity">
+		INSERT INTO res_gqd_xt(
+		xtbh,zymc,zcd,gqsl,ywjb,cqxz,whfs,jsdw,jgsj,
+		regionid,sszt,remark,orgid
+		) VALUES(
+		#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{zcd,jdbcType=VARCHAR},#{gqsl,jdbcType=VARCHAR},
+		#{ywjb,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+		#{jsdw,jdbcType=VARCHAR},to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),
+		#{regionid,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},
+		#{remark,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 获取挂墙段系统关联的挂墙段 -->
+	<select id="getGqdByGldxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select f.zymc,f.xtbh from res_gqd f where (f.status != '9' or f.status is null) and f.ssgqxt=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取挂墙段系统关联的光缆段路由 -->
+	<select id="getGldlyByGldxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select y.zymc,y.xtbh from res_gqd f,res_gld_ly_dwss l,res_gld_ly y where
+		 (f.status != '9' or f.status is null) and (y.status != '9' or y.status is null) and f.xtbh=l.segment_id and l.gld_id=y.xtbh and f.ssgqxt=#{xtbh,jdbcType=VARCHAR} and restype='AA605'
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gqd_xt set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+</mapper>

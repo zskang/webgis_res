@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.BsxxMapper">
+	<!-- 含simid查询   条件：名称 原名称 simid 道路名称 设施状态 产权性质 区域 所属管理区 时间范围 -->
+	<select id="queryBsxxList" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select a.objectid, a.xtbh, a.zymc, a.ymc, a.dlmc, a.mp, a.sszt, a.cqxz, a.jtwz, 
+		a.bsyt, a.whfs, a.bsjtlx, sfwxd, ms, ssglq, a.sydw, 
+		round(a.lon,6) lon, round(a.lat,6) lat, a.regionid, a.orgid, a.createdate, a.ewm, a.status,
+		a.shape.minx projectx,a.shape.miny projecty 
+		from res_bsxx a left join res_gprs_record b on a.xtbh = b.resid where b.restype ='A22'
+		and (a.status != '9' or a.status is null)
+		<if test="zymc != null and zymc != ''">
+			and a.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ymc != null and ymc != ''">
+			and a.ymc like '%' || #{ymc,jdbcType=VARCHAR} || '%'
+		</if>				
+		<if test="simid != null and simid != ''">
+			and b.simid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="dlmc != null and dlmc != ''">
+			and a.dlmc like '%' || #{dlmc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and a.sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and a.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and a.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and a.ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+			<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and a.createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and a.createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>			
+	</select>
+	
+	<!-- 无simid查询   条件：名称 原名称  道路名称 设施状态 产权性质 区域 所属管理区 时间范围 -->
+	<select id="queryBsxxListNoSimid" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select objectid, xtbh, zymc, ymc, dlmc, mp, sszt, cqxz, jtwz, 
+		bsyt, whfs, bsjtlx, sfwxd, ms, ssglq, sydw, 
+		round(lon,6) lon, round(lat,6) lat, regionid, orgid, createdate, ewm, status,
+		b.shape.minx projectx,b.shape.miny projecty from res_bsxx b where (status != '9' or status is null)
+		
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ymc != null and ymc != ''">
+			and ymc like '%' || #{ymc,jdbcType=VARCHAR} || '%'
+		</if>				
+		<if test="dlmc != null and dlmc != ''">
+			and dlmc like '%' || #{dlmc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>			
+	</select>
+	<!-- 根据管井编号获取相关光接头 -->
+	<select id="getGjtByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select t.zymc,t.xtbh from res_gjt t where (t.status != '9' or t.status is null) and t.sssslx='A22' and t.ssssmc=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	
+	<!-- 单个标石查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.BsxxEntity"
+		parameterType="string" flushCache="true">
+		select objectid, xtbh, zymc, ymc, dlmc, mp, sszt, cqxz, jtwz, 
+		bsyt, whfs, bsjtlx, sfwxd, ms, ssglq, sydw, 
+		round(lon,6) lon, round(lat,6) lat, regionid, orgid, createdate, ewm, status,
+		b.shape.minx projectx,b.shape.miny projecty from res_bsxx b 
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+    <!-- 新增标石信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.BsxxEntity">
+		INSERT INTO res_bsxx b(objectid,
+		xtbh,zymc,ymc,dlmc,mp,sszt,cqxz,jtwz,bsyt,whfs,bsjtlx,sfwxd,
+		ms,ssglq,sydw,lon,lat,regionid,orgid,ewm,b.shape
+		) VALUES(#{objectid,jdbcType=VARCHAR},
+			#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+			#{mp,jdbcType=NUMERIC},#{sszt,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+			#{jtwz,jdbcType=VARCHAR},#{bsyt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+			#{bsjtlx,jdbcType=VARCHAR},#{sfwxd,jdbcType=VARCHAR},#{ms,jdbcType=VARCHAR},
+			#{ssglq,jdbcType=VARCHAR},#{sydw,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR},
+			#{pointY,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},#{dlmc,jdbcType=VARCHAR},
+			#{orgid,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR},sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	<!-- 跟新标石信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.BsxxEntity">
+		UPDATE res_bsxx SET
+			zymc=#{zymc,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},dlmc=#{dlmc,jdbcType=VARCHAR},
+			mp=#{mp,jdbcType=NUMERIC},sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+			jtwz=#{jtwz,jdbcType=VARCHAR},bsyt=#{bsyt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+			bsjtlx=#{bsjtlx,jdbcType=VARCHAR},sfwxd=#{sfwxd,jdbcType=VARCHAR},ms=#{ms,jdbcType=VARCHAR},
+			ssglq=#{ssglq,jdbcType=VARCHAR},sydw=#{sydw,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 单个标石信息逻辑删除 -->
+	<update id="deleteBs" parameterType="String">
+		UPDATE res_bsxx SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取标石信息关联的光缆段路由 -->
+	<select id="getGldlyBybsxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l 
+		where (l.status != '9' or l.status is null) and ((l.adsblx='A22' and  l.adsbmc=#{xtbh,jdbcType=VARCHAR}) 
+		or (l.zdsblx='A22' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR}))
+		union
+		select l.zymc,l.xtbh from res_relate_jgdwss j,res_gld_ly l 
+		where (l.status != '9' or l.status is null) and (j.resid=#{xtbh,jdbcType=VARCHAR} and j.restype='A22') and l.xtbh=j.gldid
+	</select>	
+	
+	<!-- 获取标石信息关联的直埋段 -->
+	<select id="getBsdBybsxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_bsd l 
+		where (l.status != '9' or l.status is null) and (l.qdbs=#{xtbh,jdbcType=VARCHAR}
+		or l.zdbs=#{xtbh,jdbcType=VARCHAR})
+	</select>	
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_bsxx set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		bsyt=#{bsyt,jdbcType=VARCHAR},bsjtlx=#{bsjtlx,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+</mapper>

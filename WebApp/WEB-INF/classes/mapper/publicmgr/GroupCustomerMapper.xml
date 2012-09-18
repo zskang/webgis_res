@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.GroupCustomerMapper">
+	<select id="getbyid"
+		resultType="com.cabletech.res.entity.publicmgr.GroupCustomerEntity"
+		parameterType="string" flushCache="true">
+		select
+		n.xtbh,n.groupid,n.groupname,n.ymc,n.groupaddr,n.grouptype,n.regionid,n.lon,n.lat,n.jkblxr,n.jkblxdh,n.khjl,n.khjldh,
+		to_char(n.createtime,'yyyy-MM-dd hh24:mi:ss')
+		createtime,n.jrfs,n.czywxx,n.gsjrdmc,n.sbgs,n.zyjb,n.khlb,n.remark,n.shape,n.status,n.irms_id
+		irmsid,n.linkman,n.phone,
+		n.site_id
+		siteid,n.khjb,n.gradeofservice,n.industry
+		from RES_GROUPCUSTOMER n where xtbh=#{xtbh,jdbcType=VARCHAR} and
+		(status!='9' or status is null)
+	</select>
+
+	<update id="update"
+		parameterType="com.cabletech.res.entity.publicmgr.GroupCustomerEntity">
+		UPDATE RES_GROUPCUSTOMER SET
+		groupid=#{groupid,jdbcType=VARCHAR},groupname=#{groupname,jdbcType=VARCHAR},
+		ymc=#{ymc,jdbcType=VARCHAR},groupaddr=#{groupaddr,jdbcType=VARCHAR},grouptype=#{grouptype,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR},lon=#{lon,jdbcType=VARCHAR},lat=#{lat,jdbcType=VARCHAR},
+		jkblxr=#{jkblxr,jdbcType=VARCHAR},jkblxdh=#{jkblxdh,jdbcType=VARCHAR},khjl=#{khjl,jdbcType=VARCHAR},khjldh=#{khjldh,jdbcType=VARCHAR},
+		jrfs=#{jrfs,jdbcType=VARCHAR},czywxx=#{czywxx,jdbcType=VARCHAR},gsjrdmc=#{gsjrdmc,jdbcType=VARCHAR},sbgs=#{sbgs,jdbcType=VARCHAR},
+		zyjb=#{zyjb,jdbcType=VARCHAR},khlb=#{khlb,jdbcType=VARCHAR},remark=#{remark,jdbcType=VARCHAR},createtime=to_date(#{createtime,jdbcType=VARCHAR},'yyyy-MM-dd
+		hh24:mi:ss'),
+		linkman=#{linkman,jdbcType=VARCHAR},phone=#{phone,jdbcType=VARCHAR},site_id=#{siteid,jdbcType=VARCHAR},khjb=#{khjb,jdbcType=VARCHAR},
+		gradeofservice=#{gradeofservice,jdbcType=VARCHAR},industry=#{industry,jdbcType=VARCHAR}
+		WHERE xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<insert id="save"
+		parameterType="com.cabletech.res.entity.publicmgr.GroupCustomerEntity"
+		flushCache="true">
+		insert into
+		RES_GROUPCUSTOMER(xtbh,groupid,groupname,ymc,groupaddr,grouptype,regionid,lon,lat,
+		jkblxr,jkblxdh,khjl,khjldh,createtime,jrfs,czywxx,gsjrdmc,sbgs,zyjb,khlb,remark,linkman,phone,
+		site_id,khjb,gradeofservice,industry)
+		values(#{xtbh,jdbcType=VARCHAR},#{groupid,jdbcType=VARCHAR},#{groupname,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},#{groupaddr,jdbcType=VARCHAR}
+		,#{grouptype,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},#{jkblxr,jdbcType=VARCHAR}
+		,#{jkblxdh,jdbcType=VARCHAR},#{khjl,jdbcType=VARCHAR},#{khjldh,jdbcType=VARCHAR},to_date(#{createtime,jdbcType=VARCHAR},'yyyy-MM-dd
+		hh24:mi:ss')
+		,#{jrfs,jdbcType=VARCHAR},#{czywxx,jdbcType=VARCHAR},#{gsjrdmc,jdbcType=VARCHAR},#{sbgs,jdbcType=VARCHAR}
+		,#{zyjb,jdbcType=VARCHAR},#{khlb,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR}
+		,#{linkman,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},#{siteid,jdbcType=VARCHAR},#{khjb,jdbcType=VARCHAR}
+		,#{gradeofservice,jdbcType=VARCHAR},#{industry,jdbcType=VARCHAR})
+	</insert>
+	<select id="queryGroupCustomerList" parameterType="hashmap"
+		resultType="hashmap" flushCache="true">
+select n.xtbh,
+       n.groupid,
+       n.groupname,
+       n.ymc,
+       n.groupaddr,
+       n.grouptype,
+       round(n.lon, 6) lon,
+       round(n.lat, 6) lat,
+       n.jkblxr,
+       n.jkblxdh,
+       n.khjl,
+       n.khjldh,
+       to_char(n.createtime, 'yyyy-MM-dd hh24:mi:ss') createtime,
+       n.jrfs,
+       n.czywxx,
+       n.gsjrdmc,
+       n.sbgs,
+       n.zyjb,
+       n.khlb,
+       n.remark,
+       n.status,
+       n.irms_id irmsid,
+       n.linkman,
+       n.phone,
+       n.site_id siteid,
+       n.khjb,
+       n.gradeofservice,
+       n.industry,
+       d.zymc zdmc,
+       d.regionid,
+       g.regionname,
+       m.maintenance_id,
+       o.ORGNAME orgname,
+       p.NAME PATROLGROUP,
+       d.zymc 
+  from RES_GROUPCUSTOMER n
+  left join res_zdxx d on n.site_id = d.xtbh
+  left join rs_maintenance m on d.xtbh = m.maintenance_id
+    left join view_org o on m.maintenance_id = o.ID
+  left join region g on d.regionid = g.regionid
+ where 1 = 1
+   and m.rs_type = 'C34'
+   and (n.status != '9' or n.status is null)
+		<if test="patrolgroupid != null and patrolgroupid !=''">
+			and m.patrol_group_id = #{patrolgroupid,jdbcType=VARCHAR}
+		</if>
+		<if test="patrolgroupid == null or patrolgroupid ==''">
+			<if test="orgids !=null and orgids !=''">
+				and m.maintenance_id in
+				<foreach collection="orgids" item="orgid" open="("
+					separator="," close=")">
+					#{orgid,jdbcType=VARCHAR}
+				</foreach>
+			</if>
+			<if test="orgids == null or orgids ==''">
+				<if test="regionids != null and regionids != ''">
+					and d.regionid in
+					<foreach collection="regionids" item="regionid" open="("
+						separator="," close=")">
+						#{orgid,jdbcType=VARCHAR}  
+					</foreach>
+				</if>
+			</if>
+		</if>
+		 <if test="orgid != null and orgid != ''">
+			and o.ID = #{orgid,jdbcType=VARCHAR}
+		</if>
+		<if test="groupid != null and groupid != ''">
+			and n.groupid like '%' || #{groupid,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="groupname != null and groupname != ''">
+			and n.groupname like '%' || #{groupname,jdbcType=VARCHAR}
+			|| '%'
+		</if>
+		<if test="groupaddr != null and groupaddr != ''">
+			and d.groupaddr like '%' || #{groupaddr,jdbcType=VARCHAR}
+			|| '%'
+		</if>
+		<if test="khjb != null and khjb != ''">
+			and n.khjb = #{khjb,jdbcType=VARCHAR}
+		</if>
+		<if test="gradeofservice != null and gradeofservice != ''">
+			and d.gradeofservice like '%' ||
+			#{gradeofservice,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="industry != null and industry != ''">
+			and n.industry = #{industry,jdbcType=VARCHAR}
+		</if>
+
+	</select>
+	<update id="delete" parameterType="String">
+		delete from RES_GROUPCUSTOMER
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+</mapper>

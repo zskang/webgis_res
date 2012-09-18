@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.index.LogMapper">
+	<select id="getLogList" parameterType="hashmap" resultType="hashmap">
+		select 
+			a.xtbh ID,a.zymc,a.zyxtbh XTBH,(select lable from base_sysdictionary@base b where b.codevalue = a.action and rownum=1) ACT, 
+			a.createtime DT, a.actionman MAN, (select lable from base_sysdictionary@base b where b.codevalue = a.zylx and rownum=1) ZYLX 
+		from res_logs a
+		where 1=1  
+		<if test="xtbh != null and xtbh != ''">
+			and a.zyxtbh like '%' || #{xtbh,jdbcType=VARCHAR} || '%' 
+		</if>
+		<if test="zylx != null and zylx != ''">
+			and a.zylx=#{zylx,jdbcType=VARCHAR}
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and a.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="action != null and action != ''">
+			and a.action=#{action,jdbcType=VARCHAR}
+		</if>
+		<if test="actman != null and actman != ''">
+			and a.actionman like '%' || #{actman,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="begin != null and begin != ''">
+			<![CDATA[
+			and a.createtime >= to_date(#{begin,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="end != null and end != ''">
+			<![CDATA[
+			and a.createtime <= to_date(#{end,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+	</select>
+</mapper>

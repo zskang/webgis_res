@@ -1,0 +1,98 @@
+package com.cabletech.contractor.service.onlinedata;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.service.BaseService;
+
+/**
+ * 在线实时数据 Service 接口
+ * @author Administrator
+ *
+ */
+public interface OnlineDataService extends BaseService {
+	/**
+	 * 查询今天在线人员
+	 * @param map 查询条件
+	 * @return
+	 */
+	public List<Map<String, Object>> queryTodayOnlineMan(Map<String, Object> map);
+	
+	/**
+	 * 首页统计在线人员计数
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public String getOnlineMan(UserInfo user);
+	
+	/**
+	 * 按客户端回传的区域编号集合统计在线人员
+	 * @param regionids 区域编号集合
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinemanRealdataByRegion(String regionids, UserInfo user);
+	
+	/**
+	 * 按客户端回传的组织机构编号集合统计在线人员
+	 * @param orgids 组织机构编号集合
+	 * @param user 当前登录用户
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinemanRealdataByOrg(String orgids, UserInfo user);	
+	
+	
+	/**
+	 * 按区域分
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public List<Map<String, Object>> getRegions(UserInfo user);
+	
+	/**
+	 * 按代维分
+	 * @param user 当前登录用户
+	 * @return
+	 */	
+	public List<Map<String, Object>> getContractors(UserInfo user);
+	
+	/**
+	 * 首页统计在线车辆计数
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public String getOnlineCar(UserInfo user);	
+	
+	/**
+	 * 按客户端回传的区域编号集合统计在线车辆
+	 * @param regionids 区域编号集合
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinecarRealdataByRegion(String regionids, UserInfo user);	
+	
+	/**
+	 * 按客户端回传的组织机构编号集合统计在线车辆
+	 * @param orgids 组织机构编号集合
+	 * @param user 当前登录用户
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinecarRealdataByOrg(String orgids, UserInfo user);	
+	
+	/**
+	 * 计算今日整点在线人数
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlineManCounts(UserInfo user);
+	
+	/**
+	 * 计算今日整点在线车辆
+	 * @param user 当前登录用户
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlineCarCounts(UserInfo user);
+	
+	
+}

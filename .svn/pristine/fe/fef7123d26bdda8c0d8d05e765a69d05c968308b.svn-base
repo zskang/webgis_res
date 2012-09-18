@@ -1,0 +1,70 @@
+var deviceTopo={};//props:lid,ltype,ldata,rid,rtype,rdata
+deviceTopo.tid = $("#xtbh").val();
+deviceTopo.ttype = $("#zylx").val();
+//遮盖控制
+function troggerLayer(){
+	if(!$('#layer')[0]){
+		$('.TLEFT').append('<div id="layer"><span style="display:block;float:left;color:white;margin-top:100px;margin-left:20px;">操作已经锁定，请保存或取消后继续操作。</span></div>');
+		$('#layer').addClass('mylayer');
+	}else{
+		if($('#layer')[0].style.display == "none"){
+			$('#layer').css("display","block");
+		}else{
+			$('#layer').css("display","none");
+		}
+	}
+}
+
+//初始化跳纤数据
+function init_p2p_grid(){
+	$('#grid_p2p').jqGrid({
+		url: contextPath+'/contractor/search!searchRsList.action?id='+$("#id").val(),
+		postData: {
+//        	xtbh:$("#xtbh").val(),
+//        	zylx:$("#zylx").val()
+        }, 
+		mtype: 'POST',
+		datatype: "json",
+		colNames: ['代维单位','巡检人','到达时间','巡检开始时间','巡检结束时间','巡检历时','上报异常项数','上报隐患数','解决隐患数'],
+		colModel: [
+		{ name: 'RS_NAME', width: 150, align: "left",sortable:false },
+		{ name: 'PATROLMANNAME', width: 100, align: "left",sortable:false },
+		{ name: 'ARRIVE_TIME', width: 100, align: "left",sortable:false },
+		{ name: 'START_TIME', width: 100, align: "left",sortable:false },
+		{ name: 'END_TIME', width: 100, align: "left",sortable:false },
+		{ name: '', width: 150, align: "left",sortable:false },
+		{ name: 'EXCEPTIONCOUNT', width: 10, align: "left",sortable:false },
+		{ name: '', width: 150, align: "left",sortable:false },
+		{ name: '', width: 150, align: "left",sortable:false }
+		],
+	   	rowNum:10,
+		rowList: [10, 20, 30],
+		width:'100%',
+		 multiselect: false,
+		viewrecords: true,
+		prmNames : {
+			page : "pageNo",
+			rows : "pageSize",
+			sort : "sidx",
+			order : "sord"
+		},
+		jsonReader: {
+            root:"root" , 
+            page : "pageNo", // 当前页 
+			total : "totalPages", // 总页数 
+			records : "total", // 总记录数 
+            repeatitems: false,
+            id:"XTBH"
+        },
+		pager: '#grid_p2p_pager'
+	});
+}
+function reload_p2p_grid(_xtbh,_zylx){
+	jQuery("#grid_p2p").jqGrid().setGridParam({
+        postData: {
+	    	xtbh:_xtbh,
+	    	zylx:_zylx
+        } 
+    }).trigger("reloadGrid");
+}
+

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+    "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<constant name="struts.objectFactory" value="spring"></constant>
+	<constant name="struts.action.extension" value="action"></constant>
+	<constant name="struts.convention.default.parent.package"
+		value="base-package" />
+	<package name="base-package" extends="struts-default">
+		<global-results>
+			<!-- 下面定义的结果对所有的Action都有效 -->
+			<!-- 消息提示 提示级别分为错误、警告、提示, exception 最严重的错误用于处理未知的异常 在使用应用级别的三个异常提示时，需要在Action中指定提示信息，以及需要返回的制定页面 -->
+			<result name="success">/common/appnotice.jsp</result>
+		</global-results>
+	</package>
+</struts>

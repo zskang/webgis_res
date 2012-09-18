@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.groupcustomsmgr.BroadBandMapper">
+
+	<!-- 单个标石查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.groupcustomsmgr.BroadBandEntity"
+		parameterType="string" flushCache="true">
+		select b.objectid,b.xtbh,b.commid,b.zymc,b.ymc,b.commaddr,b.regionid,b.countyid,b.broadtype,
+		b.gsjrdmc,b.sbgs,b.status,round(b.x,6) lon,round(b.y,6) lat,
+		b.shape.minx projectx,b.shape.miny projecty from RES_BROADCOMMUNTY b where xtbh=#{xtbh,jdbcType=VARCHAR} and ( status is null or status != '9' )
+	</select>
+
+	<update id="update" parameterType="com.cabletech.res.entity.groupcustomsmgr.BroadBandEntity">
+		UPDATE RES_BROADCOMMUNTY SET
+			commid=#{commid,jdbcType=VARCHAR},zymc=#{zymc,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},
+			commaddr=#{commaddr,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+			broadtype=#{broadtype,jdbcType=VARCHAR},sbgs=#{sbgs,jdbcType=VARCHAR},
+			gsjrdmc=#{gsjrdmc,jdbcType=VARCHAR}
+		WHERE
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<insert id="save" parameterType="com.cabletech.res.entity.groupcustomsmgr.BroadBandEntity" flushCache="true">
+		insert into RES_BROADCOMMUNTY(objectid,xtbh,commid,zymc,ymc,commaddr,regionid,x,y,broadtype,sbgs,gsjrdmc,
+		createtime,shape) 
+		values(#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR}
+		,#{commid,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR}
+		,#{ymc,jdbcType=VARCHAR},#{commaddr,jdbcType=VARCHAR}
+		,#{regionid,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR}
+		,#{pointY,jdbcType=VARCHAR},#{broadtype,jdbcType=VARCHAR}
+		,#{sbgs,jdbcType=VARCHAR},#{gsjrdmc,jdbcType=VARCHAR}
+		,sysdate,sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	<select id="queryBroadBandList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select b.objectid,b.xtbh,b.commid,b.zymc,b.ymc,b.commaddr,b.regionid,b.countyid,b.broadtype,
+		b.gsjrdmc,b.sbgs,b.status,round(b.x,6) lon,round(b.y,6) lat from RES_BROADCOMMUNTY b
+		where 1=1 and ( status is null or status != '9' )
+		<if test="broadtype != null and broadtype != ''">
+			and broadtype=#{broadtype,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(createtime,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>	
+	<select id="queryBroadBandListWithSimid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select b.objectid,b.xtbh,b.commid,b.zymc,b.ymc,b.commaddr,b.regionid,b.countyid,b.broadtype,
+		b.gsjrdmc,b.sbgs,b.status,round(b.x,6) lon,round(b.y,6) lat ,r.deviceid from RES_BROADCOMMUNTY b,res_gprs_record r
+		where r.resid=b.xtbh and r.restype='AA315' and ( b.status is null or b.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.deviceid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="broadtype != null and broadtype != ''">
+			and b.broadtype=#{broadtype,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and b.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and b.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(b.createtime,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(b.createtime,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>
+	<update id="delete" parameterType="String">
+		UPDATE RES_BROADCOMMUNTY SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+</mapper>

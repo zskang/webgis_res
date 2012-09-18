@@ -1,0 +1,59 @@
+/**
+ * 作者：吕仁钊 
+ * 公司：鑫干线(合肥)
+ * 时间：2012/01/29
+ */
+package com.cabletech.core.entity.config;
+
+/**
+ * gis配置实体类(配置注入)。
+ */
+public class GlobalConfigInfo {
+
+	private String webliburl;// Web-Library Url
+	private String weblibctx;// Web-Library上下文
+	private String root;// GIS菜单ID
+	private String tablespacename;// 表空间名称，用于sde生成objectid。
+	private String logouturl; // 登出地址
+
+	public String getWebliburl() {
+		return webliburl;
+	}
+
+	public String getTablespacename() {
+		return tablespacename;
+	}
+
+	public void setTablespacename(String tablespacename) {
+		this.tablespacename = tablespacename;
+	}
+
+	public void setWebliburl(String webliburl) {
+		this.webliburl = webliburl;
+	}
+
+	public String getWeblibctx() {
+		return weblibctx;
+	}
+
+	public void setWeblibctx(String weblibctx) {
+		this.weblibctx = weblibctx;
+	}
+
+	public String getRoot() {
+		return root;
+	}
+
+	public void setRoot(String root) {
+		this.root = root;
+	}
+
+	public String getLogouturl() {
+		return logouturl;
+	}
+
+	public void setLogouturl(String logouturl) {
+		this.logouturl = logouturl;
+	}
+
+}

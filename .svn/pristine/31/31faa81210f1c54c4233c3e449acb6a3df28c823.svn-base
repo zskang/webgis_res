@@ -1,0 +1,69 @@
+package com.cabletech.contractor.action.carinfo;
+
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.contractor.entity.carinfo.CarInfoEntity;
+import com.cabletech.contractor.service.carinfo.CarInfoService;
+import com.cabletech.core.action.BaseAction;
+
+/**
+ * 车辆信息Action
+ */
+@Namespace("/contractor")
+@Results({
+		@Result(name = "view", location = "/contractor/carinfo/carinfo_view.jsp"),
+		@Result(name = "data", location = "/contractor/carinfo/cardata_info.jsp")})
+@Action("carinfo")
+public class CarInfoAction extends BaseAction {
+
+	private static final long serialVersionUID = 1L;
+
+	@Resource(name = "carInfoServiceImpl")
+	private CarInfoService service;
+	
+	private CarInfoEntity entity;
+
+	@Override
+	public String execute() {
+		return "data";
+	}
+	
+	
+	public String view() throws Exception {
+		return "view";
+	}	
+	
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		if(entity == null){
+			entity = new CarInfoEntity();
+		}
+
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String id = request.getParameter("id");
+		if(StringUtils.isNotBlank(id)){
+			entity = service.getbyid(id);
+			request.setAttribute("id", id);
+			request.setAttribute("entity", entity);
+		}else{
+			entity = new CarInfoEntity();
+		}
+
+	}
+
+	@Override
+	public Object getModel() {
+		if(entity == null){
+			entity = new CarInfoEntity();
+		}
+		return entity;
+	}
+}

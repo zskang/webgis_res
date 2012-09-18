@@ -1,0 +1,135 @@
+package com.cabletech.res.service.cableequipmgr;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.cableequipmgr.GfxxEntity;
+import com.cabletech.res.mapper.cableequipmgr.GfxxMapper;
+
+/**
+ * 光分纤箱信息管理Service实现
+ * 
+ * @author 杨隽 2011-05-23 创建
+ * 
+ */
+@Service
+public class GfxxServiceImpl extends BaseServiceImpl implements GfxxService {
+	@Resource(name = "gfxxMapper")
+	private GfxxMapper gfxxmapper;
+
+	/**
+	 * 保存
+	 * 
+	 * @param entity  GfxxEntity 光分纤箱实体
+	 */
+	public boolean saveOrUpdate(GfxxEntity entity) {
+		try{
+			EsriRestEntity esrientity = new EsriRestEntity();
+			esrientity.setAttrobj(entity);
+			esrientity.setRestype(super.restservice.POINT);
+			esrientity.setRescode("AA004");
+			esrientity.setX(entity.getProjectx());
+			esrientity.setY(entity.getProjecty());
+			if(StringUtils.isBlank(entity.getXtbh())){
+				entity.setLon(entity.getPointX());
+				entity.setLat(entity.getPointY());
+				entity.setXtbh(super.getXTBH());
+			}
+			if(restservice.restPost(esrientity)){
+				return true;
+			}else{
+				return false;
+			}
+		}catch (Exception e) {
+			logger.error("新增或更新光分纤箱：",e);
+			return false;
+		}
+	}
+
+	/**
+	 * 查看
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 * @return GfxxEntity 光分纤箱实体
+	 */
+	public GfxxEntity view(String xtbh) {
+		return gfxxmapper.view(xtbh);
+	}
+ 
+	/**
+	 * 删除
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 */
+	@Transactional
+	public void delete(String xtbh) {
+		// 1、删除光分纤箱下级联信息
+		// 2、删除光分纤箱信息
+		gfxxmapper.deleteGfxxConnByGfxxXtbh(xtbh);
+		gfxxmapper.deleteGfxxDzByGfxxXtbh(xtbh);
+		gfxxmapper.delete(xtbh);
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 光分纤箱实体
+	 */
+	@Override
+	public String getTreeNodes(GfxxEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gldlylist = gfxxmapper.getGldlyByGfxx(entity.getXtbh());
+		List<Map<String, Object>> jflist = gfxxmapper.getJfByGfxx(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),20));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		nodes.append(super.getNode(entity.getXtbh(), "27", restype, jflist));
+		return nodes.toString();
+	}
+	
+	@Override
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gfxxmapper.deleteGfxxConnByGfxxXtbh(xtbh[i]);
+				//gfxxmapper.deleteGfxxDzByGfxxXtbh(xtbh[i]);				
+				gfxxmapper.delete(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除光分纤箱：",e);
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gfxxmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑光分纤箱：",e);
+			return false;
+		}
+	}	
+	/**
+	 * 获取资源树(连接管理模块需要，吕仁钊添加)
+	 * @param map 表单值
+	 * @return
+	 */
+	public List<Map<String,Object>> getResTree(String xtbh){
+		return gfxxmapper.getResTree(xtbh);
+	}
+}

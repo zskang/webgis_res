@@ -1,0 +1,18 @@
+package com.cabletech.contractor.service.search;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+
+/**
+ * 搜索服务层
+ * 
+ * @author cqp
+ * @date 2012-7-31
+ *
+ */
+public interface SearchService extends BaseService{
+
+	
+
+}

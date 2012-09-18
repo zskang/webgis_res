@@ -1,0 +1,177 @@
+package com.cabletech.res.action.publicmgr;
+
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.action.BaseAction;
+import com.cabletech.res.entity.publicmgr.GroupCustomerEntity;
+import com.cabletech.res.service.publicmgr.GroupCustomerService;
+
+/**
+ * 集客
+ * 
+ * @author zg
+ * 
+ */
+@Namespace("/res/publicmgr")
+@Results({
+		@Result(name = "input", location = "/res/publicmgr/groupcustomer/groupcustomer_input.jsp"),
+		@Result(name = "frame", location = "/res/publicmgr/groupcustomer/groupcustomer_frame.jsp"),
+		@Result(name = "view", location = "/res/publicmgr/groupcustomer/groupcustomer_view.jsp"),
+		@Result(name = "list", location = "/res/publicmgr/groupcustomer/groupcustomer_list.jsp"), })
+@Action("groupcustomer")
+public class GroupCustomerAction extends BaseAction {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private GroupCustomerEntity entity;
+
+	@Resource(name = "groupCustomerServiceImpl")
+	private GroupCustomerService service;
+
+	/**
+	 * NodeB保存信息
+	 * 
+	 */
+	public String save() {
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getXtbh())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		if (service.saveorupdate(entity)) {
+			if (toPage.equals("input")) {
+				entity = new GroupCustomerEntity();
+				entity.setActionMessage("新增成功!");
+			}
+		} else {
+			entity = new GroupCustomerEntity();
+			entity.setActionMessage("新增失败!");
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+	/**保存
+	 * @return
+	 */
+	public String save4nbsp() {
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getXtbh())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		if (service.saveorupdate(entity)) {
+			if (toPage.equals("input")) {
+				entity = new GroupCustomerEntity();
+				entity.setActionMessage("新增成功!");
+			}
+		} else {
+			entity = new GroupCustomerEntity();
+			entity.setActionMessage("新增失败!");
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+
+	@Override
+	public String execute() {
+		String xtbh = request.getParameter("xtbh");// 获取资源id
+		request.setAttribute("xtbh", xtbh);
+		return "frame";
+	}
+
+	/**
+	 * 删除
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String delete() throws Exception {
+		String xtbh = request.getParameter("xtbh");
+		if (service.delete(xtbh)) {
+			super.outmessage("删除成功！");
+		} else {
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+
+	/**
+	 * 列表页面
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public String list() throws Exception {
+		return "list";
+	}
+
+	/**
+	 * @return
+	 * @throws Exception
+	 */
+	public String imput() throws Exception {
+		return "imput";
+	}
+
+	/**
+	 * 查询列表的数据
+	 * 
+	 * @throws Exception
+	 */
+	public void listdata() throws Exception {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		String condition = entity.getSerializeQueryCondition();
+		if (StringUtils.isBlank(condition)) {
+			condition = request.getQueryString();
+		}
+		Map<String, Object> conditionMap = super.getDecodeCondtionMap(
+				condition, user);
+		service.setExportconditionmap(conditionMap);
+		Map<String, Object> map = null;
+		map = service.queryPageMap("queryGroupCustomerList", conditionMap,
+				super.getPage(), super.getLimit());
+		super.convertpagemaptojson(map);
+	}
+
+	@Override
+	public Object getModel() {
+		if (entity == null) {
+			entity = new GroupCustomerEntity();
+		}
+		return entity;
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String xtbh = request.getParameter("xtbh");// 获取资源id
+		if (StringUtils.isNotBlank(xtbh)) {
+			GroupCustomerEntity entity = service.getbyid(xtbh);
+			request.setAttribute("entity", entity);
+		} else {
+			entity = new GroupCustomerEntity();
+		}
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		if (entity == null) {
+			entity = new GroupCustomerEntity();
+		}
+
+	}
+
+}

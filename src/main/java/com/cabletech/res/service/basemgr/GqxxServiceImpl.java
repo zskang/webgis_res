@@ -1,0 +1,144 @@
+package com.cabletech.res.service.basemgr;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.GqxxEntity;
+import com.cabletech.res.mapper.basemgr.GqdMapper;
+import com.cabletech.res.mapper.basemgr.GqxxMapper;
+import com.cabletech.res.mapper.basemgr.YsMapper;
+
+/**
+ * 挂墙信息管理
+ * @author zhanglei 2011-05-11
+ *
+ */
+@Service
+public class GqxxServiceImpl extends BaseServiceImpl  implements GqxxService {
+	
+	@Resource(name = "gqxxMapper")
+	private GqxxMapper gqxxmapper;
+	
+	@Resource(name = "gqdMapper")
+	private GqdMapper gqdmapper;
+	
+	@Resource(name = "ysMapper")
+	private YsMapper ysmapper;		
+	
+	/**
+	 * 挂墙修改
+	 * @param entity 挂墙实体
+	 */
+	@Transactional
+	public boolean saveorupdate(GqxxEntity entity){
+		try{
+			EsriRestEntity esrientity = new EsriRestEntity();
+			esrientity.setAttrobj(entity);
+			esrientity.setRestype(super.restservice.POINT);
+			esrientity.setRescode("A23");
+			esrientity.setX(entity.getProjectx());
+			esrientity.setY(entity.getProjecty());
+			if(StringUtils.isBlank(entity.getXtbh())){
+				entity.setLon(entity.getPointX());
+				entity.setLat(entity.getPointY());
+				entity.setCreatedate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
+				entity.setXtbh(super.getXTBH());
+			}
+			if(restservice.restPost(esrientity)){
+				return true;
+			}else{
+				return false;
+			}
+		}catch (Exception e) {
+			logger.error("新增或更新挂墙信息实体：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 单条查看挂墙信息
+	 * @param xtbh 系统编号
+	 * @return 单条挂墙实体
+	 */
+	public GqxxEntity getbyid(String xtbh){
+		return gqxxmapper.getbyid(xtbh);
+	}
+	
+	/**
+	 * 挂墙单条删除
+	 * @param xtbh 系统编号
+	 * @return Boolean 删除成功或者失败
+	 */
+	public boolean delete(String xtbh){
+		try {
+			gqxxmapper.deleteGq(xtbh);
+			gqdmapper.deleteGqdByGq(xtbh);
+			ysmapper.deleteYsByGq(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除挂墙信息：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 挂墙信息
+	 */
+	@Override
+	public String getTreeNodes(GqxxEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gldlylist = gqxxmapper.getGldlyBygqxx(entity.getXtbh());
+		List<Map<String, Object>> Gqdlist = gqxxmapper.getGqdBygqxx(entity.getXtbh());
+		List<Map<String, Object>> gjtlist = gqxxmapper.getGjtByGjbh(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),3));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		nodes.append(super.getNode(entity.getXtbh(), "16", restype, gjtlist));
+		nodes.append(super.getNode(entity.getXtbh(), "4", restype, Gqdlist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 挂墙的批量逻辑删除
+	 * @param xtbhs 挂墙的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gqxxmapper.deleteGq(xtbh[i]);
+				gqdmapper.deleteGqdByGq(xtbh[i]);
+				ysmapper.deleteYsByGq(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除电杆：",e);
+			return false;
+		}
+	}	
+
+	/**
+	 * 挂墙批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gqxxmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑挂墙：",e);
+			return false;
+		}
+	}
+}

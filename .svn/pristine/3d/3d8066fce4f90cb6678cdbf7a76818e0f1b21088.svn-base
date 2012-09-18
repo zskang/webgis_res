@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.boardfibermgr.JxgxllzMapper">
+
+	<!-- 获取链路组 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.boardfibermgr.JxgxllzEntity"
+		parameterType="string" flushCache="true">
+		select * from res_jxgx_lgz where id=#{id,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据链路组名称查询链路组集合 -->	
+	<select id="queryJxgxllzList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_jxgx_lgz where llzmc like '%' || #{llzmc,jdbcType=VARCHAR} || '%'
+	</select>
+	
+	<!-- 删除链路组 -->
+	<delete id="delete" parameterType="string" flushCache="true">
+		delete from res_jxgx_lgz where id=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 更新链路组 -->
+	<update id="update" parameterType="com.cabletech.res.entity.boardfibermgr.JxgxllzEntity" flushCache="true">
+		update res_jxgx_lgz set llzmc = #{llzmc,jdbcType=VARCHAR},qssbid = #{qssbid,jdbcType=VARCHAR},
+		qssblx = #{qssblx,jdbcType=VARCHAR},zzsbid=#{zzsbid,jdbcType=VARCHAR},
+		zzsblx=#{zzsblx,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		remark=#{remark,jdbcType=VARCHAR} where id = #{id,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 新增链路组 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.boardfibermgr.JxgxllzEntity" flushCache="true">
+		insert into res_jxgx_lgz(id,llzmc,qssbid,qssblx,zzsbid,zzsblx,sszt,remark) 
+		values(#{id,jdbcType=VARCHAR},#{llzmc,jdbcType=VARCHAR}
+		,#{qssbid,jdbcType=VARCHAR},#{qssblx,jdbcType=VARCHAR}
+		,#{zzsbid,jdbcType=VARCHAR},#{zzsblx,jdbcType=VARCHAR}
+		,#{sszt,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR})		
+	</insert>
+	
+	<select id="getObjectIds" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.objectid from res_jxgx_ly y,res_gld_ly g where g.xtbh=y.ssgldly and y.lytype='A33'
+	</select>
+</mapper>

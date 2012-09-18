@@ -1,0 +1,122 @@
+/**
+ * 显示今日在线统计结果列表
+ * @param index 访问地址索引
+ * @returns
+ */
+var showOnlineResult = function(index){
+	var firsturls = [contextPath + '/contractor/onlinedata!todayonlinemanresult.action',
+		contextPath + '/contractor/onlinedata!todayonlinecarresult.action'];
+	var secondurls = [contextPath + '/contractor/onlinedata!todayrealonlinemandata.action?R='+Math.random(),
+		contextPath + '/contractor/onlinedata!todayrealonlinecardata.action?R='+Math.random()];
+	$.ajax({
+		url : firsturls[index],
+		dataType:'html',
+		success:function(html){
+			mainlayout.open("east");
+			$("#resultcontent").html(html);
+			var regionids = [],orgids = [];
+			jQuery.each($("#regions li").find("span"), function(key, value){
+				regionids.push($(value).attr("id"));
+			});
+			jQuery.each($("#contractors li").find("span"), function(key, value){
+				orgids.push($(value).attr("id"));
+			});
+			if(regionids.length==0 || orgids.length==0)return;
+			//向服务器端回写请求真实在线数据
+			$.ajax({
+				url: secondurls[index]+"&regionids="+regionids.join(",")+"&orgids="+orgids.join(","),
+				dataType:'json',
+				success:function(json){
+					var regions = json['regionsonline'];
+					var contractors = json['orgsonline'];
+					jQuery.each(regions, function(key, value){
+						if(value.cnt){
+							$('#'+value.regionid).html(value.cnt);
+							$('#'+value.regionid).parent().bind('click', function(){showOnlineByRegion(value.regionid, index);});
+						}else{
+							$('#'+value.regionid).parent().unbind('click').css({"text-decoration":"none"});
+						}
+					});
+					jQuery.each(contractors, function(key, value){
+						if(value.cnt){
+							$('#'+value.orgid).html(value.cnt);
+							$('#'+value.orgid).parent().bind('click', function(){showOnlineByOrg(value.orgid, index);});
+						}else{
+							$('#'+value.orgid).parent().unbind('click').css({"text-decoration":"none"});
+						}
+					});
+					
+					var onlinecount = json["onlinecount"];
+					var timekey = [], timecnt = [];
+					jQuery.each(onlinecount, function(key, value){
+						timekey.push(value.timekey.substr(0,value.timekey.length-3));
+						if(value.timecnt){
+							timecnt.push(value.timecnt);
+						}else{
+							timecnt.push("");
+						}
+					});
+					
+					chart = new Highcharts.Chart({
+						credits: {enabled: false},
+						chart: {
+							renderTo: 'container',
+							defaultSeriesType: 'column'
+						},
+						title: {
+							text: '整点分布图'
+						},
+						xAxis: {
+							categories: timekey,
+							labels: {rotation: -90,align: 'right',
+								style: {
+									font: 'normal 13px Verdana, sans-serif'
+								}
+							}							
+						},
+						yAxis: {
+							min: 0,
+							tickInterval: 1,
+							title: {
+								text: '数量 (个)'
+							}
+						},
+						legend: {
+							enabled: false
+						},						
+						tooltip: {
+							formatter: function() {
+								return this.y;
+							}
+						},
+						labels: {
+							items: [{
+								style: {
+									left: '0px',
+									top: '0px',
+									color: 'black'
+								}
+							}]
+						},					
+						series: [{
+							data: timecnt,
+							dataLabels: {
+								enabled: true,
+								align: 'right',								
+								y: 1,
+								formatter: function() {
+									return this.y;
+								},
+								style: {
+									font: 'normal 13px Verdana, sans-serif'
+								}							
+							}
+						}]						
+					});
+
+				}
+			});	
+		
+		}
+	});
+}

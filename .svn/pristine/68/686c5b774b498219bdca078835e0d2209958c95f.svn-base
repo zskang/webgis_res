@@ -1,0 +1,46 @@
+package com.cabletech.res.service.index;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.mapper.index.LogMapper;
+import com.cabletech.res.mapper.index.NoticeMapper;
+
+/**
+ * 日志操作
+ * 
+ * @author 吕仁钊 2012-08-11
+ * 
+ */
+@Service
+public class NoticeServiceImpl extends BaseServiceImpl implements NoticeService {
+
+	@Resource(name = "noticeMapper")
+	private NoticeMapper noticeMapper;
+
+	
+	/**
+	 * 根据用户获取未读通告
+	 * @param user 用户
+	 * @return 未读通告 
+	 */
+	public int getUnReadNotices(UserInfo user){
+		Map<String,Object> params = new HashMap<String, Object>();
+		params.put("userid", user.getUserId());
+		params.put("regionid", user.getRegionId());
+		return noticeMapper.getUnReadNotices(null);
+	}
+	
+}

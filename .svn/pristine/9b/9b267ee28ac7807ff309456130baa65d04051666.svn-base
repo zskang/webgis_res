@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.index.NoticeMapper">
+	
+	<select id="getNotices" parameterType="hashmap" resultType="hashmap">
+		select ID XTBH,TYPE,TITLE,to_char(ISSUEDATE,'YYYY/MM/DD') DT,(SELECT count(1) FROM res_notice_isread b where b.noticeid = a.id and userid = #{userid,jdbcType=VARCHAR}) IFREAD from res_notice a order by a.issuedate desc
+	</select>
+	
+	<select id="getUnReadNotices" parameterType="hashmap" resultType="int">
+		select count(1) from res_notice a, res_notice_isread b where a.id = b.noticeid and 1=1 
+		<if test="regionids != null and regionids != ''">
+			and  a.regionid like rtrim(#{regionid,jdbcType=VARCHAR},'0')||'%' 
+		</if> 
+		<if test="userid != null and userid != ''">
+			and b.userid like '%' || #{userid,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+	
+</mapper>

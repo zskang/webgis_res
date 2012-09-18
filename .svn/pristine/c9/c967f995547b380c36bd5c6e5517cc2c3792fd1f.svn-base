@@ -1,0 +1,129 @@
+package com.cabletech.res.mapper.publicmgr;
+
+import java.util.List;
+import java.util.Map;
+import com.cabletech.res.entity.publicmgr.OdfEntity;
+
+/**
+ * odf信息管理
+ * 
+ * @author zhanglei 2012-05-11
+ */
+public interface OdfMapper {
+	
+	/**
+	 * 编辑
+	 * @param entity odf实体
+	 */
+	public void update(OdfEntity entity);
+	
+	/**
+	 * 保存
+	 * @param entity odf实体
+	 */
+	public void save(OdfEntity entity);
+	
+	/**
+	 * 查看
+	 * @param xtbh 系统编号
+	 * @return odf实体
+	 */
+	public OdfEntity getbyid(String xtbh);
+	
+	/**
+	 * 查询odf系统
+	 * @param map 条件不包含SIMID
+	 * @return 符合条件的List集合
+	 */
+	public List<Map<String, Object>> queryOdfHaveSimid(Map<String, Object> map);	
+	/**
+	 * 查询odf系统
+	 * @param map 条件 包含SIMID
+	 * @return 符合条件的List集合
+	 */
+	public List<Map<String, Object>> queryOdfNoSimid(Map<String, Object> map);	
+	/**
+	 * 逻辑删除odf系统
+	 * @param xtbh 系统编号
+	 */
+	public void deleteOdf(String xtbh);
+	
+	/**
+	 * 逻辑删除odf根据站点编号
+	 * @param xtbh 站点系统编号
+	 */
+	public void deleteOdfByZdxxXtbh(String xtbh);	
+	
+	/**
+	 * 逻辑删除odf成端根据站点编号
+	 * @param xtbh 站点系统编号
+	 */
+	public void deleteOdfConnByZdxxXtbh(String xtbh);	
+	
+	/**
+	 * 逻辑删除odf端子根据站点编号
+	 * @param xtbh 站点系统编号
+	 */
+	public void deleteOdfDzByZdxxXtbh(String xtbh);
+	
+	/**
+	 * 逻辑删除odf端子根据机房编号
+	 * @param xtbh 机房系统编号
+	 */	
+	public void deleteOdfDzByJfxxXtbh(String xtbh);
+	
+	/**
+	 * 逻辑删除odf成端根据机房编号
+	 * @param xtbh 机房系统编号
+	 */	
+	public void deleteOdfConnByJfxxXtbh(String xtbh);
+	
+	/**
+	 * 逻辑删除odf根据机房编号
+	 * @param xtbh 机房系统编号
+	 */		
+	public void deleteOdfByJfxxXtbh(String xtbh);
+	
+	/**
+	 * 逻辑删除odf成端根据odf编号
+	 * @param xtbh odf系统编号
+	 */		
+	public void deleteOdfConnByOdfXtbh(String xtbh);
+	
+	/**
+	 * 逻辑删除odf端子根据odf编号
+	 * @param xtbh odf系统编号
+	 */		
+	public void deleteOdfDzByOdfXtbh(String xtbh);	
+	
+	/**
+	 * 获取odf关联树中 光缆段
+	 * @param xtbh 系统编号
+	 */
+	public 	List<Map<String, Object>> getGldlyByOdf(String xtbh);
+	
+	/**
+	 * 获取odf关联树中 站点信息
+	 * @param xtbh 系统编号
+	 */
+	public List<Map<String, Object>>  getZdxxByOdf(String xtbh);
+	/**
+	 * 获取odf关联树中 机房信息
+	 * @param xtbh 系统编号
+	 */
+	public List<Map<String, Object>>  getJfxxByOdf(String xtbh);
+	
+	/**
+	 * ODF批量编辑
+	 * @param map 表单值
+	 * @throws Exception
+	 */
+	public void batchEdit(Map<String, Object> map)throws Exception;	
+	
+	/**
+	 * 获取资源树(连接管理模块需要，吕仁钊添加)
+	 * @param map 表单值
+	 * @return
+	 */
+	public List<Map<String,Object>> getResTree(String xtbh);
+}

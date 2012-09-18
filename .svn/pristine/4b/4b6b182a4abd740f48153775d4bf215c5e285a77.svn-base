@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.contractor.mapper.search.SearchMapper">
+	<!-- 搜索在线巡检人 -->
+	<select id="searchPatrolMan" parameterType="hashmap" resultType="hashmap">
+		SELECT
+			o.patrolman_id PID,o.businesstype,vp.NAME LABEL,vp.PARENTNAME PARENTNAME,vp.ORGNAME,to_char(o.activetime,'yyyy-mm-dd hh24:mi:ss') activetime,vr.regionname,o.ct_x lon,o.ct_y lat
+		FROM 
+		 view_region vr,view_patrolgroupperson vp left join onlineman o on o.patrolman_id=vp.ID
+		where vp.REGIONID=vr.REGIONID and vp.OBJTYPE='MAN'
+			<if test="patrolname!=''">
+				and vp.NAME like '%'||#{patrolname,jdbcType=VARCHAR}||'%'
+			</if>
+			<if test="starttime != '' and endtime != ''">
+				and o.activetime between to_date(#{starttime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') 
+				and to_date(#{endtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')  
+			</if>
+			<if test="orgid != ''">
+				start with vp.PARENTORGID=#{orgid,jdbcType=VARCHAR}
+				connect by prior vp.PARENTORGID=vp.ORGID
+			</if>
+	</select>
+	<!-- 搜索代维车辆 -->
+	<select id="searchCar" parameterType="hashmap" resultType="hashmap">
+		SELECT
+		    car.carno,o.simid,o.businesstype,car.mentor,car.phone,vo.orgname,o.ct_x lon,o.ct_y lat,to_char(o.activetime,'yyyy-mm-dd hh24:mi:ss') activetime,vo.ID 
+		FROM car_info car,onlineman o,view_org vo 
+		WHERE car.contractorid=vo.ID and o.simid=car.simid
+			<if test="carno!=''">
+				and car.carno like '%'||#{carno,jdbcType=VARCHAR}||'%'
+			</if>
+			<if test="mentor!=''">
+				and car.mentor like '%'||#{mentor,jdbcType=VARCHAR}||'%'
+			</if>
+			<if test="starttime != '' and endtime != ''">
+				and o.activetime between to_date(#{starttime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss') 
+				and to_date(#{endtime,jdbcType=VARCHAR},'yyyy-mm-dd hh24:mi:ss')  
+			</if>
+			<if test="orgid != ''">
+				connect by prior vo.ID=vo.PARENTID 
+				start with vo.ID=#{orgid,jdbcType=VARCHAR}
+			</if>
+	</select>
+</mapper>

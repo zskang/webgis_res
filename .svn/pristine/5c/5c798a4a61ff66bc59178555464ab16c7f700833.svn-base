@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.BsdMapper">
+	<!-- 直埋段查询  条件：名称 起点标石  终点标石  产权性质 区域 -->
+	<select id="queryBsdList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_bsd where  (status != '9' or status is null)
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="qdbs != null and qdbs != ''">
+			and qdbs=#{qdbs,jdbcType=VARCHAR}
+		</if>				
+		<if test="zdbs != null and zdbs != ''">
+			and zdbs=#{zdbs,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>	
+	
+	<!-- 单个直埋段查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.BsdEntity"
+		parameterType="string" flushCache="true">
+		select objectid, sydw, syqr, yt, sfgj, sfgx, orgid, createdate, shape, xtbh, zymc, ssbsxt, qdbs, zdbs, bsdcd, cqxz, regionid, sszt, status,b.shape.minx projectx,b.shape.miny projecty from res_bsd b where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 标石段跟新 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.BsdEntity">
+		UPDATE res_bsd SET
+			zymc=#{zymc,jdbcType=VARCHAR},ssbsxt=#{ssbsxt,jdbcType=VARCHAR},qdbs=#{qdbs,jdbcType=VARCHAR},
+			zdbs=#{zdbs,jdbcType=NUMERIC},whfs=#{whfs,jdbcType=VARCHAR},bsdcd=#{bsdcd,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+			cqxz=#{cqxz,jdbcType=VARCHAR},sydw=#{sydw,jdbcType=VARCHAR},syqr=#{syqr,jdbcType=VARCHAR},
+			yt=#{yt,jdbcType=VARCHAR},sfgj=#{sfgj,jdbcType=VARCHAR},sfgx=#{sfgx,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR}
+		WHERE
+			XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 标石段保存 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.BsdEntity">
+		INSERT INTO res_bsd(
+		objectid,xtbh,zymc,qdbs,ssbsxt,zdbs,bsdcd,regionid,cqxz,sydw,syqr,yt,sfgj,sfgx,orgid,sszt
+		<if test="geostr != null and geostr != ''">
+			,shape
+		</if>
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{ssbsxt,jdbcType=VARCHAR},
+		#{qdbs,jdbcType=VARCHAR},#{zdbs,jdbcType=NUMERIC},#{bsdcd,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{sydw,jdbcType=VARCHAR},
+		#{syqr,jdbcType=VARCHAR},#{yt,jdbcType=VARCHAR},#{sfgj,jdbcType=VARCHAR},
+		#{sfgx,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR}
+		
+		<if test="geostr != null and geostr != ''">
+			,sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR})
+		</if>
+		)
+	</insert>
+	
+	<!-- 单条逻辑删除直埋段 -->
+	<update id="delete" parameterType="String">
+		UPDATE res_bsd SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 根据起点或者终点类型 删除直埋段 -->
+	<update id="deleteBsdByBs" parameterType="String">
+		UPDATE res_bsd SET status='9' where qdbs=#{xtbh,jdbcType=VARCHAR} or zdbs=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 置空直埋段的 所属直埋段系统 -->
+	<update id="deleteSsbsxt" parameterType="String">
+		UPDATE res_bsd SET ssbsxt='' where ssbsxt=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取标石段相关的标石信息 -->
+	<select id="getBsxxByBsd" parameterType="string" resultType="hashmap" flushCache="true">
+		select s.zymc,s.xtbh  from res_bsxx s where  s.xtbh=(select b.qdbs from res_bsd b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+		union
+		select s.zymc,s.xtbh  from res_bsxx s where  s.xtbh=(select b.zdbs from res_bsd b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+	</select>
+	
+	<!-- 获取标石段相关的光缆段路由信息 -->
+	<select id="getGldlyByBsd" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gld_ly g,res_gld_ly_dwss l where g.xtbh=l.gld_id and l.segment_id=#{xtbh,jdbcType=VARCHAR} and l.restype='AD603'
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_bsd set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		yt=#{yt,jdbcType=VARCHAR},sfgj=#{sfgj,jdbcType=VARCHAR},
+		sfgx=#{sfgx,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>					
+</mapper>

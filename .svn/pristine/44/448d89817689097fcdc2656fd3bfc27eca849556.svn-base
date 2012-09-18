@@ -1,0 +1,49 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.publicmgr.NodeBEntity;
+
+/**
+ * NodeB 业务接口类
+ * 
+ * @author wangt
+ * 
+ */
+public interface NodeBService extends BaseService {
+
+	/**
+	 * 获取单个实体信息
+	 * 
+	 * @param nodeid
+	 *            系统编号
+	 * @return
+	 */
+	NodeBEntity getbyid(String nodeid);
+
+	/**
+	 * 删除单个实体信息
+	 * 
+	 * @param nodeid
+	 *            系统编号
+	 * @return
+	 */
+	boolean delete(String nodeid);
+
+	/**
+	 * 保存或删除
+	 * 
+	 * @param entity
+	 *            操作对象
+	 * @return
+	 */
+	boolean saveorupdate(NodeBEntity entity);
+	/**
+	 * 设置条件
+	 * 
+	 * @param conditionMap
+	 */
+	void setExportconditionmap(Map<String, Object> conditionMap);
+
+}

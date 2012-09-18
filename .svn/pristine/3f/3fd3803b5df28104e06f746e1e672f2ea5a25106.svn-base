@@ -1,0 +1,198 @@
+var contextPath;
+/**
+ * set context path
+ */
+setContextPath = function(path) {
+	contextPath = path;
+}
+/**
+ * 刷新页面
+ */
+function breakPage() {
+	window.location.href=window.location.href;
+ 	window.location.reload; 
+}
+// 弹出区域选择窗口
+function showRegion(url) {
+	var val = window.showModalDialog(url, '',
+			'status:no;center:yes;dialogWidth:400px;dialogHeight:300px;');
+	var regionname = "";
+	var regionid = "";
+	var newval
+	if (!!val) {
+		for (var i = 0; i < val.length; i++) {
+			regionname += val[i].REGIONNAME + ",";
+			regionid += val[i].REGIONID + ",";
+		}
+		newval = new Array(2);
+		regionid = regionid.substring(0, regionid.length - 1);
+		regionname = regionname.substring(0, regionname.length - 1);
+		newval[0] = regionid;
+		newval[1] = regionname;
+	}
+	return newval;
+}
+// 弹出巡检组窗口
+function showPatrolGroup(url) {
+	var val = window.showModalDialog(url, '',
+			'status:no;center:yes;dialogWidth:400px;dialogHeight:300px;');
+	var groupName = "";
+	var groupId = "";
+	var newval;
+	if (!!val) {
+		for (i = 0; i < val.length; i++) {
+			groupName += val[i].NAME + ",";
+			groupId += val[i].ID + ",";
+		}
+		groupId = groupId.substring(0, groupId.length - 1);
+		groupName = groupName.substring(0, groupName.length - 1);
+		newval = new Array(2);
+		newval[0] = groupId;
+		newval[1] = groupName;
+	}
+	return newval;
+}
+// 弹出组织人员窗口
+function showOrgPerson(url) {
+	var val = window.showModalDialog(url, '',
+			'status:no;center:yes;dialogWidth:400px;dialogHeight:300px;');
+	var userName = "";
+	var userId = "";
+	var newval;
+	if (!!val) {
+		for (i = 0; i < val.length; i++) {
+			userName += val[i].NAME + ",";
+			userId += val[i].ID + ",";
+		}
+		userId = userId.substring(0, userId.length - 1);
+		userName = userName.substring(0, userName.length - 1);
+		newval = new Array(2);
+		newval[0] = userId;
+		newval[1] = userName;
+	}
+	return newval;
+}
+// 弹出组织窗口
+function showOrg(url) {
+	var val = window.showModalDialog(url, '',
+			'status:no;center:yes;dialogWidth:400px;dialogHeight:300px;');
+	var userName = "";
+	var userId = "";
+	var newval;
+	if (!!val) {
+		for (i = 0; i < val.length; i++) {
+			userName += val[i].NAME + ",";
+			userId += val[i].ID + ",";
+		}
+		userId = userId.substring(0, userId.length - 1);
+		userName = userName.substring(0, userName.length - 1);
+		newval = new Array(2);
+		newval[0] = userId;
+		newval[1] = userName;
+	}
+	return newval;
+}
+function showresource(url) {
+	var val = window.showModalDialog(url, '',
+			'status:no;center:yes;dialogWidth:600px;dialogHeight:400px;');
+	return val;
+}
+// jqgrid resize
+function grid_resize(grid) {
+	// var grid = jQuery("#"+gridid);
+	var h = jQuery(window).height() - grid.offset().top - 28;
+	var w = jQuery(window).width() - 5;
+	grid.setGridWidth(w).setGridHeight(h);
+}
+// 时间差值，返回天 小时 分 秒 传入参数格式为 yyyy-MM-dd HH:mm:ss
+function timeDiff(starttime, endtime) {
+	var end = Date.parse(starttime.replace(/-/g, "/"));
+	var start = Date.parse(endtime.replace(/-/g, "/"));
+	var leftsecond = parseInt((end - start) / 1000);
+	var d = parseInt(leftsecond / 3600 / 24);
+	var h = parseInt((leftsecond / 3600) % 24);
+	var m = parseInt((leftsecond / 60) % 60);
+	var s = parseInt(leftsecond % 60);
+	return d + "天 " + h + "小时" + m + "分" + s + "秒";
+}
+// 比例转换
+function rate(sum, over) {
+	if (sum !== 0) {
+		return (over / sum * 100).toFixed(2) + '%';
+	}
+	return "--";
+}
+
+function loadingtext(id, gv) {
+	jQuery("<div class='loading ui-state-default ui-state-active' style='margin:0' id='load_"
+			+ id + "'>读取中...</div>").appendTo(gv);
+}
+// 弹出窗口
+function openDialog(new_url) {
+	window.open(new_url, "", "width:600, height: 400");
+}
+// 搜索巡检组
+function searchOrg(url) {
+	var val = showOrg(url);
+	if (!!val) {
+		jQuery("#orgid").val(val[0]);
+		jQuery("#orgname").val(val[1]);
+	}
+}
+// 弹出信息
+function info(msg) {
+	jQuery.dialog({
+				lock : true,
+				content : msg,
+				cancelVal : '关闭',
+				cancel : true,
+				time : 3
+			});
+}
+// 确认信息
+function confirminfo(msg, fun) {
+	art.dialog({
+		content : msg,
+		ok : fun,
+		cancelVal : '关闭',
+		cancel : true
+			// 为true等价于function(){}
+		});
+}
+// 弹出GIS选择窗口
+function showGis(url) {
+	var val = window.showModalDialog(url, window,
+			'status:no;center:yes;dialogWidth:400px;dialogHeight:300px;');
+	var userName = "";
+	var userId = "";
+	var newval;
+	if (!!val) {
+		for (i = 0; i < val.length; i++) {
+			userName += val[i].NAME + ",";
+			userId += val[i].ID + ",";
+		}
+		userId = userId.substring(0, userId.length - 1);
+		userName = userName.substring(0, userName.length - 1);
+		newval = new Array(2);
+		newval[0] = userId;
+		newval[1] = userName;
+	}
+	return newval;
+}
+//获取组织
+function getorg() {
+	var url = contextPath+'/commonaccess!getorg.action?orgtype=2&regionid='
+			+ jQuery('#regionid').val();
+	searchOrg(url);
+}
+//获取巡检组
+function getgroup() {
+	var url = contextPath+'/commonaccess!getpatrolgroup.action?orgid='
+			+ jQuery('#orgid').val();
+	searchPatrolGroup(url);
+}
+//刷新页面
+function breakPage() {
+	window.location.href=window.location.href;
+ 	window.location.reload; 
+}

@@ -1,0 +1,24 @@
+package com.cabletech.res.service.analyse;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+ 
+/**
+ * 直埋段管理
+ * @author zhanglei 2011-05-11
+ *
+ */
+@Service
+public class BaseAnalyseServiceImpl extends BaseServiceImpl implements BaseAnalyseService {
+
+}

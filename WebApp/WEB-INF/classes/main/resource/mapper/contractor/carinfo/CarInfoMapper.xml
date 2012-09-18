@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.contractor.mapper.carinfo.CarInfoMapper">
+	<!--  获取车辆信息 -->
+	<select id="getbyid" parameterType="string" resultType="com.cabletech.contractor.entity.carinfo.CarInfoEntity" flushCache="true">
+		select * from car_info where id=#{id,jdbcType=VARCHAR}
+	</select>	
+</mapper>

@@ -1,0 +1,69 @@
+package com.cabletech.contractor.service.sublineinfo;
+
+import java.util.List;
+import java.util.Map;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.contractor.entity.sublineinfo.SublineInfoEntity;
+import com.cabletech.res.entity.basemgr.BaseEntity;
+
+/**
+ * 路由段信息Service
+ * @author Administrator
+ *
+ */
+public interface SublineInfoService {
+	
+	/**
+	 * 获取资源表名称
+	 * @param restype 资源类型
+	 * @return
+	 */
+	public String getTableNameByResType(String restype);
+	
+	/**
+	 * 获取资源信息
+	 * @param map ｛tablename objectid｝
+	 * @return
+	 */
+	public BaseEntity getResourceEntity(Map<String, Object> map);
+	
+	/**
+	 * 获取路由段
+	 * @param user 当前登录用户
+	 * @return
+	 */
+	public List<Map<String, Object>> getSulineList(UserInfo user);
+	
+	/**
+	 * 获取点线关系
+	 * @param sublineid 路由段编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getSubline2Points(String sublineid);
+	
+	/**
+	 * 连线操作
+	 * @param entity 路由段实体
+	 * @param objects 点序关系
+	 * @return
+	 */
+	public boolean linkline(SublineInfoEntity entity, String[] objects);
+	
+	/**
+	 * 获取表空间注册编号
+	 * @param tablename 业务表名
+	 * @param owner 数据库用户名
+	 * @return
+	 * @throws Exception
+	 */
+	public String getRegId(String tablename, String owner)throws Exception;	
+	
+	/**
+	 * 获取业务表空间生成字段所需的参数srid
+	 * @param tablename 业务表名
+	 * @param owner 数据库用户名
+	 * @return
+	 * @throws Exception
+	 */
+	public String getSRID(String tablename, String owner)throws Exception;	
+}

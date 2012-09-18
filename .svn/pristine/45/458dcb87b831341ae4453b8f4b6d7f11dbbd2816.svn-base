@@ -1,0 +1,152 @@
+package com.cabletech.res.action.groupcustomsmgr;
+
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.action.BaseAction;
+import com.cabletech.res.entity.groupcustomsmgr.BroadBandEntity;
+import com.cabletech.res.service.groupcustomsmgr.BroadBandService;
+
+/**
+ * 宽带小区-宽带小区信息管理
+ * 
+ * @author wangt 2011-05-11
+ */
+@SuppressWarnings("serial")
+@Namespace("/res/groupcustomsmgr")
+@Results( {
+		@Result(name = "frame", location = "/res/groupcustomsmgr/broadband/broadband_frame.jsp"),
+		@Result(name = "input", location = "/res/groupcustomsmgr/broadband/broadband_input.jsp"),
+		@Result(name = "view", location = "/res/groupcustomsmgr/broadband/broadband_view.jsp"),
+		@Result(name = "query", location = "/res/groupcustomsmgr/broadband/broadband_query.jsp"),
+		@Result(name = "list", location = "/res/groupcustomsmgr/broadband/broadband_list.jsp")})
+@Action("broadband")
+public class BroadBandAction extends BaseAction {
+
+	private BroadBandEntity entity;
+
+	@Resource(name = "broadBandServiceImpl")
+	private BroadBandService broadBandservice;
+	
+	/**
+	 * 宽带小区资源查询条件
+	 * 
+	 */
+	public String query()throws Exception{
+		UserInfo user = (UserInfo)request.getSession().getAttribute("user");
+		String condition = request.getQueryString();
+		Map<String, Object> decodeCondtionMap = super.getDecodeCondtionMap(condition, user);
+		request.setAttribute("searchCondition", decodeCondtionMap);
+		return "query";
+	}
+	 
+	@Override
+	public String execute() {
+		String resId = request.getParameter("resId");//获取资源id
+		request.setAttribute("resId", resId);
+		return "frame";
+	}
+	
+	/**
+	 * 宽带小区资源查询结果
+	 */
+	public String list()throws Exception{
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		String condition = entity.getSerializeQueryCondition();
+		if (StringUtils.isBlank(condition)) {
+			condition = request.getQueryString();
+		}
+		Map<String, Object> conditionMap = super.getDecodeCondtionMap(
+				condition, user);
+		Map<String, Object> map = null;
+		String method = "queryBroadBandList";
+		if (conditionMap.containsKey("simid") && StringUtils.isNotBlank(conditionMap.get("simid").toString())) {
+			 method = "queryBroadBandListWithSimid";
+		}
+		map = broadBandservice.queryPageMap(method, conditionMap, super.getPage("page"), super.getLimit("rows"));		
+		
+		request.setAttribute("map", map);
+		// 转换为列表参数
+		request.setAttribute("condition", condition);
+		return "list";
+	}
+	
+
+	/**
+	 * 宽带小区新增或修改资源
+	 */
+	public String save() {
+		String toPage;
+		if(StringUtils.isNotBlank(entity.getXtbh())){
+			toPage = "view";
+		}else{
+			toPage = "input";
+		}
+		if(broadBandservice.saveorupdate(entity)){
+			setInfoMessage("保存成功!", toPage);
+		}else{
+			setInfoMessage("保存失败!", toPage);
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	} 
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String xtbh = request.getParameter("xtbh");// 获取资源id
+		request.setAttribute("tipview", super.getParameterValue("tipview"));//tip 视图显示
+		if (StringUtils.isNotBlank(xtbh)) {
+			BroadBandEntity entity = broadBandservice.getbyid(xtbh);
+			request.setAttribute("entity", entity);
+		} else {
+			entity = new BroadBandEntity();
+		}
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		if (entity == null) {
+			entity = new BroadBandEntity();
+		}
+	}
+
+	@Override
+	public BroadBandEntity getModel() {
+		if (entity == null) {
+			entity = new BroadBandEntity();
+		}
+		return entity;
+	}
+	/**
+	 * 删除
+	 * @return
+	 * @throws Exception
+	 */
+	public String delete()throws Exception{
+		prepareViewModel();
+		if(broadBandservice.delete(entity)){
+			super.outmessage("删除成功！");
+		}else{
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+	
+	/**
+	 * 设置提示信息
+	 * @param info 提示信息
+	 * @param toPage 页面
+	 */
+	public void setInfoMessage(String info, String toPage){
+		if(toPage.equals("input")){
+			entity = new BroadBandEntity();
+		}
+		entity.setActionMessage(info);		
+	}	
+
+}

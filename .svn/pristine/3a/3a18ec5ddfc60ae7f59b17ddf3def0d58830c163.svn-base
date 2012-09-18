@@ -1,0 +1,51 @@
+package com.cabletech.res.service.tracemgr;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.boardfibermgr.DzConnEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllzEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxlyEntity;
+
+public interface TraceService extends BaseService{
+	
+	/**
+	 * 获取设备所有端子信息
+	 * @param sblx 设备类型
+	 * @param sbid 设备端子
+	 * @return
+	 */
+	public List<Map<String, Object>> getAlldzList(String sblx, String sbid);
+	
+	/**
+	 * 根据链路组实体Trace 出符合A端设备至Z端设备的经过路由对象集合
+	 * @param entity 链路组实体
+	 * @return 路由对象集合
+	 */
+	public List<JxgxlyEntity> traceBySB(JxgxllzEntity entity);
+	
+	/**
+	 * 以某个光交设备上的端子为起点Trace与之对应的终止光交设备的端子
+	 * @param entity 链接实体
+	 * @return 集合
+	 */
+	public List<JxgxllEntity> traceByDz(DzConnEntity entity);
+	
+	/**
+	 * 获取路由设备成端信息或熔纤信息
+	 * @param ly 路由当前设备
+	 * @param predz 成端信息
+	 * @return
+	 */
+	public DzConnEntity getDzConnEntity(JxgxlyEntity ly, DzConnEntity predz);	
+	
+	/**
+	 * 判断是否是光交设备类型
+	 * @param lx 设备类型
+	 * @param types 类型集合
+	 * @return
+	 */
+	public boolean strInArray(String lx, String[] types);
+}

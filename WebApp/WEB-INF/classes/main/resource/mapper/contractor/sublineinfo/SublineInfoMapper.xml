@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.contractor.mapper.sublineinfo.SublineInfoMapper">
+	
+	<!-- 获取资源信息 -->
+	<select id="getResourceEntity" parameterType="hashmap" resultType="com.cabletech.res.entity.basemgr.BaseEntity" flushCache="true">
+		select c.*,c.shape.minx projectx,c.shape.miny projecty from ${tablename} c where c.objectid=#{objectid}
+	</select>
+
+	<!-- 获取路由段信息 -->
+	<select id="getbyid" parameterType="string" resultType="com.cabletech.contractor.entity.sublineinfo.SublineInfoEntity" flushCache="true">
+		select * from sublineinfo where sublineid=#{sublineid,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取路由线段 -->
+	<select id="getSulineList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from sublineinfo s where 1=1
+		<if test="regionidlist != null">
+			and regionid in
+			<foreach collection="regionidlist" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="orgidlist != null">
+			and contractorid in
+			<foreach collection="orgidlist" item="orgid" open="(" separator="," close=")">
+				#{orgid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 删除点线关系 -->
+	<delete id="deleteSubline2Point" parameterType="string" flushCache="true">
+		delete from subline2point where sublineid=#{sublineid,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 新增点线关系 -->
+	<insert id="insertSubline2Point" parameterType="hashmap" flushCache="true">
+		insert into subline2point(pointid, sublineid, inumber, restype)values
+		(#{pointid,jdbcType=VARCHAR},#{sublineid,jdbcType=VARCHAR},#{inumber,jdbcType=INTEGER},#{restype,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 更新点线关系 -->
+	<update id="updateSubline2Point" parameterType="hashmap" flushCache="true">
+		update subline2point set inumber=#{inumber,jdbcType=INTEGER} where sublineid=#{sublineid,jdbcType=VARCHAR} and pointid=#{pointid,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取点线关系 -->
+	<select id="getSubline2Points" parameterType="string" resultType="hashmap" flushCache="true">
+		select sp.*,s.objectid from subline2point sp,sublineinfo s 
+		where s.sublineid=sp.sublineid and sp.sublineid=#{sublineid,jdbcType=VARCHAR} order by sp.inumber 
+	</select>
+	
+	<!-- 获取业务表空间注册编号 -->
+	<select id="getRegId" parameterType="hashmap" resultType="String" flushCache="true">
+		SELECT REGISTRATION_ID regid FROM sde.TABLE_REGISTRY 
+		WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{owner,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取业务表空间生成字段所需的参数srid -->
+	<select id="getSRID" parameterType="hashmap" resultType="String" flushCache="true">
+		SELECT srid FROM sde.st_geometry_columns 
+		WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{owner,jdbcType=VARCHAR}
+	</select>	
+</mapper>

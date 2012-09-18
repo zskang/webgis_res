@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.analyse.AnalyseMapper">
+	<select id="getAnalyse" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select id, resource_type, statistics_type, plate_name, statistics_sql from res_statistics 
+		where resource_type=#{zylx,jdbcType=VARCHAR} and statistics_type = #{tjlx,jdbcType=VARCHAR} and rownum=1
+	</select>
+	<select id="executeSql" parameterType="hashmap" resultType="java.util.LinkedHashMap" flushCache="true">
+		${sql}
+	</select>
+</mapper>

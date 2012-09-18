@@ -1,0 +1,32 @@
+package com.cabletech.res.mapper.common;
+
+import java.util.HashMap;
+
+/**
+ * 光分纤箱信息管理DaoMapper
+ * 
+ * @author 杨隽 2012-05-23 创建
+ */
+public interface MainTenceMapper {
+
+	
+	/**添加
+	 * @param pp
+	 */
+	void save(HashMap<String, Object> pp);
+	/**
+	 * 添加
+	 * @param maintenceid 
+	 * @param type 
+	 */
+	void save(String maintenceid, String type);
+
+	/**
+	 * 删除
+	 * @param maintenceid 
+	 * @param type 
+	 */
+	void deleteByMaintenceAndRsType(String maintenceid, String type);
+
+	
+}

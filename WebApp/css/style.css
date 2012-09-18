@@ -1,0 +1,47 @@
+*,html,body {
+	/*font: 9pt "宋体", "Lucida Sans Unicode", Tahoma, Verdana;*/
+	font-family: 微软雅黑, 宋体, Tahoma, Verdana, Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	line-height: inherit;
+}
+/*表格样式*/
+.tabcontent {
+	font-size: 12px;
+	width: 100%;
+	margin-top: 10px;
+	text-align: left;
+	border-collapse: collapse !important;
+}
+
+.tabcontent table {
+	width: 85%;
+	border: 1px solid #D2ECFA;
+	border-collapse: collapse !important;
+}
+
+.tabcontent td {
+	border: 1px #D2ECFA solid;
+	line-height: 24px;
+	text-indent: 2px;
+	width: 35%
+}
+
+.tabcontent td table {
+	border: 1px #D2ECFA solid;
+	border-collapse: collapse !important;
+}
+
+.tabcontent th {
+	line-height: 24px;
+	border: 1px #D2ECFA solid;
+	text-align: right;
+	background-color: #F0FCFE;
+	width: 15%
+}
+/*输入框样式*/
+.inputtext {
+	border: solid 1px #999999;
+	background-color: #ffffff;
+	text-align: left;
+	height: 20px;
+}

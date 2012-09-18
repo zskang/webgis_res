@@ -1,0 +1,27 @@
+package com.cabletech.contractor.service.search;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+
+/**
+ * 搜索服务层
+ * 
+ * @author cqp
+ * @date 2012-7-31
+ *
+ */
+public interface SearchService extends BaseService{
+
+	/**
+	 * 显示巡检的详细信息根据资源的编号
+	 * 
+	 * @param condition 搜索条件，包括巡检人姓名、巡检时间段、和组织机构ID
+	 * @return
+	 */
+	public List<Map<String, Object>> getSearchRsList(
+			String id);
+	
+
+}

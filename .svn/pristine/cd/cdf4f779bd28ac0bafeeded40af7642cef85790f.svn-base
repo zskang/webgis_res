@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.cableequipmgr.GfxxMapper">
+	<!-- 光分纤箱 资源树 -->
+	<select id="getResTree" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select xtbh id,zymc name,'AA004' type,'AA004' rtype, '' pid from res_gfxx where xtbh = #{xtbh,jdbcType=VARCHAR} and (status is null or status !='9')
+	</select>
+	<!-- 插入光分纤箱信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.cableequipmgr.GfxxEntity">
+		INSERT INTO RES_GFXX(
+		OBJECTID,XTBH,zymc,GFXXBH,YMC,GDZCBH,SCCJ,GGXH,SFJN,SSJF,DLMC,JTWZ,AZFS,YWJB,LS,lmks,kplfs,kls,khs,LPLFS,dzhplfs,DZLPLFS,CQXZ,SSZT,WHFS,WYZT,YT,ZJDW,CJDW,SSGLQ,LON,LAT,REGIONID,BZ,ORGID,CREATEDATE,EWM,SHAPE
+		)
+		VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{gfxxbh,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+		#{gdzcbh,jdbcType=VARCHAR},#{sccj,jdbcType=VARCHAR},#{ggxh,jdbcType=VARCHAR},#{sfjn,jdbcType=VARCHAR},
+		#{ssjf,jdbcType=VARCHAR},#{dlmc,jdbcType=VARCHAR},
+		#{jtwz,jdbcType=VARCHAR},#{azfs,jdbcType=VARCHAR},#{ywjb,jdbcType=VARCHAR},#{ls,jdbcType=VARCHAR},
+		#{lmks,jdbcType=VARCHAR},#{kplfs,jdbcType=VARCHAR},#{kls,jdbcType=VARCHAR},#{khs,jdbcType=VARCHAR},
+		#{lplfs,jdbcType=VARCHAR},#{dzhplfs,jdbcType=VARCHAR},#{dzlplfs,jdbcType=VARCHAR},
+		#{cqxz,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{yt,jdbcType=VARCHAR},
+		#{zjdw,jdbcType=VARCHAR},#{cjdw,jdbcType=VARCHAR},#{ssglq,jdbcType=VARCHAR},
+		#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+		#{bz,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},sysdate,#{ewm,jdbcType=VARCHAR},
+		sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	<!-- 更新光分纤箱信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.cableequipmgr.GfxxEntity">
+		UPDATE RES_GFXX SET
+		zymc=#{zymc,jdbcType=VARCHAR},GFXXBH=#{gfxxbh,jdbcType=VARCHAR},YMC=#{ymc,jdbcType=VARCHAR},
+		GDZCBH=#{gdzcbh,jdbcType=VARCHAR},SCCJ=#{sccj,jdbcType=VARCHAR},GGXH=#{ggxh,jdbcType=VARCHAR},
+		SFJN=#{sfjn,jdbcType=VARCHAR},SSJF=#{ssjf,jdbcType=VARCHAR},DLMC=#{dlmc,jdbcType=VARCHAR},
+		JTWZ=#{jtwz,jdbcType=VARCHAR},AZFS=#{azfs,jdbcType=VARCHAR},YWJB=#{ywjb,jdbcType=VARCHAR},
+		LS=#{ls,jdbcType=VARCHAR},lmks=#{lmks,jdbcType=VARCHAR},kls=#{kls,jdbcType=VARCHAR},khs=#{khs,jdbcType=VARCHAR},
+		kplfs=#{kplfs,jdbcType=VARCHAR},LPLFS=#{lplfs,jdbcType=VARCHAR},
+		DZhPLFS=#{dzhplfs,jdbcType=VARCHAR},DZLPLFS=#{dzlplfs,jdbcType=VARCHAR},CQXZ=#{cqxz,jdbcType=VARCHAR},SSZT=#{sszt,jdbcType=VARCHAR},
+		WHFS=#{whfs,jdbcType=VARCHAR},WYZT=#{wyzt,jdbcType=VARCHAR},YT=#{yt,jdbcType=VARCHAR},
+		ZJDW=#{zjdw,jdbcType=VARCHAR},CJDW=#{cjdw,jdbcType=VARCHAR},SSGLQ=#{ssglq,jdbcType=VARCHAR},
+		REGIONID=#{regionid,jdbcType=VARCHAR},
+		BZ=#{bz,jdbcType=VARCHAR},ORGID=#{orgid,jdbcType=VARCHAR},EWM=#{ewm,jdbcType=VARCHAR},
+		twwidth = #{twwidth,jdbcType=VARCHAR},
+	    twheight = #{twheight,jdbcType=VARCHAR},
+	    twx = #{twx,jdbcType=VARCHAR},
+	    twy = #{twy,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 查看光分纤箱信息 -->
+	<select id="view" resultType="com.cabletech.res.entity.cableequipmgr.GfxxEntity"
+		parameterType="string" flushCache="true">
+		select gf.objectid,gf.xtbh,gf.zymc,gf.gfxxbh,gf.ymc,
+		gf.gdzcbh,gf.sccj,gf.ggxh,gf.sfjn,gf.ssjf,round(gf.lon,6) lon,round(gf.lat,6) lat,
+		gf.dlmc,gf.jtwz,gf.azfs,gf.ywjb,gf.ls,gf.lplfs,gf.dzlplfs,
+		gf.cqxz,gf.sszt,gf.whfs,gf.wyzt,gf.yt,gf.zjdw,gf.cjdw,gf.bz,gf.regionid,gf.ssglq,
+		gf.orgid,gf.ewm,gf.status,gf.lmks,gf.kplfs,gf.kls,gf.khs,gf.dzhplfs,gf.dzbhgz,
+		gf.shape.minx projectx,gf.shape.miny projecty from RES_GFXX gf where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询光分纤箱信息 -->
+	<select id="queryGfxxList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select gf.objectid,gf.xtbh,gf.zymc,gf.gfxxbh,gf.ymc,
+		gf.gdzcbh,gf.sccj,gf.ggxh,gf.sfjn,gf.ssjf,round(gf.lon,6) lon,round(gf.lat,6) lat,
+		gf.dlmc,gf.jtwz,gf.azfs,gf.ywjb,gf.ls,gf.lplfs,gf.dzlplfs,
+		gf.cqxz,gf.sszt,gf.whfs,gf.wyzt,gf.yt,gf.zjdw,gf.cjdw,gf.bz,gf.regionid,gf.ssglq,
+		gf.orgid,gf.ewm,gf.status,gf.lmks,gf.kplfs,gf.kls,gf.khs,gf.dzhplfs from RES_GFXX gf
+		left join res_gprs_record r
+		on gf.xtbh = r.resid and r.restype ='AA004'
+		where 1=1 and ( gf.status is null or gf.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.deviceid like '%' || #{simid,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and gf.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="gfxxbh != null and gfxxbh != ''">
+			and gf.GFXXBH like '%' || #{gfxxbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="azfs != null and azfs != ''">
+			and gf.azfs = #{azfs,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and gf.SSZT = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and gf.CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and gf.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and gf.createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and gf.createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+		order by gf.createdate desc
+	</select>
+	<!-- 查询光分纤箱信息（无sim卡号） -->
+	<select id="queryGfxxListNoSimid" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select gf.objectid,gf.xtbh,gf.zymc,gf.gfxxbh,gf.ymc,
+		gf.gdzcbh,gf.sccj,gf.ggxh,gf.sfjn,gf.ssjf,round(gf.lon,6) lon,round(gf.lat,6) lat,
+		gf.dlmc,gf.jtwz,gf.azfs,gf.ywjb,gf.ls,gf.lplfs,gf.dzlplfs,
+		gf.cqxz,gf.sszt,gf.whfs,gf.wyzt,gf.yt,gf.zjdw,gf.cjdw,gf.bz,gf.regionid,gf.ssglq,
+		gf.orgid,gf.ewm,gf.status,gf.lmks,gf.kplfs,gf.kls,gf.khs,gf.dzhplfs from RES_GFXX gf
+		where 1=1 and ( status is null or status
+		!= '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="gfxxbh != null and gfxxbh != ''">
+			and GFXXBH like '%' || #{gfxxbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and SSZT = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="azfs != null and azfs != ''">
+			and azfs = #{azfs,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+		order by createdate desc
+	</select>
+	<!-- 逻辑删除光分纤箱成端信息 -->
+	<update id="deleteGfxxConnByGfxxXtbh" parameterType="String" flushCache="true">
+		UPDATE RES_GFXX_CONN SET
+		status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除光分纤箱端子信息 -->
+	<update id="deleteGfxxDzByGfxxXtbh" parameterType="String" flushCache="true">
+		UPDATE RES_GFXX_DZ SET
+		status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除光分纤箱信息 -->
+	<update id="delete" parameterType="String">
+		UPDATE RES_GFXX SET
+		status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>		
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gfxx set ywjb=#{ywjb,jdbcType=VARCHAR},azfs=#{azfs,jdbcType=VARCHAR},
+		wyzt=#{wyzt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+	
+	<!-- 获取光分纤箱关联树中 光缆段  -->
+	<select id="getGldlyByGfxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l where ((l.adsblx='AA004' and l.adsbmc=#{xtbh,jdbcType=VARCHAR}) or (l.zdsblx='AA004' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})) and (status is null or status != '9')
+	</select>
+	<!-- 获取光分纤箱关联树中 机房  -->
+	<select id="getJfByGfxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select j.zymc,j.xtbh from res_jf j,res_gfxx g where g.ssjf=j.xtbh and g.xtbh=#{xtbh,jdbcType=VARCHAR} and (j.status is null or j.status != '9')
+	</select>
+	<!-- 获取光分纤箱关联树中 站点  -->
+	<select id="getZdByGfxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select z.zymc,z.xtbh from res_jf j,res_gfxx,res_zdxx g,res_zdxx z where g.ssjf=j.xtbh and z.xtbh=j.sszd and g.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,158 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>链路组查询</title>
+		<script type="text/javascript">
+			In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+			In.add('giscss',{path:'${ctx}/css/jquery.ct.ui.gis.layout.css'});
+			In.add('dropdowncss',{path:'${ctx }/css/dropdown/dropdown.css',rely:['flickrcss']});
+			In.add('flickrcss',{path:'${ctx }/css/dropdown/themes/flickr.com/default.css'});
+			In.add('commonjs', {path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+			In.add('rightmenujs',{path:'${ctx}/js/rightmenu.js',type : 'js',charset : 'utf-8'});
+			In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+			In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+			In.add('resztree',{path:'${ctx}/js/resztree.js',type:'js',charset:'utf-8'});
+			In.ready('ctcss','giscss','dropdowncss','commonjs','rightmenujs','ztreejs','resztree',function(){
+				In.css(".ztree li span.button.dz_icon_ico_docu{margin-right:2px; background: url('http://${config.webliburl}/cabletech/ui/css/img/diy/10.png') no-repeat scroll 0 0 transparent; vertical-align:top; *vertical-align:middle}");
+				In.css('html,body{height:100%}');
+				In.css('.ui-form-input {width:200px}');
+				In.css('#datatable {padding: 0;margin: 0;border-left:1px solid #C1DAD7}');
+				In.css('#datatable th {font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;color: #4f6b72;border-right: 1px solid #C1DAD7;border-bottom: 1px solid #C1DAD7;border-top: 1px solid #C1DAD7;letter-spacing: 2px;text-transform: uppercase;text-align: left;padding: 6px 6px 6px 12px;background: #CAE8EA  no-repeat;}');
+				In.css('#datatable td {border-right: 1px solid #C1DAD7;border-bottom: 1px solid #C1DAD7;background: #fff;font-size:11px;padding: 6px 6px 6px 12px;color: #4f6b72;}');
+				
+				In.css('#context-menu {font:400 12px/1.5 Arial;color:#333;display:none;position:absolute;padding:0 4px;width:120px;border:1px solid #B8CBCB;box-shadow:2px 2px 5px #666;background:#FFF;z-index:9;overflow:hidden;}');
+				In.css('#context-menu li {float:left;margin-top:-1px;padding:4px 0;width:120px;height:25px;line-height:25px;border-top:1px solid #B8CBCB;list-style:none;}');
+				In.css('#context-menu a, #context-menu a:visited {display:block;text-indent:10px;color:#333;text-decoration:none;}');
+				In.css('#context-menu a:hover {color:#FFF;background-color:#348CCC;text-decoration:none;}');
+
+				$.fn.setCondition2ParentPage('${condition}');
+				new rightMenu({obj:"#datatable tbody", menu:"#context-menu", offX:10, offY:5});
+				loadDzTree('tree','${ctx}/res/boardfibermgr/jxgxll!getTreeNodes.action?llzid=${jxgxllz.id}');
+         		$(function(){
+         			$('#searchform').submit(function() {
+						$('#serializeQueryCondition').val('');
+						$('#serializeQueryCondition').val($(this).serialize());
+			  			return true;
+					});
+         		});
+			});
+			
+			function addJXLL(url){
+				var zTree = $.fn.zTree.getZTreeObj("tree");
+				var nodes = zTree.getCheckedNodes(true);
+				if(nodes.length==1){
+				  $.ajax({
+						url: encodeURI(url+"&odmid="+nodes[0].pId+"&dzbh="+nodes[0].name+"&R="+Math.random()),
+						dataType: "html",
+						type:'GET',
+						cache:true,
+						async:true,
+						success : function(result){
+							if(result == '新增成功！'){
+								window.parent.exchangeDiv('${ctx}/res/boardfibermgr/jxgxll!getJxgxllByllzId.action?llzid=${jxgxllz.id}','查询局向光纤链路',700);
+							}
+							$.fn.Alert(result, 4);
+						},
+						error : function() {
+							$.fn.Alert("无法新增局向光纤！",4);
+						}
+					});
+				}else{
+					$.fn.Alert("请选择一条！", 4);				
+				}
+			}
+			
+			var openBatchAdd = function(url){
+				parent.openResourcetreediv("批量添加", url, 400, 247);
+			}
+		</script>
+	</head>
+	<body>
+		<div class="ui-form-input-box">
+			<input id="addbtn" type="button" onclick="addJXLL('${ctx}/res/boardfibermgr/jxgxll!add.action?llzid=${jxgxllz.id}')" value="新增">
+			<input id="btAddbtn" type="button" onclick="openBatchAdd('${ctx}/res/boardfibermgr/jxgxll!tobatchAddPage.action?llzid=${jxgxllz.id}')" value="批量增加">
+			<input id="coordbtn" type="button" value="定位" onclick="javascript:window.parent.locate('A33',${objectids});">
+		</div>
+		<div class="ui-form-input-box">
+			 <fieldset>
+			    <legend>局向光纤链路组信息</legend>
+			    <div class="ui-div-list">
+			    	<ul>
+			    		<li>局向光纤链路组名称：${jxgxllz.llzmc}</li>
+			    		<li>起端设备：<resinfo:resCommon keyValue="${jxgxllz.qssbid}" resType="${jxgxllz.qssblx}"/></li>
+			    		<li>终端设备：<resinfo:resCommon keyValue="${jxgxllz.zzsbid}" resType="${jxgxllz.zzsblx}"/></li>
+			    	</ul>
+			    </div>
+			 </fieldset>				
+		</div>
+		<div class="ui-form-input-box">
+			 <fieldset>
+			    <legend>详细信息</legend>		
+			<div style="float:left;width:25%;height:100%;">
+				<div id="tree" class="ztree" style="background-color:#FFF;width:220px;border:0;margin:0;padding:0"></div>
+			</div>
+			<div style="float:right;width:70%;height:100%;overflow:hidden;">  
+			    <c:choose>
+				    <c:when test="${map['total'] > 0}">
+						<table id="datatable" cellspacing="0">
+							<thead>
+							<tr>
+								<th>
+									<span style="float: left;z-index:5px;">
+										<ul class="dropdown dropdown-horizontal">
+											<li>
+												<span class="dir">操作</span>
+												<ul style="width: 60px">
+													<li>
+														<a href="javascript:void(0);" onclick="$.batchDelete('${ctx}/res/boardfibermgr/jxgxll!delete.action')">批量删除</a>
+													</li>
+												</ul>
+											</li>
+										</ul>
+									</span>									
+								</th>							
+								<th>起端ODM</th>
+								<th>起端纤芯</th>
+								<th>起端设备端口</th>
+								<th>终端ODM</th>
+								<th>终端纤芯</th>
+								<th>终端设备端口</th>
+							</tr>
+							</thead>
+							<tbody>
+							<c:forEach items="${map['rows']}" var="item">
+								<tr id="${item.ID}">
+									<td>
+										<input type="checkbox" value="${item.ID}">
+									</td>
+									<td>${item.QSSBODM}&nbsp;</td>
+									<td>${item.QSXXH}&nbsp;</td>
+									<td>${item.QSSBDZ}&nbsp;</td>
+									<td>${item.ZZSBODM}&nbsp;</td>
+									<td>${item.ZZXXH}&nbsp;</td>
+									<td>${item.ZZSBDZ}&nbsp;</td>									
+								</tr>
+							</c:forEach>
+							</tbody>
+						</table>
+						<c:if test="${map['total'] > 0}">
+							<div style="padding-top: 20px"></div>
+							<baseinfo:pagenation paginationCls="pagination" adjacents="1" records="${map['total']}" allowPageSelect="false" url="${ctx}/res/boardfibermgr/jxgxll!list.action?${condition}"></baseinfo:pagenation>
+						</c:if>						
+					</c:when>
+					<c:otherwise>
+						<div style="margin:5px;text-align: center">抱歉！没有搜索到数据！</div>
+					</c:otherwise>
+				</c:choose>
+			</div>
+			</fieldset>
+		</div>
+		<ul id="context-menu">
+			<li><a href="javascript:void(0)" onclick="deleteJX('${ctx}/res/boardfibermgr/jxgxll!delete.action');">删除局向光纤</a></li>
+		</ul>		
+	</body>
+</html>

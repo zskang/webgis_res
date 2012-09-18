@@ -1,0 +1,139 @@
+package com.cabletech.contractor.service.sublineinfo;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.business.Service.BaseInfoProvider;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.contractor.entity.sublineinfo.SublineInfoEntity;
+import com.cabletech.contractor.mapper.sublineinfo.SublineInfoMapper;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.BaseEntity;
+
+/**
+ * 路由段信息Service实现
+ * @author Administrator
+ *
+ */
+@Service
+public class SublineInfoServiceImpl extends BaseServiceImpl implements SublineInfoService {
+
+	@Resource(name="baseInfoProvider")
+	private BaseInfoProvider baseInfoProvider;	
+	
+	@Resource(name="sublineInfoMapper")
+	private SublineInfoMapper mapper;
+	
+	private String[] restypes = {"A20","A21","A22","A23","AD701","AD702","AD703","AD704","AD706","AA001","AA003","AA004","AA005","AA006"};
+	private String[] restables = {"res_dgxx","res_gjxx","RES_BSXX","RES_GQXX","RES_JF","RES_ODF","RES_ODM","RES_DXJXS","RES_GLPL","RES_ODF","RES_GJJX","RES_GFXX","RES_GJT","RES_GZDH"};
+	
+	@Override
+	public String getTableNameByResType(String restype) {
+		if(restype == null){
+			return null;
+		}
+		for(int i = 0; i<restypes.length; i++){
+			if(restype.equals(restypes[i])){
+				
+				return restables[i];
+			}
+		}
+		return null;
+	}
+	
+
+	@Override
+	public BaseEntity getResourceEntity(Map<String, Object> map) {
+		return mapper.getResourceEntity(map);
+	}	
+	
+	@Override
+	public List<Map<String, Object>> getSulineList(UserInfo user) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		if(user.isMobile()){
+			List<String> regionidlist = baseInfoProvider.getRegionService().getRegionIdList(user.getUserId());
+			param.put("regionidlist", regionidlist);
+		}else{
+			List<String> orgidlist = baseInfoProvider.getOrgService().getOrgIdList(user.getUserId());
+			param.put("orgidlist", orgidlist);
+		}
+		return mapper.getSulineList(param);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getSubline2Points(String sublineid){
+		List<Map<String, Object>> list = null;
+		try {
+			list = mapper.getSubline2Points(sublineid);
+		} catch (Exception e) {
+			logger.info("获取点线关系出错！",e);
+		}
+		return list;
+	}
+	
+	@Transactional
+	@Override
+	public boolean linkline(SublineInfoEntity entity, String[] objects) {
+		boolean flag = true;
+		List<Map<String, String>> points = new ArrayList<Map<String, String>>();
+		for(int i=0; i<objects.length; i++){
+			String[] address = objects[i].split("\\@");
+			String[] pt = address[1].split(",");
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("x", pt[0]);
+			map.put("y", pt[1]);
+			points.add(map);
+		}
+		EsriRestEntity esrientity = new EsriRestEntity();
+		esrientity.setAttrobj(entity);
+		esrientity.setRestype(super.restservice.LINE);
+		esrientity.setRescode("A32");
+		esrientity.setList(points);
+		if(restservice.restPost(esrientity)){//rest post 更新路由段空间信息
+			try{
+				Map<String, Object> subline2point = new HashMap<String, Object>();
+				for(int i=0; i<objects.length; i++){
+					String[] address = objects[i].split("\\@");
+					subline2point.put("pointid", address[0]);
+					subline2point.put("inumber", i);
+					subline2point.put("sublineid", entity.getSublineid());
+					if(entity.getNewpointid().equals(address[0])){//新增资源点
+						subline2point.put("restype", entity.getNewrestype());
+						mapper.insertSubline2Point(subline2point);
+					}else{//更新原有资源点
+						mapper.updateSubline2Point(subline2point);
+					}
+				}
+			}catch(Exception e) {
+				logger.error("连线操作失败！", e);
+				flag = false;
+			}
+		}else{
+			flag = false;
+		}
+		return flag;
+	}
+	
+	@Override
+	public String getRegId(String tablename, String owner)throws Exception{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tablename", tablename.toUpperCase());
+		map.put("owner", owner.toUpperCase());
+		return mapper.getRegId(map);		
+	}
+	
+	@Override
+	public String getSRID(String tablename, String owner)throws Exception{
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tablename", tablename.toUpperCase());
+		map.put("owner", owner.toUpperCase());
+		return mapper.getSRID(map);		
+	}
+	
+}

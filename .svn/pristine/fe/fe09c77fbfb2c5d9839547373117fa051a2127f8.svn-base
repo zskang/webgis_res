@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.cableequipmgr.GzdhMapper">
+	<!-- 光终端盒 资源树 -->
+	<select id="getResTree" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select xtbh id,zymc name,'AA006' type,'AA006' rtype, '' pid from res_gzdh where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 无SIMID查询  条件:名称 产权性质 安装方式 设施状态 区域 时间段 -->
+	<select id="queryGzdhList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select d.objectid,d.xtbh,d.zymc,d.gzdhbh,d.ymc,d.sccj,d.ggxh,
+		d.sfjn,d.ssjf,d.dlmc,d.jtwz,d.azfs,d.ywjb,d.sszt,d.ls,d.lplfs,
+		d.dzlplfs,d.szjf,d.wyzt,d.ssglq,d.ssgc,d.zjdw,d.cjdw,d.bz,d.orgid,
+		d.ewm,d.regionid,d.cqxz,d.status,d.whfs,d.lmks,d.kplfs,d.kls,d.khs,d.dzhplfs,
+		round(d.lon,6) lon,round(d.lat,6) lat from res_gzdh d
+		where  ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="azfs != null and azfs != ''">
+			and azfs=#{azfs,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>			
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>	
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+	</select>	
+
+	<!-- 含SIMID查询  条件:名称 产权性质 安装方式 设施状态 区域 时间段 -->
+	<select id="queryGzdhListWithSimid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select d.objectid,d.xtbh,d.zymc,d.gzdhbh,d.ymc,d.sccj,d.ggxh,
+		d.sfjn,d.ssjf,d.dlmc,d.jtwz,d.azfs,d.ywjb,d.sszt,d.ls,d.lplfs,
+		d.dzlplfs,d.szjf,d.wyzt,d.ssglq,d.ssgc,d.zjdw,d.cjdw,d.bz,d.orgid,
+		d.ewm,d.regionid,d.cqxz,d.status,d.whfs,d.lmks,d.kplfs,d.kls,d.khs,d.dzhplfs,
+		round(d.lon,6) lon,round(d.lat,6) lat ,r.simid from res_gzdh d,res_gprs_record r
+		where r.resid=d.xtbh and r.restype='AA006' and ( d.status is null or d.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.simid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and d.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and d.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="azfs != null and azfs != ''">
+			and d.azfs=#{azfs,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and d.sszt=#{sszt,jdbcType=VARCHAR}
+		</if>			
+		<if test="regionids != null and regionids != ''">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>				
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and d.createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and d.createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+	</select>
+	
+	<!-- 单个光终端盒查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.cableequipmgr.GzdhEntity"
+		parameterType="string" flushCache="true">
+		select d.objectid,d.xtbh,d.zymc,d.gzdhbh,d.ymc,d.sccj,d.ggxh,
+		d.sfjn,d.ssjf,d.dlmc,d.jtwz,d.azfs,d.ywjb,d.sszt,d.ls,d.lplfs,
+		d.dzlplfs,d.szjf,d.wyzt,d.ssglq,d.ssgc,d.zjdw,d.cjdw,d.bz,d.orgid,
+		d.ewm,d.regionid,d.cqxz,d.status,d.whfs,d.lmks,d.kplfs,d.kls,d.khs,d.dzhplfs,
+		round(d.lon,6) lon,round(d.lat,6) lat,d.dzbhgz,
+		d.shape.minx projectx,d.shape.miny projecty from res_gzdh d where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 光终端盒跟新 -->
+	<update id="update" parameterType="com.cabletech.res.entity.cableequipmgr.GzdhEntity">
+		UPDATE res_gzdh SET
+			zymc=#{zymc,jdbcType=VARCHAR},gzdhbh=#{gzdhbh,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},
+			sccj=#{sccj,jdbcType=VARCHAR},ggxh=#{ggxh,jdbcType=VARCHAR},sfjn=#{sfjn,jdbcType=VARCHAR},
+			ssjf=#{ssjf,jdbcType=VARCHAR},dlmc=#{dlmc,jdbcType=VARCHAR},jtwz=#{jtwz,jdbcType=VARCHAR},
+			azfs=#{azfs,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+			ls=#{ls,jdbcType=VARCHAR},lmks=#{lmks,jdbcType=VARCHAR},kls=#{kls,jdbcType=VARCHAR},khs=#{khs,jdbcType=VARCHAR},
+			kplfs=#{kplfs,jdbcType=VARCHAR},LPLFS=#{lplfs,jdbcType=VARCHAR},
+			DZhPLFS=#{dzhplfs,jdbcType=VARCHAR},DZLPLFS=#{dzlplfs,jdbcType=VARCHAR},szjf=#{szjf,jdbcType=VARCHAR},wyzt=#{wyzt,jdbcType=VARCHAR},
+			ssglq=#{ssglq,jdbcType=VARCHAR},ssgc=#{ssgc,jdbcType=VARCHAR},zjdw=#{zjdw,jdbcType=VARCHAR},
+			cjdw=#{cjdw,jdbcType=VARCHAR},bz=#{bz,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR},
+			whfs=#{whfs,jdbcType=VARCHAR},
+			regionid=#{regionid,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+			twwidth = #{twwidth,jdbcType=VARCHAR},
+		    twheight = #{twheight,jdbcType=VARCHAR},
+		    twx = #{twx,jdbcType=VARCHAR},
+		    twy = #{twy,jdbcType=VARCHAR}
+		WHERE
+			XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 光终端盒保存-->
+	<insert id="save" parameterType="com.cabletech.res.entity.cableequipmgr.GzdhEntity">
+		INSERT INTO res_gzdh(
+		objectid,xtbh,zymc,gzdhbh,ymc,sccj,ggxh,sfjn,ssjf,dlmc,jtwz,
+		azfs,ywjb,sszt,ls,lmks,kplfs,kls,khs,lplfs,dzhplfs,dzlplfs,szjf,wyzt,whfs,ssglq,ssgc,zjdw,cqxz,
+		cjdw,bz,ewm,orgid,regionid,lon,lat,shape
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{gzdhbh,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+		#{sccj,jdbcType=VARCHAR},#{ggxh,jdbcType=VARCHAR},#{sfjn,jdbcType=VARCHAR},
+		#{ssjf,jdbcType=VARCHAR},#{dlmc,jdbcType=VARCHAR},#{jtwz,jdbcType=VARCHAR},
+		#{azfs,jdbcType=VARCHAR},#{ywjb,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},
+		#{ls,jdbcType=VARCHAR},#{lmks,jdbcType=VARCHAR},#{kplfs,jdbcType=VARCHAR},#{kls,jdbcType=VARCHAR},#{khs,jdbcType=VARCHAR},
+		#{lplfs,jdbcType=VARCHAR},#{dzhplfs,jdbcType=VARCHAR},#{dzlplfs,jdbcType=VARCHAR},
+		#{szjf,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+		#{ssglq,jdbcType=VARCHAR},#{ssgc,jdbcType=VARCHAR},#{zjdw,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{cjdw,jdbcType=VARCHAR},#{bz,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},
+		sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	<!-- 逻辑删除光终端盒成端 -->
+	<update id="deleteGzdhConnByGzdhXtbh" parameterType="String">
+		UPDATE RES_GZDH_ZONN SET status='9' where CONNECTOR_ID=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除光终端盒端子 -->
+	<update id="deleteGzdhDzByGzdhXtbh" parameterType="String">
+		UPDATE RES_GZDH_DZ SET status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除光终端盒 -->
+	<update id="delete" parameterType="String">
+		UPDATE res_gzdh SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>		
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gzdh set ywjb=#{ywjb,jdbcType=VARCHAR},azfs=#{azfs,jdbcType=VARCHAR},
+		wyzt=#{wyzt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+	
+	<!-- 获取光终端盒关联树中 光缆段  -->
+	<select id="getGldlyByGzdh" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l where (l.adsblx='AA006' and l.adsbmc=#{xtbh,jdbcType=VARCHAR}) or (l.zdsblx='AA006' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})
+	</select>
+	<!-- 获取光终端盒关联树中 机房  -->
+	<select id="getJfByGzdh" parameterType="string" resultType="hashmap" flushCache="true">
+		select j.zymc,j.xtbh from res_jf j,res_gzdh g where g.ssjf=j.xtbh and g.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+</mapper>

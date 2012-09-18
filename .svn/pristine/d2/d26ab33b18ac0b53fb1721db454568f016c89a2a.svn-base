@@ -1,0 +1,316 @@
+package com.cabletech.res.action.publicmgr;
+
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.action.BaseAction;
+import com.cabletech.res.entity.publicmgr.ZdxxEntity;
+import com.cabletech.res.service.publicmgr.ZdxxService;
+
+/**
+ * 公共资源-站点信息管理
+ * 
+ * @author 周刚 2012-07-12
+ */
+@SuppressWarnings("serial")
+@Namespace("/res/publicmgr")
+@Results({
+		@Result(name = "frame", location = "/res/publicmgr/zdxx/zdxx_frame.jsp"),
+		@Result(name = "input", location = "/res/publicmgr/zdxx/zdxx_input.jsp"),
+		@Result(name = "input_dwzh", location = "/res/publicmgr/zdxx/zdxx_input_dwzh.jsp"),
+		@Result(name = "view", location = "/res/publicmgr/zdxx/zdxx_view.jsp"),
+		@Result(name = "query", location = "/res/publicmgr/zdxx/zdxx_query.jsp"),
+		@Result(name = "list", location = "/res/publicmgr/zdxx/zdxx_list.jsp"),
+		@Result(name = "list_dwzh", location = "/res/publicmgr/zdxx/zdxx_list_dwzh.jsp"),
+		@Result(name = "edit", location = "/res/publicmgr/zdxx/zdxx_edit.jsp") })
+@Action("zdxx")
+public class ZdxxAction extends BaseAction {
+	private ZdxxEntity entity;
+	private ZdxxEntity queryentity = new ZdxxEntity();
+	@Resource(name = "zdxxServiceImpl")
+	private ZdxxService zdxxService;
+
+	@Override
+	public String execute() {
+		String xtbh = request.getParameter("xtbh");
+		request.setAttribute("xtbh", xtbh);
+		return "frame";
+	}
+
+	public String view() {
+		String xtbh = getParameterValue("xtbh");
+		entity = zdxxService.getbyid(xtbh);
+		request.setAttribute("entity", entity);
+		return "view";
+	}
+
+	public String inputDwzh() {
+		return "input_dwzh";
+	}
+
+	public String input() {
+		String xtbh = getParameterValue("xtbh");
+		if (StringUtils.isNotBlank(xtbh)) {
+			entity = zdxxService.getbyid(xtbh);
+		}
+		request.setAttribute("entity", entity);
+		return "input";
+	}
+
+	/**
+	 * 站点资源保存
+	 * 
+	 * @return String
+	 */
+	public String save() {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		entity.setOrgid(user.getOrgId());
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getXtbh())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		if (zdxxService.saveOrUpdate(entity)) {
+			setInfoMessage("保存成功!", toPage);
+		} else {
+			setInfoMessage("保存失败!", toPage);
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+
+	/**
+	 * 站点资源保存
+	 * 
+	 * @return String
+	 */
+	public String saveDwzh() {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		entity.setOrgid(user.getOrgId());
+		String toPage;
+		if (StringUtils.isNotBlank(entity.getXtbh())) {
+			toPage = "view";
+		} else {
+			toPage = "input";
+		}
+		zdxxService.saveOrUpdate_dwzh(entity);
+		if (entity.getXtbh() != null) {
+			setInfoMessage("保存成功!", toPage);
+		} else {
+			setInfoMessage("保存失败!", toPage);
+		}
+		request.setAttribute("entity", entity);
+		return toPage;
+	}
+
+	/**
+	 * 站点资源查询条件
+	 * 
+	 * @return String
+	 */
+	public String query() throws Exception {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		String condition = request.getQueryString();
+		Map<String, Object> decodeCondtionMap = super.getDecodeCondtionMap(
+				condition, user);
+		request.setAttribute("searchCondition", decodeCondtionMap);
+		return "query";
+	}
+
+	/**
+	 * 列表数据
+	 */
+	public void listdata() {
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");// 获取当前用户
+		preSetZdListQuery(queryentity, user);
+		String condition = queryentity.getSerializeQueryCondition();
+		if (StringUtils.isBlank(condition)) {
+			condition = request.getQueryString();
+		}
+		Map<String, Object> conditionMap = new HashMap<String, Object>();
+		try {
+			conditionMap = super.getDecodeCondtionMap(condition, user);
+			String mapper = "";
+			if (user.isMobile()) {
+				mapper = "getZdListByYD";
+			}
+			if (user.isContractor()) {
+				mapper = "getZdListByDW";
+			}
+			Map<String, Object> map = zdxxService.queryPageMap(mapper,
+					conditionMap, super.getPage(), super.getLimit());
+			convertpagemaptojson(map);
+		} catch (Exception e) {
+			logger.error(e);
+		}
+		request.setAttribute("condition", condition);
+
+	}
+
+	/**
+	 * 列表查询的参数信息
+	 * 
+	 * @param queryentity
+	 *            zdxxEntity 传入的查询参数信息
+	 * @param userInfo
+	 *            UserInfo 当前登录用户信息
+	 */
+	public void preSetZdListQuery(ZdxxEntity queryentity, UserInfo userInfo) {
+		queryentity.setLoginUser(userInfo);
+	}
+
+	/**
+	 * 站点资源查询结果
+	 * 
+	 * @return String
+	 */
+	public String list() throws Exception {
+
+		UserInfo user = (UserInfo) request.getSession().getAttribute("user");
+		String condition = entity.getSerializeQueryCondition();
+		if (StringUtils.isBlank(condition)) {
+			condition = request.getQueryString();
+		}
+		Map<String, Object> conditionMap = super.getDecodeCondtionMap(
+				condition, user);
+		zdxxService.setExportconditionmap(conditionMap);
+		Map<String, Object> map = null;
+		String method = "queryZdxxListNoSimid";
+		if (conditionMap.containsKey("simid")
+				&& StringUtils.isNotBlank(conditionMap.get("simid").toString())) {
+			method = "queryZdxxList";
+		}
+		map = zdxxService.queryPageMap(method, conditionMap,
+				super.getPage("page"), super.getLimit("rows"));
+		request.setAttribute("map", map); // 转换为列表参数
+		request.setAttribute("condition", condition);
+
+		return LIST;
+	}
+
+	public String listDwzh() {
+		return "list_dwzh";
+	}
+
+	/**
+	 * 删除站点信息
+	 * 
+	 * @return String
+	 */
+	public String delete() throws Exception {
+		String xtbh = entity.getXtbh();
+		if (zdxxService.delete(xtbh)) {
+			super.outmessage("删除成功！");
+		} else {
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+
+	/**
+	 * 获取资源关联树结点串
+	 * 
+	 * @return 结点串
+	 * @throws Exception
+	 */
+	public String getTreeNodes() throws Exception {
+		prepareViewModel();
+		response.setContentType("application/html;charset=UTF-8");
+		response.setHeader("Cache-Control", "no-cache");
+		PrintWriter out = response.getWriter();
+		out.print(zdxxService.getTreeNodes(entity));
+		out.flush();
+		return null;
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String xtbh = request.getParameter("xtbh");
+		request.setAttribute("tipview", super.getParameterValue("tipview"));// tip
+																			// 视图显示
+		if (StringUtils.isNotBlank(xtbh)) {
+			entity = zdxxService.getbyid(xtbh);
+			request.setAttribute("entity", entity);
+		} else {
+			entity = new ZdxxEntity();
+		}
+	}
+
+	/**
+	 * 站点的批量逻辑删除
+	 */
+	public String batchDelete() {
+		String xtbhs = request.getParameter("xtbhs");
+		if (zdxxService.batchDelete(xtbhs)) {
+			super.outmessage("删除成功！");
+		} else {
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+
+	/**
+	 * 转向批量编辑页面
+	 * 
+	 * @return
+	 */
+	public String toBatchEditPage() {
+		String xtbhs = request.getParameter("xtbhs");
+		request.setAttribute("xtbhs", xtbhs);
+		return "edit";
+	}
+
+	/**
+	 * 批量编辑
+	 * 
+	 * @return
+	 */
+	public String batchEdit() throws Exception {
+		String former = request.getQueryString();
+		Map<String, Object> map = super.getSerializeForm(former);
+		if (zdxxService.batchEdit(map)) {
+			super.outmessage("编辑成功！");
+		} else {
+			super.outmessage("编辑失败！");
+		}
+		return null;
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		if (entity == null) {
+			entity = new ZdxxEntity();
+		}
+	}
+
+	@Override
+	public ZdxxEntity getModel() {
+		if (entity == null) {
+			entity = new ZdxxEntity();
+		}
+		return entity;
+	}
+
+	/**
+	 * 设置提示信息
+	 * 
+	 * @param info
+	 *            提示信息
+	 * @param toPage
+	 *            页面
+	 */
+	public void setInfoMessage(String info, String toPage) {
+		if (toPage.equals("input")) {
+			entity = new ZdxxEntity();
+		}
+		entity.setActionMessage(info);
+	}
+}

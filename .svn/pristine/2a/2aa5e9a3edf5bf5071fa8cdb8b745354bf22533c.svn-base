@@ -1,0 +1,60 @@
+package com.cabletech.res.mapper.tracemgr;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.res.entity.boardfibermgr.DzConnEntity;
+import com.cabletech.res.entity.opticcablemgr.GldlyEntity;
+
+public interface TraceMapper {
+	
+	/**
+	 * 根据起端设备编号获取对应光缆段路由
+	 * @param sbid 起端设备系统编号
+	 * @return 光缆端路由集合
+	 */
+	List<Map<String, Object>> getlybyadsbid(String sbid);
+	
+	/**
+	 * 根据相对起端设备编号获取对应光缆段路由
+	 * @param sbid 相对的起端设备系统编号
+	 * @return 光缆端路由集合
+	 */	
+	List<Map<String, Object>> getlybyzdsbid(String sbid);
+	
+	/**
+	 * 根据光缆段编号获取对应光缆段
+	 * @param id 相对的起端设备系统编号
+	 * @return 光缆段
+	 */	
+	GldlyEntity getlybyid(String id);
+	
+	/**
+	 * 获取Z端光缆编号、纤芯号信息
+	 * @param dzconn 成端实体
+	 * @return 成端实体
+	 */
+	public DzConnEntity getDzConn(DzConnEntity dzconn);
+	
+	/**
+	 * 获取Z端光缆编号、纤芯号信息
+	 * @param dzconn 成端实体
+	 * @return 成端实体
+	 */
+	public DzConnEntity getSbConn(DzConnEntity dzconn);	
+	
+	/**
+	 * 获取路由长度
+	 * @param map 光缆段系统编号集合
+	 * @return 长度
+	 */
+	public String getjxgxlylen(Map<String, Object> map);	
+	
+	/**
+	 * 获取光交设备对应所有的端子信息
+	 * @param map 端子表名称、设备编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getAllDzbysssbid(Map<String, Object> map);
+	
+}

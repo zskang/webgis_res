@@ -1,0 +1,147 @@
+package com.cabletech.res.service.basemgr;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.DgxxEntity;
+import com.cabletech.res.entity.basemgr.GldEntity;
+import com.cabletech.res.mapper.basemgr.DgxxMapper;
+import com.cabletech.res.mapper.basemgr.GldMapper;
+import com.cabletech.res.mapper.basemgr.GldxtMapper;
+
+/**
+ * 承载--杆路段管理 Service实现
+ * 
+ * @author zhb 2012/5/11
+ */
+@Service
+public class GldServiceImpl extends BaseServiceImpl implements GldService {
+
+	@Resource(name = "gldMapper")
+	private GldMapper gldMapper;
+	
+	@Resource(name = "gldxtMapper")
+	private GldxtMapper gldxtMapper;
+	
+	@Resource(name = "dgxxMapper")
+	private DgxxMapper dgxxmapper;
+	
+	/**
+	 * 获取杆路段实体
+	 * @param resId 资源编号
+	 * @return entity
+	 */	
+	public GldEntity getbyid(String resId){
+		return gldMapper.getbyid(resId);
+	}
+	
+	/**
+	 * 新增或更新杆路段实体｛并更新杆路系统电杆数｝
+	 * @param entity 杆路实体
+	 */
+	@Transactional
+	public boolean saveorupdate(GldEntity entity){
+		try{
+			List<Map<String, String>> points = new ArrayList<Map<String, String>>();
+			EsriRestEntity esrientity = new EsriRestEntity();
+			esrientity.setAttrobj(entity);
+			esrientity.setRestype(super.restservice.LINE);
+			esrientity.setRescode("AD602");			
+			DgxxEntity start = dgxxmapper.getbyid(entity.getQddg());
+			Map<String, String> map = new HashMap<String, String>();
+			map.put("x", start.getProjectx());
+			map.put("y", start.getProjecty());
+			points.add(map);
+			DgxxEntity end = dgxxmapper.getbyid(entity.getZddg());
+			Map<String, String> map2 = new HashMap<String, String>();
+			map2.put("x", end.getProjectx());
+			map2.put("y", end.getProjecty());
+			points.add(map2);
+			esrientity.setList(points);
+			if(StringUtils.isBlank(entity.getXtbh())){
+				entity.setCreatedate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
+				entity.setXtbh(super.getXTBH());
+			}		
+			if(super.restservice.restPost(esrientity)){
+				return true;
+			}else{
+				return false;
+			}			
+		}catch (Exception e) {
+			logger.error("新增或更新杆路段实体：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 逻辑删除杆路段
+	 * @param entity 杆路实体
+	 */
+	public boolean delete(GldEntity entity){
+		try {
+			gldMapper.deleteGld(entity.getXtbh());
+			return true;
+		} catch (Exception e) {
+			logger.error("删除杆路段：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 杆路段实体
+	 */
+	@Override
+	public String getTreeNodes(GldEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> dgxxlist = gldMapper.getDgxxByGld(entity.getXtbh());
+		List<Map<String, Object>> gldlylist = gldMapper.getGldlyByGld(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),13));
+		nodes.append(super.getNode(entity.getXtbh(), "12", restype, dgxxlist));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 杆路段的批量逻辑删除
+	 * @param xtbhs 杆路段的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gldMapper.deleteGld(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除杆路段：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 杆路段批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gldMapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑杆路段：",e);
+			return false;
+		}
+	}	
+}

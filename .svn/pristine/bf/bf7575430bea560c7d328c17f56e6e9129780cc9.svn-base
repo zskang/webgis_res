@@ -1,0 +1,38 @@
+package com.cabletech.res.service.common;
+
+import com.cabletech.core.service.BaseService;
+
+/**
+ * 光分纤箱信息管理Service
+ * 
+ * @author 杨隽 2011-05-23 创建
+ * 
+ */
+public interface MainTenceService extends BaseService {
+
+	/**
+	 * 删除维护关系
+	 * 
+	 * @param maintenceid
+	 * @param type
+	 */
+	public void deleteByMaintenceAndRsType(String maintenceid, String type);
+
+	/**
+	 * 增加维护关系
+	 * 
+	 * @param maintenceid
+	 * @param type
+	 */
+	public void save(String maintenceid, String type);
+
+	/*
+	 * 增加维护关系
+	 * 
+	 * @param maintenceid
+	 * 
+	 * @param type
+	 */
+	public void save4nbsp(String maintenceid, String type);
+
+}

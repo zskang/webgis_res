@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.OdfMapper">
+	<!-- ODF 资源树 -->
+	<select id="getResTree" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select xtbh id,zymc name,'AA001' type,'AA001' rtype, '' pid from res_odf where xtbh = #{xtbh,jdbcType=VARCHAR} and (status is null or status !='9')
+		union
+		select xtbh id, decode(sssbm,'AE301',zymc || ' -A','AE302',zymc || ' -B',zymc) name,'AA001' type,'AD703' rtype,#{xtbh,jdbcType=VARCHAR} pid from res_odm where SSSB = #{xtbh,jdbcType=VARCHAR} and sssblx='AA001' and (status is null or status != '9') 
+	</select>
+	<!-- 插入ODF信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.OdfEntity">
+		INSERT INTO RES_ODF(
+		xtbh,zymc,odfymc,gdzcbh,ssjf,sblx,jtwz,sccj,ggxh,kd,sd,gd,
+		odmkhs,odmhls,khplfs,klplfs,odfyt,ythbz,kx,cqxz,whfs,wyzt,regionid,bz,orgid,kphgz,ewm,ssglq
+		)
+		VALUES(
+		#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{odfymc,jdbcType=VARCHAR},#{gdzcbh,jdbcType=VARCHAR},
+		#{ssjf,jdbcType=VARCHAR},#{sblx,jdbcType=VARCHAR},#{jtwz,jdbcType=VARCHAR},
+		#{sccj,jdbcType=VARCHAR},#{ggxh,jdbcType=VARCHAR},#{kd,jdbcType=VARCHAR},
+		#{sd,jdbcType=VARCHAR},#{gd,jdbcType=VARCHAR},#{odmkhs,jdbcType=VARCHAR},
+		#{odmhls,jdbcType=VARCHAR},#{khplfs,jdbcType=VARCHAR},#{klplfs,jdbcType=VARCHAR},
+		#{odfyt,jdbcType=VARCHAR},#{ythbz,jdbcType=VARCHAR},#{kx,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{whfs,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+		#{bz,jdbcType=VARCHAR},
+		#{orgid,jdbcType=VARCHAR},#{kphgz,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR},
+		#{ssglq,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!-- 更新odf -->
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.OdfEntity">
+		update res_odf set 
+	       zymc = #{zymc,jdbcType=VARCHAR},
+	       odfymc = #{odfymc,jdbcType=VARCHAR},
+	       gdzcbh = #{gdzcbh,jdbcType=VARCHAR},
+	       ssjf = #{ssjf,jdbcType=VARCHAR},
+	       sblx = #{sblx,jdbcType=VARCHAR},
+	       jtwz = #{jtwz,jdbcType=VARCHAR},
+	       sccj = #{sccj,jdbcType=VARCHAR},
+	       ggxh = #{ggxh,jdbcType=VARCHAR},
+	       kd = #{kd,jdbcType=VARCHAR},
+	       sd = #{sd,jdbcType=VARCHAR},
+	       gd = #{gd,jdbcType=VARCHAR},     
+	       odmkhs = #{odmkhs,jdbcType=VARCHAR},
+	       odmhls = #{odmhls,jdbcType=VARCHAR},
+	       khplfs = #{khplfs,jdbcType=VARCHAR},
+	       klplfs = #{klplfs,jdbcType=VARCHAR},
+	       kphgz = #{kphgz,jdbcType=VARCHAR},
+	       ythbz = #{ythbz,jdbcType=VARCHAR},
+	       regionid = #{regionid,jdbcType=VARCHAR},
+	       cqxz = #{cqxz,jdbcType=VARCHAR},
+	       whfs = #{whfs,jdbcType=VARCHAR},
+	       wyzt = #{wyzt,jdbcType=VARCHAR},
+	       kx = #{kx,jdbcType=VARCHAR},
+	       odfyt = #{odfyt,jdbcType=VARCHAR},
+	       ssglq = #{ssglq,jdbcType=VARCHAR},
+	       ewm = #{ewm,jdbcType=VARCHAR},
+	       bz = #{bz,jdbcType=VARCHAR},
+	       twwidth=#{twwidth,jdbcType=VARCHAR},
+	       twheight=#{twheight,jdbcType=VARCHAR},
+	       twx=#{twx,jdbcType=VARCHAR},
+		   twy=#{twy,jdbcType=VARCHAR}
+		WHERE
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 查看odf信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.OdfEntity"
+		parameterType="string" flushCache="true">
+		select * from RES_ODF where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询 包含SIMID -->
+	<select id="queryOdfHaveSimid" parameterType="hashmap"
+		resultType="hashmap" flushCache="true">
+		select d.*,r.simid from res_odf d,res_gprs_record r
+		where r.resid=d.xtbh and r.restype='AD702' and (d.status != '9' or d.status is
+		null)
+		<if test="zymc != null and zymc != ''">
+			and d.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="simid != null and simid != ''">
+			and r.simid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and d.ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and d.cqxz = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(d.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(d.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>
+	<!-- 查询ODF不含simid -->
+	<select id="queryOdfNoSimid" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select * from RES_ODF
+		where ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and to_char(createdate,'yyyy-mm-dd HH24:mi:ss') >= #{starttime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+	</select>
+	<!-- 删除odf信息 -->
+	<update id="deleteOdf" parameterType="String">
+		UPDATE RES_ODF SET
+		status='9',ssjf='' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除odf根据站点编号 -->
+	<update id="deleteOdfByZdxxXtbh" parameterType="String" flushCache="true">
+		update res_odf set status='9' where ssjf in (select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR})
+	</update>
+	
+	<!-- 逻辑删除odf成端根据站点编号 -->
+	<update id="deleteOdfConnByZdxxXtbh" parameterType="String" flushCache="true">
+		update res_odf_conn set status='9' where sssb in(select xtbh from res_odf where ssjf=#{xtbh,jdbcType=VARCHAR})
+		<!-- to_id in(select xtbh from res_odm where sssb in (select xtbh from res_odf d where d.ssjf in(select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR})))
+		or from_id in(select xtbh from res_odm where sssb in (select xtbh from res_odf d where d.ssjf in(select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR}))) -->
+		
+	</update>
+	
+	<!-- 逻辑删除odf端子根据站点编号 -->
+	<update id="deleteOdfDzByZdxxXtbh" parameterType="String" flushCache="true">
+		update RES_ODF_DZ set status='9' where sssb in(select xtbh from res_odf where ssjf in(select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR}))		
+	</update>
+	
+	<!-- 逻辑删除odf端子根据机房编号 -->
+	<update id="deleteOdfDzByJfxxXtbh" parameterType="String" flushCache="true">
+		update res_odf set status='9' where ssjf in (select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR})
+	</update>
+	
+	<!-- 逻辑删除odf成端根据机房编号 -->
+	<update id="deleteOdfConnByJfxxXtbh" parameterType="String" flushCache="true">
+		update res_odf_conn set status='9' where sssb in(select xtbh from res_odf where ssjf=#{xtbh,jdbcType=VARCHAR})
+		<!--to_id in(select xtbh from res_odm where sssb in (select xtbh from res_odf d where d.ssjf=#{xtbh,jdbcType=VARCHAR}))-->
+		<!--or from_id in(select xtbh from res_odm where sssb in (select xtbh from res_odf d where d.ssjf=#{xtbh,jdbcType=VARCHAR}))-->
+	</update>	
+	
+	<!-- 逻辑删除odf根据机房编号 -->
+	<update id="deleteOdfByJfxxXtbh" parameterType="String" flushCache="true">
+		update res_odf set status='9' where ssjf=#{xtbh,jdbcType=VARCHAR}
+	</update>	
+	
+	<!-- 逻辑删除odf成端根据odf编号 -->
+	<update id="deleteOdfConnByOdfXtbh" parameterType="String" flushCache="true">
+		update res_odf_conn set status='9' where sssb in(select xtbh from res_odf where xtbh=#{xtbh,jdbcType=VARCHAR})
+		<!-- or from_id in(select xtbh from res_odm where sssb=#{xtbh,jdbcType=VARCHAR})-->		
+	</update>
+	
+	<!-- 逻辑删除odf端子根据odf编号 -->
+	<update id="deleteOdfByOdfXtbh" parameterType="String" flushCache="true">
+		update res_odf_dz set status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>			
+	
+	<!-- 获取odf关联树中 光缆段  -->
+	<select id="getGldlyByOdf" parameterType="string" resultType="hashmap" flushCache="true">
+		<!-- select * from res_gld_ly l where (l.adsblx='AD702' and l.adsbmc=#{xtbh,jdbcType=VARCHAR}) or (l.zdsblx='AD702' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})-->
+		 select * from res_gld_ly l where (l.adsbmc=#{xtbh,jdbcType=VARCHAR} or  l.zdsbmc=#{xtbh,jdbcType=VARCHAR}) and (l.status!='9' or l.status is null)
+	</select>	
+	
+	<!-- 获取odf关联树中 站点信息  -->
+	<select id="getZdxxByOdf" parameterType="string" resultType="hashmap" flushCache="true">
+		select z.zymc,z.xtbh from res_jf j,RES_ODF o,res_zdxx z where o.ssjf=j.xtbh and z.xtbh=j.sszd and o.xtbh=#{xtbh,jdbcType=VARCHAR} 
+		and (z.status!='9' or z.status is null)
+	</select>
+	
+	<!-- 获取odf关联树中 机房  -->
+	<select id="getJfxxByOdf" parameterType="string" resultType="hashmap" flushCache="true">
+		select j.zymc,j.xtbh from res_jf j,RES_ODF o where o.ssjf=j.xtbh and o.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_odf set odfyt=#{odfyt,jdbcType=VARCHAR},wyzt=#{wyzt,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+</mapper>

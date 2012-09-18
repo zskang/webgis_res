@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.cableequipmgr.GjjxMapper">
+	<!-- 光交接箱 资源树 -->
+	<select id="getResTree" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select xtbh id,zymc name,'AA003' type,'AA003' rtype, '' pid from res_gjjx where xtbh = #{xtbh,jdbcType=VARCHAR}
+		union
+		select xtbh id, decode(sssbm,'AE301',zymc || ' -A','AE302',zymc || ' -B',zymc) name,'AA003' type,'AD703' rtype,#{xtbh,jdbcType=VARCHAR} pid from res_odm where SSSB = #{xtbh,jdbcType=VARCHAR} and sssblx='AA003' 
+	</select>
+	<!-- 插入光交接箱信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.cableequipmgr.GjjxEntity">
+		INSERT INTO RES_GJJX(
+		OBJECTID,XTBH,zymc,GJJXBH,YMC,GDZCBH,SCCJ,GGXH,BCRL,YTHBZ,SPLX,YWJB,JTWZ,DLMC,MP,AZFS,KHPLFS,KLPLFS,ODMKHS,ODMKLS,WYZT,CQXZ,SSZT,WHFS,YT,SSGC,ZJDW,CJDW,SSGLQ,REGIONID,LON,LAT,ORGID,EWM,SHAPE
+		)
+		VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{gjjxbh,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+		#{gdzcbh,jdbcType=VARCHAR},#{sccj,jdbcType=VARCHAR},#{ggxh,jdbcType=VARCHAR},#{bcrl,jdbcType=VARCHAR},
+		#{ythbz,jdbcType=VARCHAR},#{splx,jdbcType=VARCHAR},#{ywjb,jdbcType=VARCHAR},#{jtwz,jdbcType=VARCHAR},
+		#{dlmc,jdbcType=VARCHAR},#{mp,jdbcType=VARCHAR},#{azfs,jdbcType=VARCHAR},#{khplfs,jdbcType=VARCHAR},#{klplfs,jdbcType=VARCHAR},
+		#{odmkhs,jdbcType=VARCHAR},#{odmkls,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{sszt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},#{yt,jdbcType=VARCHAR},#{ssgc,jdbcType=VARCHAR},#{zjdw,jdbcType=VARCHAR},
+		#{cjdw,jdbcType=VARCHAR},#{ssglq,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR},
+		#{pointY,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR},sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	<!-- 更新光交接箱信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.cableequipmgr.GjjxEntity">
+		UPDATE RES_GJJX SET
+		zymc=#{zymc,jdbcType=VARCHAR},GJJXBH=#{gjjxbh,jdbcType=VARCHAR},YMC=#{ymc,jdbcType=VARCHAR},
+		GDZCBH=#{gdzcbh,jdbcType=VARCHAR},SCCJ=#{sccj,jdbcType=VARCHAR},GGXH=#{ggxh,jdbcType=VARCHAR},
+		BCRL=#{bcrl,jdbcType=VARCHAR},YTHBZ=#{ythbz,jdbcType=VARCHAR},SPLX=#{splx,jdbcType=VARCHAR},
+		YWJB=#{ywjb,jdbcType=VARCHAR},JTWZ=#{jtwz,jdbcType=VARCHAR},DLMC=#{dlmc,jdbcType=VARCHAR},
+		MP=#{mp,jdbcType=VARCHAR},AZFS=#{azfs,jdbcType=VARCHAR},KHPLFS=#{khplfs,jdbcType=VARCHAR},
+		KLPLFS=#{klplfs,jdbcType=VARCHAR},ODMKHS=#{odmkhs,jdbcType=VARCHAR},ODMKLS=#{odmkls,jdbcType=VARCHAR},
+		WYZT=#{wyzt,jdbcType=VARCHAR},CQXZ=#{cqxz,jdbcType=VARCHAR},SSZT=#{sszt,jdbcType=VARCHAR},
+		WHFS=#{whfs,jdbcType=VARCHAR},YT=#{yt,jdbcType=VARCHAR},SSGC=#{ssgc,jdbcType=VARCHAR},
+		ZJDW=#{zjdw,jdbcType=VARCHAR},CJDW=#{cjdw,jdbcType=VARCHAR},SSGLQ=#{ssglq,jdbcType=VARCHAR},
+		REGIONID=#{regionid,jdbcType=VARCHAR},
+		ORGID=#{orgid,jdbcType=VARCHAR},EWM=#{ewm,jdbcType=VARCHAR},
+		twwidth = #{twwidth,jdbcType=VARCHAR},
+        twheight = #{twheight,jdbcType=VARCHAR},
+        twx = #{twx,jdbcType=VARCHAR},
+        twy = #{twy,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 查看光交接箱信息 -->
+	<select id="view" resultType="com.cabletech.res.entity.cableequipmgr.GjjxEntity"
+		parameterType="string" flushCache="true">
+		select gj.objectid,gj.xtbh,gj.zymc,gj.gjjxbh,gj.ymc,gj.gdzcbh,
+		gj.sccj,gj.ggxh,gj.bcrl,gj.ythbz,gj.splx,gj.ywjb,gj.jtwz,gj.dlmc,
+		gj.mp,gj.azfs,gj.khplfs,gj.klplfs,gj.odmkhs,gj.odmkls,gj.wyzt,gj.cqxz,gj.sszt,
+		gj.whfs,gj.yt,gj.ssgc,gj.zjdw,gj.cjdw,gj.ssglq,gj.regionid,
+		round(gj.lon,6) lon,round(gj.lat,6) lat,gj.orgid,gj.status,gj.ewm,
+		gj.shape.minx projectx,gj.shape.miny projecty from RES_GJJX gj where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询光交接箱信息 -->
+	<select id="queryGjjxList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select gj.objectid,gj.xtbh,gj.zymc,gj.gjjxbh,gj.ymc,gj.gdzcbh,
+		gj.sccj,gj.ggxh,gj.bcrl,gj.ythbz,gj.splx,gj.ywjb,gj.jtwz,gj.dlmc,
+		gj.mp,gj.azfs,gj.khplfs,gj.klplfs,gj.odmkhs,gj.odmkls,gj.wyzt,gj.cqxz,gj.sszt,
+		gj.whfs,gj.yt,gj.ssgc,gj.zjdw,gj.cjdw,gj.ssglq,gj.regionid,
+		round(gj.lon,6) lon,round(gj.lat,6) lat,gj.orgid,gj.status,gj.ewm from RES_GJJX gj
+		left join res_gprs_record r
+		on gj.xtbh = r.resid and r.restype ='AA003'
+		where 1=1 and ( gj.status is null or gj.status != '9' )
+		<if test="simid != null and simid != ''">
+			and r.simid like '%' || #{simid,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and gj.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and gj.SSZT = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and gj.CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and gj.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and gj.createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and gj.createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+	</select>
+	<!-- 查询光交接箱信息（无sim卡号） -->
+	<select id="queryGjjxListNoSimid" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select gj.objectid,gj.xtbh,gj.zymc,gj.gjjxbh,gj.ymc,gj.gdzcbh,
+		gj.sccj,gj.ggxh,gj.bcrl,gj.ythbz,gj.splx,gj.ywjb,gj.jtwz,gj.dlmc,
+		gj.mp,gj.azfs,gj.khplfs,gj.klplfs,gj.odmkhs,gj.odmkls,gj.wyzt,gj.cqxz,gj.sszt,
+		gj.whfs,gj.yt,gj.ssgc,gj.zjdw,gj.cjdw,gj.ssglq,gj.regionid,
+		round(gj.lon,6) lon,round(gj.lat,6) lat,gj.orgid,gj.status,gj.ewm from RES_GJJX gj
+		where ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and SSZT = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+			<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and createdate >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and createdate <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+	</select>
+	<!-- 逻辑删除光交接箱成端信息 -->
+	<update id="deleteGjjxConnByGjjxXtbh" parameterType="String" flushCache="true">
+		UPDATE RES_GJJX_Conn SET
+		status='9' where CONNECTOT_ID=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除光交接箱端子信息 -->
+	<update id="deleteGjjxDzByGjjxXtbh" parameterType="String" flushCache="true">
+		UPDATE RES_GJJX_DZ SET
+		status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 删除光交接箱信息 -->
+	<update id="delete" parameterType="String" flushCache="true">
+		UPDATE RES_GJJX SET
+		status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>		
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gjjx set splx=#{splx,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},azfs=#{azfs,jdbcType=VARCHAR},
+		wyzt=#{wyzt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+	
+		<!-- 获取光终端盒关联树中 光缆段  -->
+	<select id="getGldlyByGjjx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l where (l.adsblx='AA003' and l.adsbmc=#{xtbh,jdbcType=VARCHAR}) or (l.zdsblx='AA003' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})
+	</select>
+</mapper>

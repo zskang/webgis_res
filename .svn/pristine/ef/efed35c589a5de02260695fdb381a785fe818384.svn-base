@@ -1,0 +1,233 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Wlan信息查询</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script>
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In
+			.add(
+					'ctcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom_nbsp.css'
+					});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('common', {
+		path : '${ctx}/js/common.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In.add('wlan_common', {
+		path : '${ctx}/js/res/publicmgr/wlan_common.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+
+	In
+			.ready(
+					'ctcss',
+					'uicss',
+					'ztreecss',
+					'jggridjs',
+					'jggridlocalejs',
+					'commonjs',
+					'common',
+					'jqgridcss',
+					'wresize',
+					'wlan_common',
+					'wdatepicker',
+					function() {
+						var jqgrid = $("#wlangrid")
+								.jqGrid(
+										{
+											url : "${ctx}/res/publicmgr/wlan!listData.action",
+											datatype : "json",
+											mtype : "GET",
+											rownumbers : true,
+											colNames : [ '热点名称', '所属站点',
+													'NAS-ID', '热点类型', '传输类型',
+													'AP数量', '地址', 'siteid',
+													'操作' ],
+											colModel : [ {
+												name : 'HOSTNAME',
+												id : 'HOSTNAME',
+												sortable : true
+											}, {
+												name : 'ZYMC',
+												id : 'ZYMC',
+												sortable : true
+											}, {
+												name : 'NASID',
+												id : 'NASID',
+												sortable : true
+											}, {
+												name : 'HOSTTYPE',
+												id : 'HOSTTYPE',
+												sortable : true
+											}, {
+												name : 'TRANSTYPE',
+												id : 'TRANSTYPE',
+												sortable : true
+											}, {
+												name : 'APNUM',
+												id : 'APNUM',
+												sortable : true
+											}, {
+												name : 'ADDRESS',
+												id : 'ADDRESS',
+												sortable : false
+											}, {
+												name : 'SITEID',
+												id : 'SITEID',
+												hidden : true
+											}, {
+												name : 'ID',
+												id : 'ID',
+												sortable : false,
+												formatter : WaitHandWlanFmatter
+											} ],
+											rowNum : 15,
+											autowidth : true,
+											rowList : [ 15, 30, 50 ],
+											pager : '#wlanpager',
+											shrinkToFit : true,
+											viewrecords : true,/* 
+																																																																		width : '600',
+																																																																		height : '300', */
+											hidegrid : false,
+											prmNames : {
+												page : "pageNo",
+												rows : "rows",
+												sort : "sidx",
+												order : "sord"
+											},
+											jsonReader : {
+												root : "root", // 数据行（默认为：rows） 
+												page : "pageNo", // 当前页 
+												total : "totalPages", // 总页数 
+												records : "total", // 总记录数 
+												repeatitems : false,
+												id : "ID"
+											}
+										}).navGrid('#wlanpager', {
+									edit : false,
+									add : false,
+									del : false,
+									search : false,
+									sortable : false
+								});
+						$(window).wresize(function() {
+							grid_resize(jqgrid);
+						});
+						grid_resize(jqgrid);
+						In
+								.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+						In
+								.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+					});
+
+	function query() {
+		jQuery("#wlangrid").jqGrid().setGridParam({
+			postData : {
+				hostName : jQuery("#hostName").val(),
+				hostType : jQuery("#hostType").val(),
+				transType : jQuery("#transType").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+
+	function add() {
+		window.location.href = '${ctx}/res/publicmgr/wlan!input4nbsp.action';
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form name="form1" id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">WLAN名称:</span> <input
+					name="hostName" id="hostName" value="${searchCondition.hostName}"
+					class="ui-form-input" type="text" /> <span
+					class="ui-form-input-title">热点类型:</span>
+				<baseinfo:dicselector name="hostType" columntype="OVERLAY_TYPE"
+					type="select" cssClass="ui-form-input"
+					keyValue="${searchCondition.hostType}"></baseinfo:dicselector>
+
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">传输类型:</span>
+				<baseinfo:dicselector name="transType" columntype="TRANSFER_TYPE"
+					type="select" cssClass="ui-form-input"
+					keyValue="${searchCondition.transType}"></baseinfo:dicselector>
+				<span class="ui-form-input-title">&nbsp;</span> <input type="button"
+					value="查询" style="width: 80px;" onclick="query();"> <input
+					type="button" value="新增" style="width: 80px;" onclick="add();">
+				<baseinfo:expexcel cls="exprotButton" businessId="wlanlist"
+					name="导出excel"></baseinfo:expexcel>
+
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="wlangrid"></table>
+		<div id="wlanpager"></div>
+	</div>
+</body>
+</html>

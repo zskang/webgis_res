@@ -1,0 +1,294 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript">
+		 	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	        In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	        In.add('autocompleteJs',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',type:'js',charset:'utf-8',rely:['autocompleteCss']});
+	        In.add('autocompleteCss',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'});
+	        In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+	        In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+	        In.add('commonjs', {path:'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+	        In.ready('ztreejs','validatejs','autocompleteJs','ctcss','commonjs',function(){
+		        	In.css('#formname label.error {margin-left: 10px;width: auto;display: inline;}');
+		        	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+	         		$("#formname").validate({});
+	         		var xtbh = $('#xtbh').val();
+					if(!xtbh){
+						$('.ui-form-container .ui-form-input-box INPUT:last').css('display','none');
+					}
+		         	jQuery(function(){
+		         		if($('#actmsg').val()){
+		         			parent.refreshPoint('AA006');
+		         			$.fn.Alert($('#actmsg').val(), 4);
+		         		}
+		         	});					
+	         		getAutoCompleteValue(false,'ssjfinput','ssjfhidden','res_jf');
+	         		 //初始化RegionTree
+	         		initRegionTree_001();
+	        });
+	        
+			var type = "gzdh";
+			function doSubmit(act){
+				if(act == 'save' && $('#xtbh').val() == ''){
+					top.refreshPoint('AA006');
+				}
+				var url ="${ctx}/res/cableequipmgr/{type}!{act}.action";
+				document.forms[0].action=url.replace('{type}',type).replace('{act}',act);
+				if(act == 'view'){
+					window.location.href=url.replace('{type}',type).replace('{act}',act)+"?xtbh="+$('#xtbh').val();
+				}
+			}
+			var regionCallBackId = function(id){
+				$('#regionid').val(id);
+			};
+		
+		</script>
+	</head>
+	<body>
+		<div class="ui-form-container">
+			<form name="formname" id="formname" method="post" action="">
+				<input type="hidden" id="objectid" name="objectid" value="${entity.objectid}" />
+				<input type="hidden" id="actmsg" name="actmsg" value="${entity.actionMessage}" />
+				<input type="hidden" name="lon" id="lon" value="${entity.lon}" />
+				<input type="hidden" name="lat" id="lat" value="${entity.lat}" />
+				<c:if test="${entity.xtbh==null || entity.xtbh==''}">	
+				<div class="ui-form-input-box">
+					<div style="width:100%;height:30px;">
+						<span class="ui-form-input-title">经度：</span>
+						<input type="text" class="required ui-form-input" readonly="readonly" style="width:100px" name="pointX" id="pointX" /><span class="ui-form-symbol-color">*</span>
+						<input type="hidden" name="projectx" id="projectx" />
+						<input type="button" value="选择坐标" onclick="javascript:top.addPoint('AA006')" />
+					</div>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">纬度：</span>
+					<input type="text" class="required ui-form-input" readonly="readonly" style="width:100px" name="pointY" id="pointY" /><span class="ui-form-symbol-color">*</span>
+					 <input type="hidden" name="projecty" id="projecty" />
+				</div>				
+				</c:if>
+				<c:if test="${entity.xtbh!=null && entity.xtbh!=''}">
+					<input type="hidden" name="projectx" id="projectx" value="${entity.projectx}"/>
+					<input type="hidden" name="projecty" id="projecty" value="${entity.projecty}"/>
+				</c:if>					
+				<div class="ui-form-input-box">
+					<input type="hidden" id="xtbh" name="xtbh" value="${entity.xtbh}" />
+					<span class="ui-form-input-title">光终端盒名称：</span>
+					<input type="text" class="required ui-form-input" name="zymc"
+						id="zymc" value="${entity.zymc}" maxlength="50" />
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">光终端盒编号：</span>
+					<input type="text" class="ui-form-input" name="gzdhbh"
+						id="gzdhbm" value="${entity.gzdhbh}" maxlength="50" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">原名称：</span>
+					<input type="text" class="ui-form-input" name="ymc"
+						id="ymc" value="${entity.ymc}" maxlength="50"/>
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">是否局内：</span>
+					<baseinfo:dicselector name="sfjn" columntype="SF"
+						  type="select" keyValue="${entity.sfjn}"
+						cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属机房：</span>
+					<input id="ssjfinput" name="ssjfinput" class="ui-form-input" type="text" onblur="judgeHiddenValue(this,'ssjfhidden')"
+						value='<resinfo:resCommon displayName="zymc" keyColumn="xtbh" keyValue="${entity.ssjf}" tableName="res_jf"></resinfo:resCommon>' />
+					<input size="30" type="hidden" readonly name="ssjf" id="ssjfhidden"
+						value="${entity.ssjf}" />
+						<span class="ui-form-symbol-icon"></span>
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">生产厂商：</span>
+					<input type="text" class="ui-form-input" name="sccj"
+						id="sccj" value="${entity.sccj}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">规格型号：</span>
+					<input type="text" class="ui-form-input" name="ggxh" id="ggxh" value="${entity.ggxh}" maxlength="10"/>
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">道路名称：</span>
+					<input type="text" class="ui-form-input" name="dlmc"
+						id="dlmc" value="${entity.dlmc}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">具体位置：</span>
+					<input type="text" class="ui-form-input" name="jtwz"
+						id="jtwz" value="${entity.jtwz}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">安装方式：</span>
+					<baseinfo:dicselector name="azfs" columntype="AZFS"
+						  type="select" keyValue="${entity.azfs}"
+						cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">业务级别：</span>
+					<baseinfo:dicselector name="ywjb" columntype="CABLETYPE"
+						  type="select" keyValue="${entity.ywjb}"
+						cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">设施状态：</span>
+					<baseinfo:dicselector name="sszt" columntype="SSZT" type="select" keyValue="${entity.sszt}"
+						cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">产权性质：</span>
+					<baseinfo:dicselector name="cqxz" columntype="property_right" isQuery="query"
+						type="select" cssClass="ui-form-input"
+						keyValue="${entity.cqxz}"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">维护方式：</span>
+					<baseinfo:dicselector name="whfs" columntype="WHFS"
+						type="select" cssClass="ui-form-input" isQuery="query"
+						keyValue="${entity.whfs}"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">列数：</span>
+					<input type="text" class="required ui-form-input number" name="ls" id="ls"
+						value="${entity.ls}" maxlength="10" />
+						 <span class="ui-form-symbol-color">*</span>
+				</div>				
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">列排列方式：</span>
+					<baseinfo:dicselector name="lplfs" columntype="PLFS" exclude="AD001,AD002,AD003,AD006"
+						  type="select" keyValue="${entity.lplfs}"
+						cssClass="required ui-form-input" isQuery="query"></baseinfo:dicselector>
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">每列模块数：</span>
+					<input type="text" class="number ui-form-input required" value="${entity.lmks}"
+						name="lmks" id="lmks" maxlength="10" />
+					<span class="ui-form-symbol-color">*</span>
+				</div>	
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">模块排列方式：</span>
+					<baseinfo:dicselector name="kplfs" columntype="PLFS" type="select"
+						keyValue="${entity.kplfs}"   isQuery="query" exclude="AD004,AD002,AD003,AD005"
+						cssClass="required ui-form-input"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">每块列数：</span>
+					<input type="text" class="number ui-form-input required" value="${entity.kls}"
+						name="kls" id="kls" maxlength="10" />
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">每块行数：</span>
+					<input type="text" class="number ui-form-input required" value="${entity.khs}"
+						name="khs" id="khs" maxlength="10" />
+					<span class="ui-form-symbol-color">*</span>
+				</div>														
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">端子列排列方式：</span>
+					<baseinfo:dicselector name="dzlplfs" columntype="PLFS" exclude="AD001,AD002,AD003,AD006"
+						type="select" keyValue="${entity.dzlplfs}"   isQuery="query"
+						cssClass="ui-form-input required"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">端子行排列方式：</span>
+					<baseinfo:dicselector name="dzhplfs" columntype="PLFS" exclude="AD004,AD002,AD003,AD005"
+						type="select" keyValue="${entity.dzhplfs}"   isQuery="query"
+						cssClass="ui-form-input required"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>	
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">端子编号规则：</span>
+					<baseinfo:dicselector name="dzbhgz" columntype="KPHGZ"
+						type="select" keyValue="${entity.dzbhgz}"   isQuery="query"
+						cssClass="ui-form-input required"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>	
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">网元状态：</span>
+					<baseinfo:dicselector name="wyzt" columntype="WYZT"
+						  type="select" keyValue="${entity.wyzt}"
+						cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属管理区：</span>
+					<input type="text" class="ui-form-input" name="ssglq" id="precinct"
+						value="${entity.ssglq}" maxlength="50" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属工程：</span>
+					<input type="text" class="ui-form-input" name="ssgc" id="ssgc"
+						value="${entity.ssgc}" maxlength="50" />
+				</div>
+
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属区域：</span>
+					<baseinfo:regiontree defaultValue="${entity.regionid}"  widgetId="001"
+						cls="required ui-form-input" callBackId="regionCallBackId"
+						regionId="${user.regionId}"></baseinfo:regiontree>
+					<input type="hidden" id="regionid" name="regionid"
+						value="${entity.regionid}">
+						<span class="ui-form-symbol-color">*</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">主建单位：</span>
+					<input type="text" class="ui-form-input" name="zjdw" id="zjdw"
+						value="${entity.zjdw}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">参建单位：</span>
+					<input type="text" class="ui-form-input" name="cjdw" id="cjdw"
+						value="${entity.cjdw}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">二维码：</span>
+					<input type="text" class="ui-form-input" name="ewm" id="ewm"
+						value="${entity.ewm}" maxlength="50" />
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">备注：</span>
+					<textarea class="input textarea" name="bz" id="bz"
+						style="width: 210px" maxlength="50">${entity.bz}</textarea>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">&nbsp;</span>
+					<input type="submit" value="保存" onclick="doSubmit('save')"
+						style="width: 80px;">
+					<input type="button" value="取消" onclick="doSubmit('view')"
+						style="width: 80px;">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

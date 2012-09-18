@@ -1,0 +1,128 @@
+package com.cabletech.contractor.action.search;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+
+import com.cabletech.contractor.service.search.SearchService;
+import com.cabletech.core.action.BaseAction;
+
+/**
+ * 搜索Action，完成对巡检人员、车辆和隐患的搜索
+ * 
+ * @author cqp
+ * @since 2012-7-31
+ * 
+ */
+@Namespace("/contractor")
+@Results({
+		@Result(name = "patrolmanlist", location = "/contractor/onlinedata/onlineman_list.jsp"),
+		@Result(name = "patrolmanform", location = "/contractor/search/search_patrolman.jsp"),
+		@Result(name = "carlist", location = "/contractor/onlinedata/onlinecar_list.jsp"),
+		@Result(name = "carform", location = "/contractor/search/search_car.jsp") })
+@Action("search")
+public class SearchAction extends BaseAction {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	@Resource(name = "searchServiceImpl")
+	private SearchService searchService;
+
+	@Override
+	public Object getModel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String execute() {
+
+		return null;
+	}
+
+	/**
+	 * 进入车辆搜索界面
+	 * 
+	 * @return
+	 */
+	public String searchCarForm() {
+		return "carform";
+	}
+
+	/**
+	 * 搜索车辆结果列表
+	 * 
+	 * @return
+	 */
+	public String searchCar() {
+		String carno = super.converstringtoutf8(super.getParameterValue("carno"));
+		String mentor = super.converstringtoutf8(super.getParameterValue("mentor"));
+		String orgid = super.getParameterValue("orgid");
+		String stime = super.getParameterValue("stime");
+		String etime = super.getParameterValue("etime");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("starttime", stime);
+		map.put("endtime", etime);
+		map.put("carno", carno);
+		map.put("mentor", mentor);
+		map.put("orgid", orgid);
+		Map<String, Object> result = searchService.queryPageMap(
+				"searchCar", map, super.getPage("page"),
+				super.getLimit("rows"));
+		request.setAttribute("map", result);
+		return "carlist";
+	}
+
+	/**
+	 * 进入巡检搜索界面
+	 * 
+	 * @return
+	 */
+	public String searchPatrolManForm() {
+		return "patrolmanform";
+	}
+
+	/**
+	 * 搜索巡检人
+	 * 
+	 * @return String
+	 */
+	public String searchPatrolman() {
+		String name = super.converstringtoutf8(super.getParameterValue("parolname"));
+		String orgid = super.getParameterValue("orgid");
+		String stime = super.getParameterValue("stime");
+		String etime = super.getParameterValue("etime");
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("starttime", stime);
+		map.put("endtime", etime);
+		map.put("patrolname", name);
+		map.put("orgid", orgid);
+		Map<String, Object> result = searchService.queryPageMap(
+				"searchPatrolMan", map, super.getPage("page"),
+				super.getLimit("rows"));
+		request.setAttribute("map", result);
+		return "patrolmanlist";
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+}

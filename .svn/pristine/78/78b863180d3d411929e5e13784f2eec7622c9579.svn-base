@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.common.MainTenceMapper">
+
+	<delete id="deleteByMaintenceAndRsType" parameterType="hashmap">
+		delete from RES_RESOURCETYPE where xtbh = #{maintenceid,jdbcType=VARCHAR} 
+		and RESOURCE_TYPE = #{type,jdbcType=VARCHAR}
+	</delete>
+	
+	<insert id="save" parameterType="hashmap">
+		insert into RES_RESOURCETYPE
+		  (xtbh, RESOURCE_TYPE)
+		values
+		  (#{maintenceid,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR})
+	</insert>
+	
+</mapper>

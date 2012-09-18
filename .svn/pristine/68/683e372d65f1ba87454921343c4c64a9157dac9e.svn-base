@@ -1,0 +1,75 @@
+package com.cabletech.res.mapper.basemgr;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.res.entity.basemgr.GqxxEntity;
+
+/**
+ * 挂墙信息
+ * @author zhanglei 2011-05-11
+ *
+ */
+public interface GqxxMapper {
+
+	/**
+	 * 挂墙修改
+	 * @param entity 挂墙实体
+	 */
+	public void update(GqxxEntity entity);
+	
+	/**
+	 * 单条查看挂墙信息
+	 * @param xtbh 系统编号
+	 * @return 单条挂墙信息实体
+	 */
+	public GqxxEntity getbyid(String xtbh);
+	
+	/**
+	 * 查询挂墙信息
+	 * @param map 条件 含simid
+	 * @return 符合条件的List集合
+	 */
+	public List<Map<String, Object>> queryGqxxList(Map<String, Object> map);
+	
+	/**
+	 * 查询挂墙信息
+	 * @param map 条件  不含 simid
+	 * @return 符合条件的List集合
+	 */
+	public List<Map<String, Object>> queryGqxxListNoSimId(Map<String, Object> map);
+	
+	/**
+	 * 单个挂墙逻辑删除
+	 * @param xtbh 系统编号
+	 */
+	public void deleteGq(String xtbh);
+	
+	/**
+	 * 保存
+	 * 
+	 * @param entity  挂墙信息实体
+	 */
+	public void save(GqxxEntity entity);
+	
+	/**
+	 * 获取挂墙信息关联的光缆段路由
+	 * @param xtbh 系统编号
+	 * @return
+	 */
+	public List<Map<String,Object>> getGldlyBygqxx(String xtbh);
+	
+	/**
+	 * 获取挂墙信息关联的挂墙段
+	 * @param xtbh 系统编号
+	 * @return
+	 */
+	public List<Map<String,Object>> getGqdBygqxx(String xtbh);
+	
+	/**
+	 * 挂墙批量编辑
+	 * @param map 表单值
+	 * @throws Exception
+	 */
+	public void batchEdit(Map<String, Object> map)throws Exception;	
+}

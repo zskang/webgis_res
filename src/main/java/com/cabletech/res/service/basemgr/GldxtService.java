@@ -1,0 +1,60 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.basemgr.GldxtEntity;
+
+/**
+ * 承载--杆路段系统管理 Service
+ * 
+ * @author zhb @date 2012/5/11
+ */
+public interface GldxtService extends BaseService {
+	
+	/**
+	 * 获得电杆的数量
+	 * @param xtbh 系统编号
+	 * @return
+	 */
+	public String calcDgs(String xtbh);
+	/**
+	 * 获取杆路段系统实体
+	 * @param resId 资源编号
+	 * @return entity
+	 */
+	public GldxtEntity getbyid(String resId);
+	
+	/**
+	 * 新增或更新杆路段系统实体
+	 * @param entity 杆路系统实体
+	 */
+	public boolean saveorupdate(GldxtEntity entity);	
+	
+	/**
+	 * 逻辑删除杆路段系统
+	 * @param entity 杆路系统实体
+	 */
+	public boolean delete(GldxtEntity entity);	
+	
+	/**
+	 * 获取资源相关结点串
+	 * @param entity 杆路系统实体
+	 * @return
+	 */	
+	public String getTreeNodes(GldxtEntity entity);
+	
+	/**
+	 * 杆路系统的批量逻辑删除
+	 * @param xtbh 杆路系统的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean batchDelete(String xtbh);
+	
+	/**
+	 * 杆路系统批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map);		
+}

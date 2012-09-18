@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 2012 8 8 修改 -->
+<mapper namespace="com.cabletech.res.mapper.publicmgr.PrepeaterMapper">
+	<select id="getbyid4pre" resultType="com.cabletech.res.entity.publicmgr.PrepeaterEntity"
+		parameterType="string">
+		select
+		REPEATER_ID
+		prepeaterId,SITE_ID siteId,IRMS_ID irmsId,  
+		REPEATER_NAME
+		prepeaterName,STATE,FN_GETNAMEBYCODE(REPEATER_TYPE,'REPEATER_TYPE')
+		prepeaterType,
+		CELL,FN_GETNAMEBYCODE(COVER_TYPE,'REPEATER_COVER_TYPE')
+		coverType,
+		PRODUCER
+		producer,FN_GETNAMEBYCODE(SIGNAL_RECEIVE_MODE,'SIGNAL_RECEIVE_MODE')
+		signalReceiveMode,FN_GETNAMEBYCODE(POWER_SUPPLY_MODE,'POWER_SUPPLY_MODE')
+		powerSupplyMode,
+		to_char(OPENING_TIME,'yyyy-mm-dd HH24:mi:ss')
+		openingTime
+		from
+		RES_REPEATER  where
+		REPEATER_ID=#{prepeaterId,jdbcType=VARCHAR}
+	</select>
+	<!-- 列表信息 -->
+	<select id="queryPrepeaterList" resultType="hashmap"
+		parameterType="hashmap">
+		select
+		pp.REPEATER_ID,pp.SITE_ID siteId,pp.IRMS_ID irmsId,zd.zymc,
+		pp.REPEATER_NAME REPEATERNAME,
+		pp.STATE,FN_GETNAMEBYCODE(pp.REPEATER_TYPE,'REPEATER_TYPE')
+		REPEATERTYPE,
+		pp.CELL,FN_GETNAMEBYCODE(pp.COVER_TYPE,'REPEATER_COVER_TYPE')
+		COVERTYPE,
+		pp.PRODUCER,FN_GETNAMEBYCODE(pp.SIGNAL_RECEIVE_MODE,'SIGNAL_RECEIVE_MODE')
+		SIGNALRECEIVEMODE,
+		FN_GETNAMEBYCODE(pp.POWER_SUPPLY_MODE,'POWER_SUPPLY_MODE')
+		POWERSUPPLYMODE,pp.OPENING_TIME
+		from
+		RES_REPEATER pp left join res_zdxx zd on pp.site_id=zd.xtbh
+		where 1=1
+		<if test="prepeaterName != null and prepeaterName != ''">
+		<![CDATA[
+			and pp.REPEATER_NAME like '%' ||
+			#{prepeaterName,jdbcType=VARCHAR} || '%'
+			]]>
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(pp.OPENING_TIME,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(pp.OPENING_TIME,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<!-- 	<if test="orgids != null and orgids != ''"> 
+			and  exists (select 1 from res_maintenance r where 
+			r.maintenance_id in 
+				<foreach collection="orgids" item="orgid" open="(" separator="," close=")">
+					#{orgid,jdbcType=VARCHAR}
+				</foreach>
+			 and r.rs_id=pp.xtbh)	
+		 
+		</if> -->
+		ORDER BY pp.REPEATER_ID
+	</select>
+	<insert id="saveEntity" parameterType="com.cabletech.res.entity.publicmgr.PrepeaterEntity">
+		INSERT INTO RES_REPEATER
+		(
+		REPEATER_ID,
+		SITE_ID,
+		IRMS_ID,
+		REPEATER_NAME,
+		STATE,
+		REPEATER_TYPE,
+		CELL,
+		COVER_TYPE,
+		PRODUCER,
+		SIGNAL_RECEIVE_MODE,
+		POWER_SUPPLY_MODE,
+		OPENING_TIME
+		)
+		VALUES(
+		#{prepeaterId,jdbcType=VARCHAR},
+		#{siteId,jdbcType=VARCHAR},
+		#{irmsId,jdbcType=VARCHAR},
+		#{prepeaterName,jdbcType=VARCHAR},
+		#{state,jdbcType=VARCHAR},
+		#{prepeaterType,jdbcType=VARCHAR},
+		#{cell,jdbcType=VARCHAR},
+		#{coverType,jdbcType=VARCHAR},
+		#{producer,jdbcType=VARCHAR},
+		#{signalReceiveMode,jdbcType=VARCHAR},
+		#{powerSupplyMode,jdbcType=VARCHAR},
+		to_date(#{openingTime,jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss')
+		)
+	</insert>
+
+	<update id="updateEntity" parameterType="com.cabletech.res.entity.publicmgr.PrepeaterEntity">
+		update RES_REPEATER set
+		SITE_ID=#{siteId,jdbcType=VARCHAR},IRMS_ID=#{irmsId,jdbcType=VARCHAR},
+		REPEATER_NAME=#{prepeaterName,jdbcType=VARCHAR},STATE=#{state,jdbcType=VARCHAR},REPEATER_TYPE=#{prepeaterType,jdbcType=VARCHAR},
+		CELL=#{cell,jdbcType=VARCHAR},COVER_TYPE=#{coverType,jdbcType=VARCHAR},
+		PRODUCER=#{producer,jdbcType=VARCHAR},SIGNAL_RECEIVE_MODE=#{signalReceiveMode,jdbcType=VARCHAR},
+		POWER_SUPPLY_MODE=#{powerSupplyMode,jdbcType=VARCHAR},
+		to_date(#{openingTime,jdbcType=VARCHAR},'yyyy-mm-dd HH24:mi:ss'))
+		where REPEATER_ID=#{prepeaterId,jdbcType=VARCHAR}
+	</update>
+
+
+
+	<delete id="deleteEntity" parameterType="string">
+		delete from RES_REPEATER
+		where
+		REPEATER_ID=#{prepeaterId,jdbcType=VARCHAR}
+	</delete>
+</mapper>

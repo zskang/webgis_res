@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.BsdxtMapper">
+	<!-- 直埋段系统查询   条件： 名称 产权性质 设施状态 区域 -->
+	<select id="queryBsdxtList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_bsd_xt
+		where (status != '9' or status is null)
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 单个直埋段系统查看 -->
+	<select id="getbyid"
+		resultType="com.cabletech.res.entity.basemgr.BsdxtEntity"
+		parameterType="string" flushCache="true">
+		select * from  res_bsd_xt where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 直埋段系统跟新 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.BsdxtEntity">
+		UPDATE res_bsd_xt SET
+			zymc=#{zymc,jdbcType=VARCHAR},zcd=#{zcd,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},
+			bss=#{bss,jdbcType=NUMERIC},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+			cqxz=#{cqxz,jdbcType=VARCHAR},jsdw=#{jsdw,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+			bz=#{bz,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 新增直埋段系统 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.BsdxtEntity">
+		INSERT INTO res_bsd_xt(
+		xtbh,zymc,zcd,ywjb,bss,bz,regionid,cqxz,jsdw,sszt,whfs,orgid
+		) VALUES(
+		#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{zcd,jdbcType=VARCHAR},
+		#{ywjb,jdbcType=VARCHAR},#{bss,jdbcType=NUMERIC},#{bz,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{jsdw,jdbcType=VARCHAR},
+		#{sszt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!-- 逻辑删除直埋段系统 -->
+	<update id="delete" parameterType="String">
+		UPDATE res_bsd_xt SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+		
+	<!-- 获取标石段系统关联的标石段 -->
+	<select id="getBsdByBsdxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select f.zymc,f.xtbh from res_bsd f where (f.status != '9' or f.status is null) and f.ssbsxt=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取标石段系统关联光缆段路由 -->
+	<select id="getGldlyByBsdxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select y.zymc,y.xtbh from res_bsd f,res_gld_ly_dwss l,res_gld_ly y where
+		(f.status != '9' or f.status is null) and (y.status != '9' or y.status is null) and f.xtbh=l.segment_id and l.gld_id=y.xtbh and f.ssbsxt=#{xtbh,jdbcType=VARCHAR} and restype='AA603'
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_bsd_xt set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>					
+</mapper>

@@ -1,0 +1,14 @@
+package com.cabletech.res.service.analyse;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+
+/**
+ * 承载资源统计
+ * @author 吕仁钊 2012-08-11
+ *
+ */
+public interface BaseAnalyseService  extends BaseService{
+
+}

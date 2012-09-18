@@ -1,0 +1,83 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.core.common.Page;
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.publicmgr.ZdxxEntity;
+
+/**
+ * 站点信息管理Service
+ * 
+ * @author 杨隽 2011-05-22 创建
+ * 
+ */
+public interface ZdxxService extends BaseService {
+	/**
+	 * 保存
+	 * 
+	 * @param entity
+	 *            ZdxxEntity 站点实体
+	 */
+	public boolean saveOrUpdate(ZdxxEntity entity);
+
+	/**
+	 * 查看
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 * @return ZdxxEntity 站点实体
+	 */
+	public ZdxxEntity getbyid(String xtbh);
+
+	/**
+	 * 删除
+	 * 
+	 * @param xtbh
+	 *            String 系统编号
+	 */
+	public boolean delete(String xtbh);
+
+	/**
+	 * 获取资源相关结点串
+	 * 
+	 * @param entity
+	 *            站点实体
+	 * @return
+	 */
+	public String getTreeNodes(ZdxxEntity entity);
+
+	/**
+	 * 站点的批量逻辑删除
+	 * 
+	 * @param xtbh
+	 *            站点的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean batchDelete(String xtbh);
+
+	/**
+	 * 站点批量编辑
+	 * 
+	 * @param map
+	 *            表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map);
+
+	/**
+	 * 获取列表信息--周刚
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public List<Map<String, Object>> getZdList(Map<String, Object> map) throws Exception ;
+	
+	/**
+	 * 设置条件
+	 * @param conditionMap  
+	 */
+	void setExportconditionmap(Map<String, Object> conditionMap);
+
+}

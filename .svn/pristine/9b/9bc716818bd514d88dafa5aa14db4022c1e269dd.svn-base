@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.opticcablemgr.GlplMapper">
+
+	<!-- 查看光缆盘留 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.opticcablemgr.GlplEntity" parameterType="string" flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.ssgld,g.pldxh,g.szsslx,g.szssmc,g.plsj,
+		g.orgid,g.ewm,g.status,g.regionid,round(g.lon,6) lon,round(g.lat,6) lat,
+		g.shape.minx projectx,g.shape.miny projecty from res_glpl g where
+		g.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 跟新光缆盘留信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.opticcablemgr.GlplEntity">
+		UPDATE res_glpl SET
+		zymc=#{zymc,jdbcType=VARCHAR},ssgld=#{ssgld,jdbcType=VARCHAR},pldxh=#{pldxh,jdbcType=VARCHAR},
+		szsslx=#{szsslx,jdbcType=VARCHAR},szssmc=#{szssmc,jdbcType=VARCHAR},plsj=#{plsj,jdbcType=VARCHAR},
+		orgid=#{orgid,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		 WHERE XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询  条件：名称 区域  -->
+	<select id="queryglplList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.ssgld,g.pldxh,g.szsslx,g.szssmc,g.plsj,
+		g.orgid,g.ewm,g.status,g.regionid,round(g.lon,6) lon,round(g.lat,6) lat 
+		from res_glpl g where (status != '9' or status is null)
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+	
+    <!-- 光缆盘留逻辑删除 -->
+	<update id="deleteGj" parameterType="String">
+		UPDATE res_glpl SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增光缆盘留 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.opticcablemgr.GlplEntity">
+		INSERT INTO res_glpl(
+		objectid,xtbh,zymc,ssgld,pldxh,szsslx,szssmc,lon,lat,plsj,ewm,createdate,regionid,orgid,shape
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{ssgld,jdbcType=VARCHAR},
+		#{pldxh,jdbcType=VARCHAR},#{szsslx,jdbcType=VARCHAR},#{szssmc,jdbcType=VARCHAR},
+		#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},#{plsj,jdbcType=VARCHAR},
+		#{ewm,jdbcType=VARCHAR},sysdate,#{regionid,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},
+		sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	<!-- 根据光缆盘留编号获取相关光缆段 -->
+	<select id="getGldlyByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l 
+		where (l.adsblx='A21' and  l.adsbmc=#{xtbh,jdbcType=VARCHAR}) 
+		or (l.zdsblx='A21' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR}) union
+		select l.zymc,l.xtbh from res_relate_jgdwss r,res_gld_ly l
+		where l.xtbh=r.gldid and r.resid=#{xtbh,jdbcType=VARCHAR} and r.restype='A21' order by zymc	
+	</select>
+	<!-- 根据光缆盘留编号获取相关管道段 -->
+	<select id="getGddByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gdd g 
+		where g.qdgj=#{xtbh,jdbcType=VARCHAR} or  g.zdgj=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	<!-- 根据光缆盘留编号获取相关光接头 -->
+	<select id="getGjtByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select t.zymc,t.xtbh from res_gjt t where t.sssslx='A21' and t.ssssmc=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	<!-- 根据光缆盘留编号获取相关光缆盘留-->
+	<select id="getGjpmByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select p.zymc,p.xtbh from res_gj_pm p where  p.gjbh=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gjxx set jlb=#{jlb,jdbcType=VARCHAR},jlx=#{jlx,jdbcType=VARCHAR},sfydzs=#{sfydzs,jdbcType=VARCHAR},
+		jgcz=#{jgcz,jdbcType=VARCHAR},jgxz=#{jgxz,jdbcType=VARCHAR},gjgg=#{gjgg,jdbcType=VARCHAR},gjxh=#{gjxh,jdbcType=VARCHAR},
+		gjyt=#{gjyt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},sfgj=#{sfgj,jdbcType=VARCHAR},sfgx=#{sfgx,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>				
+</mapper>

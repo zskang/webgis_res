@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.connectmgr.PconnectMapper">
+	
+	<select id="getODMPorts" parameterType="hashmap" resultType="hashmap">
+		<if test="zylx == 'AD703' and parenttype == 'AA003'">
+			select portname ID,FN_GETTYPENAME(dzzt) STATE,rownum RN from res_gjjx_conn where ssodm=#{xtbh,jdbcType=VARCHAR} order by xtbh
+		</if>
+		<if test="zylx == 'AD703' and parenttype == 'AA001'">
+			select portname ID,FN_GETTYPENAME(dzzt) STATE,rownum RN from res_odf_conn where ssodm=#{xtbh,jdbcType=VARCHAR} order by xtbh
+		</if>
+	</select>
+	
+	<select id="getGFXXPorts" parameterType="hashmap" resultType="hashmap">
+		select portname ID,FN_GETTYPENAME(dzzt) STATE,rownum RN from res_gfxx_conn where sssb=#{xtbh,jdbcType=VARCHAR} order by xtbh
+	</select>
+	
+	<select id="getGZDHPorts" parameterType="hashmap" resultType="hashmap">
+		select portname ID,FN_GETTYPENAME(dzzt) STATE,rownum RN from res_gzdh_conn where sssb=#{xtbh,jdbcType=VARCHAR} order by xtbh
+	</select>
+	
+</mapper>

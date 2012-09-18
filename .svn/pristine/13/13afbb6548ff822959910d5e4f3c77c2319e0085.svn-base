@@ -1,0 +1,112 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"> 
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<%@ include file="/common/header.jsp"%>
+<script language="JavaScript" type="text/JavaScript" charset="utf-8">
+		djConfig = {
+			webliburl : "${config.webliburl}",
+			baseUrl : '${config.weblibctx}/',
+			parseOnLoad : true,
+			modulePaths : {
+				'com.cabletech' : 'cabletech/mapapi'
+			}
+		};
+		var mainlayout = null;
+	</script>
+<script type="text/javascript">
+	In.add('layoutjs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ct.ui.layout.js',type:'js',charset:'utf-8',rely:['layoutcss']});
+	In.add('layoutcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	In.add('esrijs',{path:'http://${config.webliburl}/esri/jsapi/',type:'js',charset:'utf-8',rely:['esricss','popcss']});
+	In.add('esricss',{path:'http://${config.webliburl}/esri/jsapi/js/dojo/dijit/themes/claro/claro.css'});
+	In.add('popcss',{path:'http://${config.webliburl}/esri/jsapi/js/esri/dijit/css/Popup.css'});
+	//In.add('cmapjs',{path:'http://${config.webliburl}/cabletech/mapapi/map/CMap.js',type:'js',charset:'utf-8',rely:['esrijs']});
+	In.add('gislayout',{path:'${ctx}/css/jquery.ct.ui.gis.layout.css'});
+	In.add('loadmap',{path:'${ctx}/js/loadmap.js',type:'js',charset:'utf-8',rely:['esrijs']});
+	In.add('qtipjs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.qtip.min.js',type:'js',charset:'utf-8',rely:['qtipcss']})
+	In.add('qtipcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery.qtip.min.css'});
+	In.add('lhgdialogjs',{path:'http://${config.webliburl}/cabletech/ui/lhgdialog/lhgdialog.min.js?self=false&skin=iblue',type:'js',charset:'utf-8'})
+	
+	In.add('notycss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery.noty.css'});
+	In.add('mynotycss',{path:'http://${config.webliburl}/cabletech/ui/css/noty_theme_twitter.css'});
+	In.add('noty',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.noty.js',type:'js',charset:'utf-8',rely:['notycss','mynotycss']});
+	
+	In.ready('layoutjs','loadmap','qtipjs','noty',function(){
+		var panes = {
+		applyDemoStyles : false,
+		closable : true,
+		resizable : true,
+		spacing_open : 0
+	};
+	 mainlayout = $('body').layout({
+		panes : panes,
+		east : {
+			spacing_open : 6,
+			size : 320
+		},
+		north : {
+			size : 97
+		}
+	});	 
+	 $('#pageFrame').css("height",$('#exchangediv').height()-$('.ui-gis-banner').height()-10);
+	 In('lhgdialogjs','gislayout');
+	 In.css('.claro .dijitContentPane {padding: 0;} .ui-layout-pane {border:1px solid #E8E8E8;padding:0px; overflow:auto;}')
+	 loadRightFrame("index!rightmenu.action");
+	});
+</script>	
+<title>资源管理系统</title>
+</head>
+<body class="claro">
+	<div class="ui-layout-center">
+		<div id="map" dojotype="dijit.layout.ContentPane"
+				style="width:100%;height:100%"></div>
+	</div>
+	<DIV class="ui-layout-north">
+    	<div class="ui-gis-head"> 
+    		<div class="ui-gis-system-name" style="font-size:20px;font-family:微软雅黑 ;">资源管理应用系统</div>
+    		<div class="ui-gis-head-right-menu">
+    		</div>
+		</div>
+		<div class="ui-gis-banner"> 
+			<div class="ui-gis-menu">
+		    	<ul>
+		        	<li><a href="#" onclick="tb.maptools('全图')"><span class="ui-gis-icon-fullextend"></span>全图</a></li>
+		        	<li><a href="#" onclick="tb.maptools('测距')"><span class="ui-gis-icon-ranging"></span>测距</a></li>
+		        	<!-- <li><a href="#" onclick="tb.maptools('导出')"><span class="ui-gis-icon-outpic"></span>导出</a></li> -->
+		        	<li><a href="#" onclick="tb.maptools('图例')"><span class="ui-gis-icon-legend"></span>图例</a></li>
+		        	<li><a href="#" onclick="tb.maptools('图层')"><span class="ui-gis-icon-layers"></span>图层</a></li>
+		        	<li><a href="#" onclick="tb.maptools('框选')"><span class="ui-gis-icon-marquee"></span>框选</a></li>
+		        	<li><a href="#" onclick="tb.maptools('多边形')"><span class="ui-gis-icon-Polygon"></span>多边形</a></li>
+		        	<li><a href="#" onclick="tb.maptools('清除')"><span class="ui-gis-icon-remove"></span>清除</a></li>
+		        </ul>
+		        <ul style="float:right">
+			   	   <li><span class="onlineuserinfo" style="cursor:pointer" title="显示陈庆平详细信息">欢迎 ,${user.userName }!</span></li>
+			   	   <li><a href="#">[退出]</a></li>
+			   	   <li>&nbsp;</li>
+		        </ul>
+		       </div>
+			</div>
+	</DIV>
+	<DIV class="ui-layout-south" >
+		<div class="ui-gis-fonter-bg">
+		    <span id="info"></span>
+		</div>
+	</DIV>
+	<DIV class="ui-layout-east" style="overflow:hidden">
+		<div id="rightframe" style="overflow-x:hidden"></div>
+		<div id="exchangediv" style="display:none;height:100%">
+			<div class="ui-gis-right-title-bg">
+    			<div class="ui-gis-right-title-text">
+				 <a class="ui-gis-title-link" href='javascript:void(0);' onclick="exchangeBackDiv()">资源管理</a> 
+				 <span id="divtipname"></span>
+				</div>
+   		   </div>
+   		     <input id="pagecon" type="hidden"/>
+   		   	 <iframe id="pageFrame" name="pageFrame" frameborder="0" width="100%" scrolling="auto" style="overflow-x:hidden;" />
+   		   	
+		</div>
+	</DIV>
+</body>
+</html>

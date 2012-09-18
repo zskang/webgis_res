@@ -1,0 +1,157 @@
+package com.cabletech.res.entity.basemgr;
+
+/**
+ * 引上段实体类
+ * 
+ * @author zhanglei 2012-05-09
+ */
+public class YsEntity extends BaseEntity{
+
+	private static final long serialVersionUID = 1L;
+	private String ssysxt; //所属引上系统
+	private String qdlx; // 起点类型
+	private String qdmc; // 起点名称
+	private String zdlx; // 终点类型
+	private String zdmc; // 终点名称
+	private float cd; // 长度
+	private String cqxz; // 产权性质
+	private String sszt; // 设施状态
+	private String whfs; // 维护方式
+	private String orgid;//组织ID
+	private String yt; // 用途
+	private String regionid; // 所属地市
+	private String sydw; // 使用单位
+	private String syqr; // 所有权人
+	private String ewm; // 二维码
+	private String createdate;
+
+
+
+	public String getCreatedate() {
+		return createdate;
+	}
+
+	public void setCreatedate(String createdate) {
+		this.createdate = createdate;
+	}
+
+	public String getSsysxt() {
+		return ssysxt;
+	}
+
+	public void setSsysxt(String ssysxt) {
+		this.ssysxt = ssysxt;
+	}
+
+	public String getQdlx() {
+		return qdlx;
+	}
+	public String getOrgid() {
+		return orgid;
+	}
+
+	public void setOrgid(String orgid) {
+		this.orgid = orgid;
+	}
+
+	public void setQdlx(String qdlx) {
+		this.qdlx = qdlx;
+	}
+
+	public String getQdmc() {
+		return qdmc;
+	}
+
+	public void setQdmc(String qdmc) {
+		this.qdmc = qdmc;
+	}
+
+	public String getZdlx() {
+		return zdlx;
+	}
+
+	public void setZdlx(String zdlx) {
+		this.zdlx = zdlx;
+	}
+
+	public String getZdmc() {
+		return zdmc;
+	}
+
+	public void setZdmc(String zdmc) {
+		this.zdmc = zdmc;
+	}
+
+	public float getCd() {
+		return cd;
+	}
+
+	public void setCd(float cd) {
+		this.cd = cd;
+	}
+
+	public String getCqxz() {
+		return cqxz;
+	}
+
+	public void setCqxz(String cqxz) {
+		this.cqxz = cqxz;
+	}
+
+	public String getSszt() {
+		return sszt;
+	}
+
+	public void setSszt(String sszt) {
+		this.sszt = sszt;
+	}
+ 
+	public String getWhfs() {
+		return whfs;
+	}
+
+	public void setWhfs(String whfs) {
+		this.whfs = whfs;
+	}
+
+	public String getYt() {
+		return yt;
+	}
+ 
+	public void setYt(String yt) {
+		this.yt = yt;
+	}
+ 
+	public String getRegionid() {
+		return regionid;
+	}
+
+	public void setRegionid(String regionid) {
+		this.regionid = regionid;
+	}
+
+	public String getSydw() {
+		return sydw;
+	}
+
+	public void setSydw(String sydw) {
+		this.sydw = sydw;
+	}
+
+	public String getSyqr() {
+		return syqr;
+	}
+
+	public void setSyqr(String syqr) {
+		this.syqr = syqr;
+	}
+
+	public String getEwm() {
+		return ewm;
+	}
+
+	public void setEwm(String ewm) {
+		this.ewm = ewm;
+	}
+
+}

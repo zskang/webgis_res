@@ -1,0 +1,151 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<html>
+	<head>
+	   <%@ include file="/common/header.jsp"%>
+		<script type="text/javascript">
+		 	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	        In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	        In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+	        In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+	        In.add('commonjs', {path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+		 	In.add('autocompleteJs',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',type:'js',charset:'utf-8',rely:['autocompleteCss']});
+		    In.add('autocompleteCss',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'});
+	        In.ready('ztreejs','validatejs','ctcss','commonjs','autocompleteJs',function(){
+	        	In.css('#formname label.error {margin-left: 10px;width: auto;display: inline;}');
+	        	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+	         	jQuery("#formname").validate({});
+	         	jQuery(function(){
+	         		if(navigator.userAgent.indexOf("MSIE")>0){
+	         			document.getElementById("qdmc").attachEvent("onpropertychange", refreshodm);
+	         		}else{
+	         			document.getElementById("Qdmcinput").addEventListener("input", refreshodm, false);
+	         			document.getElementById("Qdmcinput").addEventListener("focus", refreshodm, false);
+	         		}
+		         	$('#ssodm').change(function(){
+		         		refreshdz();
+		         	});
+	         	});
+	        });
+	        var requestData = [];
+			requestData["AA001"] = "res_odf";
+			requestData["AA003"] = "res_gjjx";
+			requestData["AA004"] = "res_gfxx";
+			requestData["AA006"] = "res_gzdh";
+			function qdlxChange(){
+				var qdlx = $('#qdlx').val();
+				$('#Qdmcinput').val('');
+				$('#qdmc').val('');		
+				if(qdlx in requestData) {
+					getAutoCompleteValue(true,'Qdmcinput', 'qdmc', requestData[qdlx]);
+				}
+				if(qdlx == "AA001" || qdlx == "AA003"){//odf、光交接箱
+					$('#odmdiv').show();
+				}else{
+					$('#odmdiv').hide();
+				}				
+				resetSelectOption();
+			}
+			
+		var refreshodm = function(){
+		  	var qdlx = $('#qdlx').val();
+		  	var qdid = $('#qdmc').val();
+		  	var odmurl = "${ctx}/res/tracemgr/trace!getodmlist.action?qssbid="+qdid+"&qssblx="+qdlx+"&R="+Math.random();
+		  	$.ajax({
+				url: encodeURI(odmurl),
+				dataType: "html",
+				type:'GET',
+				cache:true,
+				async:true,
+				success : function(result){
+					var d = eval(result);
+					$('#ssodm').get(0).options.length = 0;
+					$('#ssodm').append("<option value=''>请选择</option>");
+					for(var i=0; i<d.length; i++){
+						$('#ssodm').append("<option value='"+d[i].id+"'>"+d[i].name+"</option>");
+					}
+				},
+				error : function() {
+					$.fn.Alert("无法获取端子！",4);
+				}			  	
+		  	});
+		}
+		
+		var refreshdz = function(){
+			  var qdlx = $('#qdlx').val();
+			  var qdid = $('#qdmc').val();
+			  var ssodm = "";
+			  if($('#odmdiv').get(0).style.display != 'none'){//显示
+			  	if(!$('#ssodm').val()){//未选
+			  		$('#qssbdz').get(0).options.length = 0;
+			  		$('#qssbdz').append("<option value=''>不限</option>");
+			  		return;
+			  	}else{
+			  		ssodm = $('#ssodm').val();
+			  	}
+			  }
+			  var dzurl = "${ctx}/res/tracemgr/trace!getdzlist.action?qssbid="+qdid+"&qssblx="+qdlx+"&ssodm="+ssodm+"&R="+Math.random();		
+			  $.ajax({
+					url: encodeURI(dzurl),
+					dataType: "html",
+					type:'GET',
+					cache:true,
+					async:true,
+					success : function(result){
+						var d = eval(result);
+						$('#qssbdz').get(0).options.length = 0;
+						$('#qssbdz').append("<option value=''>不限</option>");
+						for(var i=0; i<d.length; i++){
+							$('#qssbdz').append("<option value='"+d[i].id+"'>"+d[i].name+"</option>");
+						}
+					},
+					error : function() {
+						$.fn.Alert("无法获取端子！",4);
+					}
+				});
+			}
+			
+			var resetSelectOption = function(){
+				$('#ssodm').get(0).options.length = 0;
+				$('#ssodm').append("<option value=''>请选择</option>");				
+				$('#qssbdz').get(0).options.length = 0;
+				$('#qssbdz').append("<option value=''>不限</option>");				
+			}
+		</script>
+	</head>
+	<body>
+		<div class="ui-form-container">
+			<form id="formname" name="formname" method="post" action="${ctx}/res/tracemgr/trace!trace.action">
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">起端设备类型：</span>
+					<baseinfo:dicselector name="qssblx" columntype="CSSBLX" id="qdlx" onChange="qdlxChange();" exclude="AA002,AA005"
+						style="width:210px" cssClass="required ui-form-input" type="select" isQuery="select"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">起端设备：</span>
+					<input type="text" style="width:210px" class="required ui-form-input" id="Qdmcinput" name="Qdmcinput" onblur="judgeHiddenValue(this,'qdmc');">
+					<input type="hidden" id="qdmc" name="qssbid"/>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box" id="odmdiv" style="display:none;">
+					<span class="ui-form-input-title">ODM：</span>
+					<select name="ssodm" id="ssodm" style="width:210px" class="required ui-form-input">
+						<option value="">请选择</option>
+					</select>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">选择端子：</span>
+					<select name="qssbdz" id="qssbdz" style="width:210px" class="ui-form-input">
+						<option value="">不限</option>
+					</select>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">&nbsp;</span>
+					<input type="submit" value="Trace" style="width: 80px;">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

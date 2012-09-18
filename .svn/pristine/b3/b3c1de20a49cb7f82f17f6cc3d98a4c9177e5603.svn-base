@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.contractor.mapper.onlinedata.OnlineDataMapper">
+	<!-- 搜索今日在线巡检人 -->
+	<select id="queryTodayOnlineMan" parameterType="hashmap" resultType="hashmap">
+		SELECT distinct o.patrolman_id pid,o.businesstype,
+			vp.NAME label,vp.ORGNAME,vp.PARENTNAME,
+			r.REGIONNAME,vp.regionid,o.ct_x x,o.ct_y  y,
+			to_char(o.activetime,'yyyy-mm-dd hh24:mi:ss') activetime
+		FROM onlineman o,view_patrolgroupperson vp,view_region r
+		WHERE vp.ID=o.patrolman_id and vp.REGIONID=r.REGIONID and o.activetime >=
+			to_date(to_char(sysdate,'yyyy-mm-dd'),'yyyy-mm-dd hh24:mi:ss') and o.businesstype!='C35'
+			<if test="regionid!=null and regionid!=''">
+				and exists(select regionid from view_region vr where vr.regionid=vp.regionid
+				connect by prior vr.regionid=vr.parentid start with vr.regionid=#{regionid,jdbcType=VARCHAR})
+			</if>
+			<if test="orgid!=null and orgid!=''">
+				and exists(select id from view_org vo where vo.id=vp.orgid
+				connect by prior vo.id=vo.parentid start with vo.id=#{orgid,jdbcType=VARCHAR})
+			</if>			
+			<if test="regionlist!=null">
+		 	and vp.REGIONID in
+				<foreach collection="regionlist" item="regionid" open="("
+					separator="," close=")">
+					#{regionid}
+				</foreach>
+			 </if>
+			 <if test="contractorlist != null">
+			 	and vp.ORGID in
+				<foreach collection="contractorlist" item="contractor" open="("
+					separator="," close=")">
+					#{contractor}
+				</foreach> 
+			 </if>
+			ORDER BY regionid asc ,activetime desc ,label asc
+	</select>
+	
+	<!-- 按区域分类 当移动用户登录 -->
+	<select id="getRegionsLoginMobile" parameterType="string" resultType="hashmap" flushCache="true">
+	select distinct regionid,regionname from view_region v 
+	where regionid!='000000' and not exists(select parentid from view_region where v.regionid=parentid and regionid=#{regionid, jdbcType=VARCHAR}) 
+	connect by prior v.parentid=v.regionid start with v.parentid=#{regionid, jdbcType=VARCHAR}
+	order by regionid	
+	</select>
+	
+	<!-- 按区域分类 当代维用户登录 -->
+	<select id="getRegionsLoginContractor" parameterType="string" resultType="hashmap" flushCache="true">
+  	select regionid,regionname from view_region r 
+  	where exists(select regionid from view_org where regionid=r.regionid and parentid!='root' connect by prior id=parentid start with id=#{orgid, jdbcType=VARCHAR})	
+	order by regionid
+	</select>
+	
+	<!-- 按代维分类：区域编号获取代维单位 -->
+	<select id="getContractorsLoginMobile" parameterType="string" resultType="hashmap" flushCache="true">
+	select distinct o.id,o.name from view_org o where o.orgtype='2' and o.regionid=#{regionid,jdbcType=VARCHAR} order by o.name desc
+	</select>
+	
+	<!-- 按代维分类：组织机构编号获取代维单位 -->
+	<select id="getContractorsLoginContractor" parameterType="string" resultType="hashmap" flushCache="true">
+	 select distinct o.id,o.name from view_org o 
+	 where o.parentid!='root' and o.orgtype='2' connect by prior o.id=o.parentid start with o.id=#{orgid, jdbcType=VARCHAR} order by o.name desc
+	</select>
+	
+	<!-- 首页统计在线人员计数（当移动用户登录时） -->
+	<select id="getOnlineManCountLoginMobile" parameterType="string" resultType="string" flushCache="true">
+	select count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select regionid from view_region where regionid=v.regionid connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate)		
+	</select>
+	
+	<!-- 首页统计在线人员计数（当代维用户登录时） -->
+	<select id="getOnlineManCountLoginContractor" parameterType="string" resultType="string" flushCache="true">
+	select count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select regionid from view_org where regionid=v.regionid connect by prior id=parentid start with id=#{orgid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate)	
+	</select>
+	
+	<!-- 按区域分、区域编号获取在线人员数量（当移动用户登录时） -->
+	<select id="getOnlinemanByRegionLoginMobile" parameterType="string" resultType="hashmap" flushCache="true">
+	select v.regionid,count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select regionid from view_region where regionid=v.regionid connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate) group by v.regionid
+	</select>
+	
+	<!-- 按区域分、组织机构编号获取在线人员数量（当代维用户登录时） -->
+	<select id="getOnlinemanByRegionLoginContractor" parameterType="hashmap" resultType="hashmap" flushCache="true">
+    select * from (select * from view_region r connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR})a ,
+    (select v.regionid,count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select regionid from view_org where regionid=v.regionid connect by prior id=parentid start with id=#{orgid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate) group by v.regionid)b
+    where a.regionid=b.regionid	
+	</select>	
+	
+	<!-- 按组织机构编号获取在线人员数量（当省移动用户登录时） -->
+	<select id="getOnlinemanByOrgProvinceMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+    select v.orgid id,count(v.orgid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35'  and o.activetime>=trunc(sysdate) 
+    and exists(select g.id from view_org g where g.id=v.orgid connect by prior g.id=g.parentid start with g.id=#{orgid,jdbcType=VARCHAR})
+    group by v.orgid     
+	</select>
+	
+	<!-- 按市移动区域编号获取在线人员数量（当市移动用户登录时） -->
+	<select id="getOnlinemanByOrgCityMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+   select a.id,b.cnt from (select id from view_org o connect by prior o.id=o.parentid start with o.id=#{orgid,jdbcType=VARCHAR})a,
+   (select p.orgid id,count(p.orgid)cnt from view_patrolgroupperson p left join onlineman o on p.id=o.patrolman_id
+   where o.businesstype!='C35' and o.activetime>=trunc(sysdate) 
+   and exists(select regionid from view_region r where p.regionid=r.regionid connect by prior r.regionid=r.parentid start with r.regionid=#{regionid,jdbcType=VARCHAR})
+   group by p.orgid)b where a.id=b.id	
+	</select>
+	
+	<!-- 按区县移动区域编号获取在线人员数量（当区县移动用户登录时） -->
+	<select id="getOnlinemanByOrgCountyMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+	select a.id,b.cnt from (select id from view_org o connect by prior o.id=o.parentid start with o.id=#{orgid,jdbcType=VARCHAR})a,
+	(select v.orgid id,count(v.orgid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select p.orgid from view_patrolgroupperson p  where v.parentorgid=p.parentorgid and p.objtype='GROUP' and exists( select distinct regionid from view_region v 
+	where p.regionid=v.regionid and regionid!='000000' and not exists(select parentid from view_region where v.regionid=parentid and regionid=#{regionid, jdbcType=VARCHAR}) 
+	connect by prior v.parentid=v.regionid start with v.regionid=#{regionid, jdbcType=VARCHAR}))
+	and o.activetime>=trunc(sysdate) group by v.orgid)b where a.id=b.id		
+	</select>
+	
+	<!-- 按代维组织机构编号获取在线人员数量（当代维用户登录时） -->
+	<select id="getOnlinemanByContractor" parameterType="string" resultType="hashmap" flushCache="true">
+	select v.orgid id,count(v.orgid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists(select distinct id from view_org where v.orgid=id and parentid!='root' and orgtype='2' connect by prior id=parentid start with id=#{orgid, jdbcType=VARCHAR})
+	and o.activetime>=trunc(sysdate) group by v.orgid
+	</select>
+	
+	<!-- 搜索今日在线巡检人 -->
+	<select id="queryTodayOnlineCar" parameterType="hashmap" resultType="hashmap" flushCache="true">
+  		SELECT distinct o.businesstype,c.carno label,v.orgname,c.mentor,r.regionname,r.regionid,
+  		o.ct_x x,o.ct_y y,to_char(o.activetime,'yyyy-mm-dd hh24:mi:ss') activetime
+		from onlineman o,view_region r,car_info c,view_org v
+		where v.id=c.contractorid and c.simid=o.simid and c.regionid=v.regionid 
+        and v.regionid=r.regionid and o.activetime>=trunc(sysdate) and o.businesstype='C35'
+        <if test="regionid!=null and regionid!=''">
+        and exists(select vr.regionid from view_region vr 
+        where c.regionid=vr.regionid connect by prior vr.regionid=vr.parentid start with vr.regionid=#{regionid, jdbcType=VARCHAR})
+        </if>
+        <if test="orgid!=null and orgid!=''">
+        and exists(select vo.id from view_org vo 
+        where c.contractorid=vo.id connect by prior vo.id=vo.parentid start with vo.id=#{orgid, jdbcType=VARCHAR})
+        </if>
+		<if test="regionlist!=null">
+	 	and c.regionid in
+			<foreach collection="regionlist" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		 </if>
+		 <if test="contractorlist != null">
+		 	and c.contratorid in
+			<foreach collection="contractorlist" item="contractor" open="("
+				separator="," close=")">
+				#{contractor}
+			</foreach> 
+		 </if>
+		 ORDER BY regionid asc ,activetime desc ,carno asc
+	</select>	
+	
+	<!-- 首页统计在线车辆计数（当移动用户登录时） -->
+	<select id="getOnlineCarCountLoginMobile" parameterType="string" resultType="string" flushCache="true">
+	select count(c.regionid)cnt from onlineman o, car_info c 
+	where c.simid=o.simid and o.businesstype='C35' and c.regionid is not null
+	and exists (select regionid from view_region where regionid=c.regionid connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR})
+	and o.activetime>=trunc(sysdate)
+	</select>
+	
+	<!-- 首页统计在线车辆计数（当代维用户登录时） -->
+	<select id="getOnlineCarCountLoginContractor" parameterType="string" resultType="string" flushCache="true">
+	select count(c.regionid)cnt from onlineman o, car_info c 
+	where c.simid=o.simid and o.businesstype='C35' and c.regionid is not null
+	and exists (select regionid from view_org where regionid=c.regionid connect by prior id=parentid start with id=#{orgid,jdbcType=VARCHAR})
+	and o.activetime>=trunc(sysdate)
+	</select>
+	
+	<!-- 按区域分、区域编号获取在线人员车辆（当移动用户登录时） -->
+	<select id="getOnlinecarByRegionLoginMobile" parameterType="string" resultType="hashmap" flushCache="true">
+      select c.contractorid id,c.regionid,count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+	  where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	  and exists (select regionid from view_region v where v.regionid=c.regionid connect by prior v.regionid=v.parentid start with v.regionid=#{regionid,jdbcType=VARCHAR})
+	  group by c.contractorid,c.regionid
+	</select>
+	
+	<!--  按区域分、区域编号获取在线人员车辆（当代维用户登录时） -->
+	<select id="getOnlinecarByRegionLoginContractor" parameterType="hashmap" resultType="hashmap" flushCache="true">
+     select a.id,b.cnt from (select id from view_org connect by prior id=parentid start with id=#{orgid,jdbcType=VARCHAR})a,
+     (select c.contractorid orgid,count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+	  where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	  and exists (select regionid from view_region v where v.regionid=c.regionid connect by prior v.regionid=v.parentid start with v.regionid=#{regionid,jdbcType=VARCHAR})
+	  group by contractorid)b where a.id=b.orgid		
+	</select>
+	
+	<!-- 按代维分、省移动区域编号获取在线车辆数量 -->
+	<select id="getOnlinecarByOrgProvinceMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+	  select a.id,b.cnt from (select id from view_org o connect by prior id=parentid start with o.id=#{orgid,jdbcType=VARCHAR})a,
+	  (select c.contractorid orgid,count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+	  where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	  and exists (select regionid from view_region v where v.regionid=c.regionid connect by prior v.regionid=v.parentid start with v.regionid=#{regionid,jdbcType=VARCHAR})
+	  group by contractorid)b where a.id=b.orgid	  
+	</select>
+	
+	<!-- 按市移动区域编号获取在线车辆数量 -->
+	<select id="getOnlinecarByOrgCityMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+	  select a.id,b.cnt from (select id from view_org o connect by prior o.id=o.parentid start with o.id=#{orgid,jdbcType=VARCHAR})a,
+	  (select c.contractorid id,count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+	  where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	  and exists (select regionid from view_region v where v.regionid=c.regionid connect by prior v.regionid=v.parentid start with v.regionid=#{regionid,jdbcType=VARCHAR})
+	  group by contractorid)b where a.id=b.id
+	</select>
+	
+	<!-- 按代维组织机构编号获取在线车辆数量 -->
+	<select id="getOnlinecarByContractor" parameterType="string" resultType="hashmap" flushCache="true">
+	  select c.contractorid id,count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+	  where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	  and exists (select id from view_org v where v.id=c.contractorid connect by prior v.id=v.parentid start with v.id=#{orgid,jdbcType=VARCHAR})
+	  group by contractorid
+	</select>
+	
+	<!-- 获取整点在线人数量（当移动用户登录时） -->
+	<select id="getTotalOnlineManCountLoginMobile" parameterType="hashmap" resultType="hashmap" flushCache="true">
+    select count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select regionid from view_region where regionid=v.regionid connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate) and o.activetime between to_date(#{begindate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') 
+	and to_date(#{enddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') group by v.regionid	
+	</select>
+	
+	<!-- 获取整点在线人数量（当代维用户登录时） -->
+	<select id="getTotalOnlineManCountLoginContractor" parameterType="hashmap" resultType="hashmap" flushCache="true">
+    select count(v.regionid)cnt from view_patrolgroupperson v left join onlineman o on v.id=o.patrolman_id
+	where o.businesstype!='C35' and exists (select id from view_org g where g.id=v.orgid connect by prior g.id=g.parentid start with g.id=#{orgid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate) and o.activetime between to_date(#{begindate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') 
+	and to_date(#{enddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') group by v.regionid	
+	</select>
+	
+	<!-- 获取整点在线车辆数量（当移动用户登录时） -->
+	<select id="getTotalOnlineCarCountLoginMobile" parameterType="hashmap" resultType="string" flushCache="true">
+    select count(c.regionid)cnt from car_info c left join onlineman o on o.simid=c.simid
+    where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+	and exists (select regionid from view_region where regionid=c.regionid connect by prior regionid=parentid start with regionid=#{regionid,jdbcType=VARCHAR}) 
+	and o.activetime>=trunc(sysdate) and o.activetime between to_date(#{begindate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') 
+	and to_date(#{enddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')	
+	</select>
+	
+	<!-- 获取整点在线车辆数量（当代维用户登录时） -->
+	<select id="getTotalOnlineCarCountLoginContractor" parameterType="hashmap" resultType="string" flushCache="true">
+    select count(contractorid)cnt from car_info c left join onlineman o on o.simid=c.simid
+    where o.businesstype='C35' and o.activetime>=trunc(sysdate)
+    and exists (select id from view_org v where v.id=c.contractorid connect by prior v.id=v.parentid start with v.id=#{orgid,jdbcType=VARCHAR})
+	and o.activetime>=trunc(sysdate) and o.activetime between to_date(#{begindate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') 
+	and to_date(#{enddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')	
+	</select>	
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.tracemgr.TraceMapper">
+	<!-- 根据起端设备编号获取对应光缆段路由 -->
+	<select id="getlybyadsbid" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		SELECT y.* FROM res_gld_ly y start with y.adsbmc=#{sbid,jdbcType=VARCHAR}
+		CONNECT BY nocycle y.adsbmc = PRIOR y.zdsbmc
+	</select>
+	
+	<!-- 根据相对起端设备编号获取对应光缆段路由 -->
+	<select id="getlybyzdsbid" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		SELECT y.* FROM res_gld_ly y start with y.zdsbmc=#{sbid,jdbcType=VARCHAR}
+		CONNECT BY nocycle y.zdsbmc = PRIOR y.adsbmc
+	</select>
+	
+	<select id="getlybyid" resultType="com.cabletech.res.entity.opticcablemgr.GldlyEntity" parameterType="string" flushCache="true">
+		select * from res_gld_ly where xtbh=#{id,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据设备的系统编号、｛ODM系统编号｝、端子编号获取对应光缆和纤芯号 -->
+	<select id="getDzConn" parameterType="com.cabletech.res.entity.boardfibermgr.DzConnEntity" resultType="com.cabletech.res.entity.boardfibermgr.DzConnEntity" flushCache="true">
+		select * from ${tableconnname} c where c.sssb=#{sssb,jdbcType=VARCHAR} and c.connecttype='AA203'
+		<choose>
+			<when test="portname!=null and portname!=''">
+				and c.portname=#{portname,jdbcType=VARCHAR}
+				<if test="ssodm!=null and ssodm!=''">
+					and c.ssodm=#{ssodm,jdbcType=VARCHAR}
+				</if>				
+			</when>
+			<otherwise>
+				<if test="gld!=null and gld!=''">
+					and c.to_classid='A33'
+					and c.to_id=#{gld,jdbcType=VARCHAR}
+				</if>
+				<if test="unit!=null and unit!=''">
+					and c.to_firstunit=#{unit,jdbcType=VARCHAR}
+				</if>		
+			</otherwise>
+		</choose>
+	</select>
+	
+	<!-- 根据光接头的系统编号、起始光缆系统编号、起始光缆纤芯号获取对应Z端光缆和纤芯号 -->
+	<select id="getSbConn" parameterType="com.cabletech.res.entity.boardfibermgr.DzConnEntity" resultType="com.cabletech.res.entity.boardfibermgr.DzConnEntity" flushCache="true">
+		select * from res_sb_conn c where c.connector_type='AA005' and c.connector_id=#{sssb,jdbcType=VARCHAR}
+		and ((from_id=#{gld,jdbcType=VARCHAR} and from_firstunit=#{unit,jdbcType=VARCHAR}) or (to_id=#{gld,jdbcType=VARCHAR} and to_firstunit=#{unit,jdbcType=VARCHAR}))
+	</select>
+	
+	<!-- 根据链路组系统编号获取路由长度 -->
+	<select id="getjxgxlylen" parameterType="hashmap" resultType="string" flushCache="true">
+		select sum(g.shape.len) len from res_gld_ly g 
+		where g.xtbh in
+		<foreach collection="gldlylist" item="xtbh" open="(" separator="," close=")">
+			#{xtbh}
+		</foreach>
+	</select>
+	
+	<select id="getAllDzbysssbid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from ${tableconnname} c where c.sssb=#{sssb,jdbcType=VARCHAR} and c.connecttype='AA203'
+	</select>
+</mapper>

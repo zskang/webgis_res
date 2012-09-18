@@ -1,0 +1,116 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<%@ include file="/common/header.jsp"%>
+<script language="JavaScript" type="text/JavaScript" charset="utf-8">
+	djConfig = {
+		webliburl : "${config.webliburl}",
+		baseUrl : '${config.weblibctx}/',
+		parseOnLoad : true,
+		modulePaths : {
+			'com.cabletech' : 'cabletech/mapapi'
+		}
+	};
+</script>
+<script type="text/javascript"
+	src="http://${config.webliburl}/cabletech/ui/js/jquery.ct.ui.layout.js"></script>
+<link rel="stylesheet" type="text/css"
+	href="http://${config.webliburl}/esri/jsapi/js/dojo/dijit/themes/tundra/tundra.css">
+<link rel="stylesheet" type="text/css"
+	href="http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css">
+<script type="text/javascript"
+	src="http://${config.webliburl}/esri/jsapi/"></script>
+<script type="text/javascript">
+	dojo.require("esri.map");
+	dojo.require("com.cabletech.map.CMap");
+	dojo.require("com.cabletech.map.CMenu");
+	dojo.require("dijit.layout.ContentPane");
+	var cmap, wgt;
+	dojo.ready(function() {
+				var json = {
+					geometryservice : "http://120.192.213.18:8399/arcgis/rest/services/Geometry/GeometryServer",
+					proxyurl : "",
+					property : "test3.jsp",
+					legendconfig : "${ctx}/legend.json",
+					baselayer : {
+						label : "西安基础",
+						url : "http://120.192.213.18:8399/arcgis/rest/services/XIAN_ZQ/MapServer"
+					},
+					operationlayer : {
+						label : "西安资源",
+						url : "http://120.192.213.18:8399/arcgis/rest/services/xian_res/MapServer",
+						details : [
+								{
+									id : "6",
+									url : "http://120.192.213.18:8399/arcgis/rest/services/xian_res/MapServer/6",
+									type : "A30",
+									label : "管井",
+									where : ""
+								},
+								{
+									id : "7",
+									url : "http://120.192.213.18:8399/arcgis/rest/services/xian_res/MapServer/7",
+									type : "A31",
+									label : "标石",
+									where : ""
+								},
+								{
+									id : "8",
+									url : "http://120.192.213.18:8399/arcgis/rest/services/xian_res/MapServer/8",
+									type : "A32",
+									label : "电杆",
+									where : ""
+								} ]
+					}
+				};
+				cmap = new com.cabletech.map.CMap("map", json);
+				 
+				var json = [
+					{'id':'001','text':'test001','parentid':'002','hrefurl':'/WEBGIS/aa.action'},
+					{'id':'002','text':'test001','parentid':'-1','hrefurl':'/WEBGIS/aa.action'},
+					{'id':'004','text':'test004ddd','parentid':'-1','hrefurl':'/WEBGIS/aa.action'}
+				];
+				var opt = new com.cabletech.map.CMenuOptions(json,"loginUserMenu","-1");
+				var menu = new com.cabletech.map.CMenu(opt);
+				menu.createMenu();
+				//以下载入layout
+				 var panes = {  
+							applyDemoStyles: 		false		 
+						,	closable:				true		 
+						,	resizable:				true	 
+					 
+						,	spacing_open:			0			 
+					  
+						 
+						};
+
+				$('body').layout({
+						panes:panes
+						,east:{
+						  spacing_open:    6
+						  ,size:           300
+						}
+						});
+			});
+</script>
+</head>
+<body class="tundra">
+	<DIV class="ui-layout-center">
+		<div id="map" dojotype="dijit.layout.ContentPane"
+			style="width:100%;height:100%;"></div>
+	</DIV>
+	<DIV class="ui-layout-north">
+	demo
+		<div id="loginUserMenu" style="height:30;background-color:red"></div>
+	</DIV>
+	<DIV class="ui-layout-south">South</DIV>
+	<DIV class="ui-layout-east">
+		<iframe id="queryFrame" frameborder="0" width="100%"
+			src="${ctx }/demo.jsp" height="100%"
+			scrolling="yes"></iframe>
+	</DIV>
+</body>
+</html>

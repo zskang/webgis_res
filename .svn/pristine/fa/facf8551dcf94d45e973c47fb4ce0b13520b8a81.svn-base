@@ -1,0 +1,225 @@
+package com.cabletech.contractor.action.onlinedata;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.contractor.service.onlinedata.OnlineDataService;
+import com.cabletech.core.action.BaseAction;
+
+/**
+ * 实时在线数据Action
+ */
+@Namespace("/contractor")
+@Results({
+		@Result(name = "onlineman", location = "/contractor/onlinedata/onlineman_list.jsp"),
+		@Result(name = "onlinemanresult", location = "/contractor/onlinedata/onlineman_result.jsp"),
+		@Result(name = "onlinecar", location = "/contractor/onlinedata/onlinecar_list.jsp"),
+		@Result(name = "onlinecarresult", location = "/contractor/onlinedata/onlinecar_result.jsp")})
+@Action("onlinedata")
+public class OnlineDataAction extends BaseAction {
+
+	private static final long serialVersionUID = 1L;
+
+	@Resource(name = "onlineDataServiceImpl")
+	private OnlineDataService onlineService;// 在线数据服务类
+
+	@Override
+	public String execute() {
+
+		return "d";
+	}
+	
+	/**
+	 * 首页统计在线车辆、人员计数
+	 *
+	 */
+	public void todaycalcdata(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		String regionOnlinemanCount = onlineService.getOnlineMan(user);
+		String regionOnlinecarCount = onlineService.getOnlineCar(user);
+		Map<String, Object> map = new HashMap<String, Object>();
+		int manCount = 0,carCount = 0;
+		if(regionOnlinemanCount != null){
+			manCount = Integer.parseInt(regionOnlinemanCount);
+		}
+		
+		if(regionOnlinecarCount != null){
+			carCount = Integer.parseInt(regionOnlinecarCount);
+		}
+		map.put("onlineman", manCount);
+		map.put("onlinecar", carCount);
+		super.convertmaptojson(map);
+	}
+	
+	/**
+	 * 返回今日巡检人列表数据 <br />
+	 * 
+	 * 移动按区县、按代维划分。代维公司按维护中心划分
+	 * 
+	 * @return
+	 */
+	public String todayonlinemanresult(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		List<Map<String, Object>> regions = onlineService.getRegions(user);
+		List<Map<String, Object>> contractors = onlineService.getContractors(user);
+		request.setAttribute("regions", regions);
+		request.setAttribute("contractors", contractors);
+		return "onlinemanresult";
+	}
+	
+	/**
+	 * 统计在线人员数量
+	 *
+	 */
+	public void todayrealonlinemandata(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		
+		String regionids = request.getParameter("regionids");
+		String orgids = request.getParameter("orgids");
+		
+		List<Map<String, Object>> regionsonline = onlineService.getOnlinemanRealdataByRegion(regionids, user);
+		List<Map<String, Object>> orgsonline = onlineService.getOnlinemanRealdataByOrg(orgids, user);
+		List<Map<String, Object>> onlinecount = onlineService.getOnlineManCounts(user);
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("regionsonline", regionsonline);
+		map.put("orgsonline", orgsonline);
+		map.put("onlinecount", onlinecount);
+		super.convertmaptojson(map);
+	}
+
+	/**
+	 * 在线巡检人列表
+	 */
+	public String todayonlineman() {
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		String regionid = request.getParameter("regionid");
+		String orgid = request.getParameter("orgid");
+		List<String> contractorlist = null;
+		List<String> regionlist = null;
+		if(user.isMobile()){
+			regionlist = baseInfoProvider.getRegionService().getRegionIdList(user.getUserId());
+		}else{
+			contractorlist = baseInfoProvider.getOrgService().getOrgIdList(user.getUserId());
+		}
+		Map<String,Object> conditionmap = new HashMap<String,Object>();
+		if(StringUtils.isBlank(regionid) && StringUtils.isBlank(orgid)){
+			conditionmap.put("regionlist", regionlist);
+			conditionmap.put("contractorlist", contractorlist);
+		}
+		conditionmap.put("regionid", regionid);
+		conditionmap.put("orgid", orgid);
+		Map<String,Object> map = onlineService.queryPageMap("queryTodayOnlineMan", conditionmap, super.getPage("page"), super.getLimit("rows"));
+		request.setAttribute("locatejson", getLocateJson(map));
+		request.setAttribute("map", map);
+		return "onlineman";
+	}
+	
+	/**
+	 * 按区域、代维统计
+	 * @return
+	 */
+	public String todayonlinecarresult(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		List<Map<String, Object>> regions = onlineService.getRegions(user);
+		List<Map<String, Object>> contractors = onlineService.getContractors(user);
+		request.setAttribute("regions", regions);
+		request.setAttribute("contractors", contractors);
+		return "onlinecarresult";		
+	}
+	
+	/**
+	 * 统计在线车辆数量
+	 *
+	 */	
+	public void todayrealonlinecardata(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		
+		String regionids = request.getParameter("regionids");
+		String orgids = request.getParameter("orgids");	
+		
+		List<Map<String, Object>> regionsonline = onlineService.getOnlinecarRealdataByRegion(regionids, user);
+		List<Map<String, Object>> orgsonline = onlineService.getOnlinecarRealdataByOrg(orgids, user);
+		List<Map<String, Object>> onlinecount = onlineService.getOnlineCarCounts(user);
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("regionsonline", regionsonline);
+		map.put("orgsonline", orgsonline);
+		map.put("onlinecount", onlinecount);
+		super.convertmaptojson(map);
+	}
+	
+	/**
+	 * 在线车辆列表
+	 * @return
+	 */
+	public String todayonlinecar(){
+		UserInfo user = ((UserInfo) request.getSession().getAttribute("user"));
+		String regionid = request.getParameter("regionid");
+		String orgid = request.getParameter("orgid");		
+		List<String> contractorlist = null;
+		List<String> regionlist = null;
+		if(user.isMobile()){
+			regionlist = baseInfoProvider.getRegionService().getRegionIdList(user.getUserId());
+		}else{
+			contractorlist = baseInfoProvider.getOrgService().getOrgIdList(user.getUserId());
+		}
+		Map<String,Object> conditionmap = new HashMap<String,Object>();
+		if(StringUtils.isBlank(regionid) && StringUtils.isBlank(orgid)){
+			conditionmap.put("regionlist", regionlist);
+			conditionmap.put("contractorlist", contractorlist);
+		}
+		conditionmap.put("regionid", regionid);
+		conditionmap.put("orgid", orgid);
+		Map<String,Object> map = onlineService.queryPageMap("queryTodayOnlineCar", conditionmap, super.getPage("page"), super.getLimit("rows"));
+		request.setAttribute("locatejson", getLocateJson(map));
+		request.setAttribute("map", map);
+		return "onlinecar";
+	}
+	
+	/**
+	 * 获取列表结果定位Json
+	 * @param map 结果集合
+	 * @return
+	 */
+	public String getLocateJson(Map<String, Object> map){
+		StringBuffer datajson = new StringBuffer();
+		String data = "";
+		List<Map<String, Object>> datalist = (ArrayList<Map<String, Object>>)map.get("rows");
+		if(datalist != null && datalist.size()>0){
+			for(Map<String, Object>m:datalist){
+				datajson.append("{\"NAME\":\""+m.get("LABEL").toString()+"\",\"X\":\""+m.get("X").toString()+"\",\"Y\":\""+m.get("Y").toString()+"\",\"IMGURL\":\"../legendIcons/"+m.get("BUSINESSTYPE").toString()+".bmp\"},");
+			}
+			if(StringUtils.isNotBlank(datajson.toString())){
+				data = datajson.toString().substring(0, datajson.toString().length()-1);
+			}
+		}
+		return data;		
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Object getModel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

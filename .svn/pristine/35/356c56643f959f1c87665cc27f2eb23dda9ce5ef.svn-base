@@ -1,0 +1,141 @@
+package com.cabletech.contractor.entity.carinfo;
+
+import java.io.Serializable;
+
+/**
+ * 车辆历史任务实体
+ * @author Administrator
+ *
+ */
+public class HistorypositionCarEntity implements Serializable {
+	/**
+	 * 车辆历史巡检轨迹
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private String keyid;
+    private String simid;
+    private String regionid;
+    private String operate;
+    private String activetime;
+    private String gpstime;
+    private String coordinat;
+    private String lon;
+    private String lat;
+    private String speed;
+    private String taskid;
+    private String course;
+    private String distance;
+    private String status;
+    private String patrolman_id;
+    private String ct_x;
+    private String ct_y;
+    
+    public String getKeyid() {
+		return keyid;
+	}
+	public void setKeyid(String keyid) {
+		this.keyid = keyid;
+	}
+	public String getSimid() {
+		return simid;
+	}
+	public void setSimid(String simid) {
+		this.simid = simid;
+	}
+	public String getRegionid() {
+		return regionid;
+	}
+	public void setRegionid(String regionid) {
+		this.regionid = regionid;
+	}
+	public String getOperate() {
+		return operate;
+	}
+	public void setOperate(String operate) {
+		this.operate = operate;
+	}
+	public String getActivetime() {
+		return activetime;
+	}
+	public void setActivetime(String activetime) {
+		this.activetime = activetime;
+	}
+	public String getGpstime() {
+		return gpstime;
+	}
+	public void setGpstime(String gpstime) {
+		this.gpstime = gpstime;
+	}
+	public String getCoordinat() {
+		return coordinat;
+	}
+	public void setCoordinat(String coordinat) {
+		this.coordinat = coordinat;
+	}
+	public String getLon() {
+		return lon;
+	}
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+	public String getLat() {
+		return lat;
+	}
+	public void setLat(String lat) {
+		this.lat = lat;
+	}
+	public String getSpeed() {
+		return speed;
+	}
+	public void setSpeed(String speed) {
+		this.speed = speed;
+	}
+	public String getTaskid() {
+		return taskid;
+	}
+	public void setTaskid(String taskid) {
+		this.taskid = taskid;
+	}
+	public String getCourse() {
+		return course;
+	}
+	public void setCourse(String course) {
+		this.course = course;
+	}
+	public String getDistance() {
+		return distance;
+	}
+	public void setDistance(String distance) {
+		this.distance = distance;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	public String getPatrolman_id() {
+		return patrolman_id;
+	}
+	public void setPatrolman_id(String patrolmanId) {
+		patrolman_id = patrolmanId;
+	}
+	public String getCt_x() {
+		return ct_x;
+	}
+	public void setCt_x(String ctX) {
+		ct_x = ctX;
+	}
+	public String getCt_y() {
+		return ct_y;
+	}
+	public void setCt_y(String ctY) {
+		ct_y = ctY;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+	
+	
+}

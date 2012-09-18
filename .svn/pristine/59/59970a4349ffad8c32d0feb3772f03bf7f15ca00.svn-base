@@ -1,0 +1,314 @@
+package com.cabletech.res.service.boardfibermgr;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.boardfibermgr.DzConnEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllzEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxlyEntity;
+import com.cabletech.res.mapper.boardfibermgr.JxgxllMapper;
+import com.cabletech.res.mapper.boardfibermgr.JxgxlyMapper;
+import com.cabletech.res.mapper.tracemgr.TraceMapper;
+import com.cabletech.res.service.tracemgr.TraceService;
+
+@Service
+public class JxgxllServiceImpl extends BaseServiceImpl implements JxgxllService {
+
+	@Resource(name="jxgxllMapper")
+	private JxgxllMapper jxgxllmapper;
+	
+	@Resource(name="jxgxlyMapper")
+	private JxgxlyMapper jxgxlymapper;
+	
+	@Resource(name="traceMapper")
+	private TraceMapper tracemapper;
+	
+	@Resource(name="traceServiceImpl")
+	private TraceService traceservice;	
+	
+	//设备类型
+	private String []typesContainAB = {"AA001","AA003"},typesNotContainAB={"AA004","AA006"};
+	//设备成端表
+	private String []restablesconnContainAB = {"res_odf_conn","res_gjjx_conn"},restablesconnNotContainAB={"res_gfxx_conn","res_gzdh_conn"};
+	//设备表
+	private String []restablesContainAB = {"res_odf","res_gjjx"},restablesNotContainAB={"res_gfxx","res_gzdh"};
+	
+	private JxgxllEntity ll = null;
+	
+	@Override
+	public JxgxllEntity getbyid(String id) {
+		return jxgxllmapper.getbyid(id);
+	}
+	
+	@Override
+	public boolean delete(String id) {
+		try {
+			jxgxllmapper.delete(id);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除链路：",e);
+			return false;
+		}
+	}
+	
+	@Transactional
+	@Override
+	public boolean batchDelete(String id) {
+		try {
+			String[] ids = id.split(",");
+			for(int i=0; i<ids.length; i++){
+				jxgxllmapper.delete(ids[i]);
+			}
+			return true;
+		} catch (Exception e) {
+			logger.error("删除链路：",e);
+			return false;
+		}
+	}	
+
+	@Override
+	public boolean deleteByllzid(String id) {
+		try {
+			jxgxllmapper.deleteByllzid(id);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除链路：",e);
+			return false;
+		}
+	}
+
+	@Override
+	public List<Map<String, Object>> getJxgxllByllzId(String llzid) {
+		return jxgxllmapper.getJxgxllByllzId(llzid);
+	}
+	
+	@Override
+	public String getTreeNodes(JxgxllzEntity llzentity){
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("xtbh", llzentity.getQssbid());
+		param.put("llzid", llzentity.getId());
+		StringBuffer nodes = new StringBuffer();
+		for(int i=0; i<2; i++){
+			if(llzentity.getQssblx().equals(typesNotContainAB[i])){
+				param.put("tableconnname",restablesconnNotContainAB[i]);
+				param.put("tablename", restablesNotContainAB[i]);
+				nodes.append(this.getNodesNotContainAB(param));
+				break;
+			}else if(llzentity.getQssblx().equals(typesContainAB[i])){
+				param.put("tableconnname",restablesconnContainAB[i]);
+				param.put("tablename", restablesContainAB[i]);
+				nodes.append(this.getNodesContainAB(param));
+				break;				
+			}
+		}
+		return nodes.toString();
+	}
+	
+	@Transactional
+	@Override
+	public boolean addJxgxll(String odmid, String dzbh, JxgxllzEntity llzentity)throws Exception{
+		if(relationship(odmid, dzbh, llzentity)){
+			logger.info("局向光纤："+ll.toString());
+			jxgxllmapper.deleteByEntity(ll);
+			jxgxllmapper.insert(ll);
+			return true;
+		}else{
+			logger.info("经过设备的路由信息不符合、无法形成局向光纤！｛具体问题，向上看↑↑↑↑↑↑｝");
+			return false;
+		}	
+	}
+	
+	@Transactional
+	@Override
+	public boolean batchAddJxgxll(String odmid, String[] dzbh, JxgxllzEntity llzentity){
+		try{
+			for(int i=0; i<dzbh.length; i++){
+				addJxgxll(odmid, dzbh[i], llzentity);
+			}
+			return true;
+		} catch (Exception e) {
+			logger.error("新增局向光纤发生错误：",e);
+			return false;
+		}		
+	}
+	
+	@Override
+	public List<Map<String, Object>> getodmlistbysbid(String qssbid, String qssblx){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("sssb", qssbid);
+		map.put("sssblx", qssblx);		
+		return jxgxllmapper.getodmlistbysbid(map);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getdzlistbyodmid(String sssb, String odmid, String type){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("sssb", sssb);
+		map.put("odmid", odmid);
+		map.put("tableconnname", getTableConnName(type));
+		return jxgxllmapper.getdzlistbyodmid(map);
+	}
+	
+	/**
+	 * 找关系｛应终止设备端子、终止设备纤芯号｝
+	 * @param odmid ODM系统编号
+	 * @param dzbh 起始端子编号
+	 * @param llzentity 链路组实体
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean relationship(String odmid, String dzbh, JxgxllzEntity llzentity)throws Exception{
+		boolean flag = true;
+		//按照顺序获取路由设备集合
+		List<JxgxlyEntity> lylist = jxgxlymapper.getJxgxlySblistByllzid(llzentity.getId());
+		if(lylist != null && lylist.size()>0){
+			//起始设备端子对应纤芯号
+			String firstunit = "";
+			int len = lylist.size();
+			DzConnEntity dzconn = new DzConnEntity();
+			for(int i=0; i<len; i++){
+				JxgxlyEntity ly = lylist.get(i);
+				dzconn.setSssb(ly.getSsgldly());
+				if(i==0){//起始
+					dzconn.setSsodm(odmid);
+					dzconn.setDzbh(dzbh);
+					dzconn.setTableconnname(getTableConnName(ly.getLytype()));
+					dzconn = tracemapper.getDzConn(dzconn);
+					if(dzconn == null){
+						flag = false;
+						logger.info("起始设备没有对应成端！所属链路组编号："+ly.getSsjxgxllz()+"设备类型："+ly.getLytype()+"设备编号："+ly.getSsgldly());
+						break;
+					}
+					firstunit = dzconn.getTo_firstunit();//A端纤芯号
+				}else{
+					dzconn = traceservice.getDzConnEntity(ly, dzconn);
+					if(dzconn==null){
+						flag = false;
+						logger.info("经过设备（包含终止设备）没有对应成端或者光接头没有对应熔纤信息！所属链路组编号："+ly.getSsjxgxllz()+"设备类型："+ly.getLytype()+"设备编号："+ly.getSsgldly());
+						break;
+					}
+				}
+			}
+			if(flag){
+				String lylen = tracemapper.getjxgxlylen(llzentity.getId());
+				ll = new JxgxllEntity();
+				ll.setId(super.getXTBH());
+				ll.setSsllz(llzentity.getId());
+				ll.setQsxxh(firstunit);
+				ll.setQssbodm(odmid);
+				ll.setQssbdz(dzbh);
+				ll.setZzxxh(dzconn.getTo_firstunit());
+				ll.setZzsbodm(dzconn.getSsodm());
+				ll.setZzsbdz(dzconn.getDzbh());
+				ll.setLength(lylen==null?"":lylen);
+			}
+			return flag;
+		}else{
+			logger.info("没有对应的局向光纤路由！");
+			return false;
+		}
+	}	
+	
+	/**
+	 * 获取对应成端业务表名
+	 * @param lytype 设备类型
+	 * @return
+	 */
+	public String getTableConnName(String lytype){
+		String tableconnname = "";
+		for(int i=0; i<2; i++){
+			if(lytype.equals(typesContainAB[i])){
+				tableconnname = restablesconnContainAB[i];break;
+			}else if(lytype.equals(typesNotContainAB[i])){
+				tableconnname = restablesconnNotContainAB[i];break;
+			}
+		}
+		return tableconnname;
+	}
+	
+	/**
+	 * 组织分AB面的端子树结点
+	 * @param param 查询条件
+	 * @return
+	 */
+	public String getNodesContainAB(Map<String, Object> param){
+		StringBuffer sb = new StringBuffer();
+		Map<String, Object> info = jxgxllmapper.getDeviceInfo(param);
+		sb.append("{\"id\":\""+info.get("XTBH")+"\",\"pId\":0,\"name\":\""+info.get("ZYMC")+"\",\"open\":\"true\"}");
+		List<Map<String, Object>> odmAlist = jxgxllmapper.getOdmContainA(param);
+		sb.append(assemblyABNodes("am", "A面", param, odmAlist));
+		List<Map<String, Object>> odmBlist = jxgxllmapper.getOdmContainB(param);
+		sb.append(assemblyABNodes("bm", "B面", param, odmBlist));
+		return sb.toString();
+	}	
+	
+	/**
+	 * 组织不分AB面的端子树结点
+	 * @param param 查询条件
+	 * @return
+	 */
+	public String getNodesNotContainAB(Map<String, Object> param){
+		StringBuffer sb = new StringBuffer();
+		Map<String, Object> info = jxgxllmapper.getDeviceInfo(param);
+		sb.append("{\"id\":\""+info.get("XTBH")+"\",\"pId\":0,\"name\":\""+info.get("ZYMC")+"\",\"open\":\"true\"}");
+		List<Map<String, Object>> dzlist = jxgxllmapper.getDzBySbXtbh(param);
+		if(dzlist != null && dzlist.size()>0){
+			for(Map<String,Object> dz:dzlist){
+				String is = isAlreayExist(dz.get("DZBH").toString(), "", param.get("llzid").toString());//端子是否存在于当前局向光纤表记录当中
+				sb.append(",{\"id\":\""+dz.get("XTBH")+"\",\"isalreayexist\":\""+is+"\",\"dzzt\":\""+dz.get("DZZT")+"\",\"pId\":\""+info.get("XTBH")+"\",\"name\":\""+dz.get("DZBH")+"\"}");
+			}
+		}
+		return sb.toString();			
+	}
+	
+	/**
+	 * 组织AB面端子树
+	 * @param id AB 面编号 ｛am  bm｝
+	 * @param mc AB 面名称 ｛A面  B面｝
+	 * @param param
+	 * @param list
+	 * @return
+	 */
+	public String assemblyABNodes(String id, String mc, Map<String, Object> param, List<Map<String, Object>> list){
+		StringBuffer sb = new StringBuffer();
+		if(list != null && list.size()>0){
+			sb.append(",{\"id\":\""+id+"\",\"pId\":\""+param.get("xtbh")+"\",\"name\":\""+mc+"\",\"open\":\"true\"}");
+			for(Map<String,Object> map:list){
+				sb.append(",{\"id\":\""+map.get("XTBH")+"\",\"pId\":\""+id+"\",\"name\":\""+map.get("ZYMC")+"\",\"open\":\"true\"}");
+				param.put("odmid", map.get("XTBH"));
+				List<Map<String, Object>> dzlist = jxgxllmapper.getDzByOdmXtbh(param);
+				if(dzlist != null && dzlist.size()>0){
+					for(Map<String,Object> dz:dzlist){
+						String is = isAlreayExist(dz.get("DZBH").toString(), "", param.get("llzid").toString());//端子是否存在于当前局向光纤表记录当中
+						sb.append(",{\"id\":\""+dz.get("XTBH")+"\",\"isalreayexist\":\""+is+"\",\"dzzt\":\""+dz.get("DZZT")+"\",\"pId\":\""+map.get("XTBH")+"\",\"name\":\""+dz.get("DZBH")+"\"}");
+					}
+				}
+			}			
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * 端子是否已存在局向光纤关系
+	 * @param dzbh 端子编号
+	 * @param odmid ODM编号
+	 * @param llzid 链路组编号
+	 * @return 返回关系
+	 */
+	public String isAlreayExist(String dzbh, String odmid, String llzid){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("dzbh", dzbh);
+		map.put("odmid", odmid);
+		map.put("llzid", llzid);
+		int flag = jxgxllmapper.isAlreayExist(map);
+		return String.valueOf(flag);
+	}
+	
+	
+
+}

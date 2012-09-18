@@ -1,0 +1,270 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>直放站信息查询</title>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script>
+	In
+			.add(
+					'validatejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'autocompleteJs',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'autocompleteCss' ]
+					});
+	In
+			.add(
+					'autocompleteCss',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'
+					});
+	In
+			.add(
+					'ctcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom_nbsp.css'
+					});
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('common', {
+		path : '${ctx}/js/common.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In.add('prepeater_common', {
+		path : '${ctx}/js/res/publicmgr/prepeater_common.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+	//Ready
+	In
+			.ready(
+					'autocompleteJs',
+					'autocompleteCss',
+					'ctcss',
+					'jqgridcss',
+					'wresize',
+					'ztreecss',
+					'jggridjs',
+					'jggridlocalejs',
+					'commonjs',
+					'common',
+					'prepeater_common',
+					'wdatepicker',
+					function() {
+						var jqgrid = $("#prepeatergrid")
+								.jqGrid(
+										{
+											url : "${ctx}/res/publicmgr/prepeater!listData.action",
+											datatype : "json",
+											mtype : "GET",
+											rownumbers : true,
+											colNames : [ '直放站名称', '所属站点',
+													'直放站类型', '网元状态', '供电方式',
+													'入网时间', '操作' ],
+											colModel : [
+													{
+														name : 'REPEATERNAME',
+														id : 'REPEATERNAME',
+														sortable : true
+													},
+													{
+														name : 'ZYMC',
+														id : 'ZYMC',
+														sortable : true
+													},
+													{
+														name : 'REPEATERTYPE',
+														id : 'REPEATERTYPE',
+														sortable : true
+													},
+													{
+														name : 'STATE',
+														id : 'STATE',
+														sortable : true
+													},
+													{
+														name : 'POWERSUPPLYMODE',
+														id : 'POWER_SUPPLY_MODE',
+														sortable : false
+													},
+													{
+														name : 'OPENING_TIME',
+														id : 'OPENING_TIME',
+														sortable : false
+													},
+													{
+														name : 'REPEATER_ID',
+														id : 'REPEATER_ID',
+														sortable : false,
+														formatter : WaitHandprepeaterFmatter
+													} ],
+											rowNum : 15,
+											autowidth : true,
+											rowList : [ 15, 30, 50 ],
+											pager : '#prepeaterpager',
+											shrinkToFit : true,
+											viewrecords : true, /* 
+																																																																							width:'600',
+																																																																							height : '300', */
+											hidegrid : false,
+											prmNames : {
+												page : "pageNo",
+												rows : "rows",
+												sort : "sidx",
+												order : "sord"
+											},
+											jsonReader : {
+												root : "root", // 数据行（默认为：rows） 
+												page : "pageNo", // 当前页 
+												total : "totalPages", // 总页数 
+												records : "total", // 总记录数 
+												repeatitems : false,
+												id : "REPEATER_ID"
+											}
+										}).navGrid('#prepeaterpager', {
+									edit : false,
+									add : false,
+									del : false,
+									search : false,
+									sortable : false
+								});
+						$(window).wresize(function() {
+							grid_resize(jqgrid);
+						});
+
+						grid_resize(jqgrid);
+						In
+								.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+						In
+								.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+						
+
+						getAutoCompleteValue(false, 'zdmc', 'siteid',
+								'res_zdxx');
+					});
+
+	function query() {
+		jQuery("#prepeatergrid").jqGrid().setGridParam({
+			postData : {
+				regionid : jQuery("#regionid").val(),
+				siteid : jQuery("#siteid").val(),
+				prepeaterType : jQuery("#prepeaterType").val(),
+				prepeaterName : jQuery("#prepeaterName").val(),
+				zdbh : jQuery("#zdbh").val(),
+				begintime : jQuery("#begintime").val(),
+				endtime : jQuery("#endtime").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+	function add() {
+		window.location.href = '${ctx}/res/publicmgr/prepeater!input.action';
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form name="form1" id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">直放站名称:</span> <input type="text"
+					class="ui-form-input" name="prepeaterName" id="prepeaterName"
+					value="${searchCondition.prepeaterName}" /> <span
+					class="ui-form-input-title">直放站类型:</span> <input type="text"
+					class="ui-form-input" name="prepeaterType" id="prepeaterType"
+					value="${searchCondition.prepeaterType}" /> <span
+					class="ui-form-input-title">所属站点:</span> <input id="zdmc"
+					class="ui-form-input" type="text"
+					onblur="judgeHiddenValue(this,'siteid')" /><span
+					class="ui-form-symbol-icon"></span> <input size="30" type="hidden"
+					readonly name="siteid" id="siteid" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">开始时间:</span> <input type="text"
+					class="ui-form-input" name="begintime" id="begintime"
+					value="${searchCondition.begintime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> <span
+					class="ui-form-input-title">结束时间:</span> <input type="text"
+					class="ui-form-input" name="endtime" id="endtime"
+					value="${searchCondition.endtime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> <span
+					class="ui-form-input-title">&nbsp;</span> <input type="button"
+					value="新增" style="width: 80px;" onclick="add();"> <input
+					type="button" value="查询" style="width: 80px;" onclick="query();">
+				<baseinfo:expexcel cls="exprotButton" businessId="prepeaterlist"
+					name="导出excel"></baseinfo:expexcel>
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="prepeatergrid"></table>
+		<div id="prepeaterpager"></div>
+	</div>
+</body>
+</html>

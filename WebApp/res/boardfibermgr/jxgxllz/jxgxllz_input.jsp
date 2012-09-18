@@ -1,0 +1,134 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+	   <%@ include file="/common/header.jsp"%>
+		<script type="text/javascript">
+		 	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	        In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	        In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+	        In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+	        In.add('commonjs', {path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+		 	In.add('autocompleteJs',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',type:'js',charset:'utf-8',rely:['autocompleteCss']});
+		    In.add('autocompleteCss',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'});
+	       
+        	In.css('#formname label.error {margin-left: 10px;width: auto;display: inline;}');
+        	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');	       
+	        In.ready('ztreejs','validatejs','ctcss','commonjs','autocompleteJs',function(){
+	         	jQuery("#formname").validate({});
+	         	jQuery(function(){
+	         		if($('#actionMessage').val()){
+	         			$.fn.Alert($('#actionMessage').val(), 4);
+	         		}
+	         	});
+	        });
+	        var requestData = [];
+			requestData["AA001"] = "res_odf";
+			requestData["AA003"] = "res_gjjx";
+			requestData["AA004"] = "res_gfxx";
+			requestData["AA006"] = "res_gzdh";
+			function qdlxChange(){
+				if($('#qdlx').val() in requestData) {
+					$('#Qdmcinput').val('');
+					$('#qdmc').val('');
+					getAutoCompleteValue(true,'Qdmcinput', 'qdmc', requestData[$('#qdlx').val()]);
+				}
+			}
+			function zdlxChange() {
+				if($('#zdlx').val() in requestData) {
+					$('#Zdmcinput').val('');
+					$('#zdmc').val('');
+					getAutoCompleteValue(true,'Zdmcinput', 'zdmc', requestData[$('#zdlx').val()]);
+				}
+			}
+			function doSubmit(act){
+				var type = "jxgxllz";
+				var url ="${ctx}/res/boardfibermgr/{type}!{act}.action";
+				document.forms[0].action=url.replace('{type}',type).replace('{act}',act);
+				if(act == 'view'){
+					document.forms[0].submit();
+				}				
+			}
+			
+			function jumpJXLL(){
+				$.ajax({
+					url:'${ctx}/res/boardfibermgr/jxgxllz!getJxgxllz.action?R='+Math.random(),
+					dataType:'html',
+					success:function(text){
+						$('#jxgxllzdiv').show();
+						$('#gobtn').show();
+						$('#cancelbtn').show();
+						$('#contentdiv').hide();
+						$('#cancelbtn').bind("click",function(){
+							$('#jxgxllzdiv').hide();
+							$('#contentdiv').show();
+						});
+						$('#gobtn').bind("click",function(){
+							if($('#jxgxllz').val()){
+								window.parent.exchangeDiv('${ctx}/res/boardfibermgr/jxgxll!getJxgxllByllzId.action?llzid='+$("#jxgxllz option:selected").val(),'查询局向光纤链路',700);
+							}else{
+								$.fn.Alert("请选择链路组！", 4);
+							}
+						});
+						$('#jxgxllz').empty();
+						jQuery.each(jQuery.parseJSON("{"+text+"}"), function(key, value) {   
+						     $('#jxgxllz').append($("<option></option>").attr("value",key).text(value)); 
+						});
+					}
+				});
+				
+			}        
+		</script>
+	</head>
+	<body>
+		<div id="jxgxllzdiv" style="width:100%;height:100%;background-color:#eee;z-index:999px;margin:0;padding:0;overflow:hidden;position:absolute;display:none">
+			<div class="ui-form-input-box" style="margin-top:30%;">
+				<span class="ui-form-input-title">链路组名称：</span><select id="jxgxllz" class="ui-form-input"></select>
+				<input type="button" id="gobtn" style="display:none;" value="前往"/>
+				<input type="button" id="cancelbtn" style="display:none;" value="取消"/>
+			</div>
+		</div>
+		<div id="contentdiv" class="ui-form-container">
+			<form id="formname" name="formname" method="post" action="">
+				<input type="hidden" id="actionMessage" name="actionMessage" value="${entity.actionMessage}">
+				<input type="hidden" id="serializeQueryCondition" name="serializeQueryCondition" value="${entity.serializeQueryCondition}" />
+				<input type="hidden" id="id" name="id" value="${entity.id}">
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">链路组名称：</span>
+					<input type="text" class="required ui-form-input" value="${entity.llzmc}" name="llzmc" id="llzmc" /><span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">起端设备类型：</span>
+					<baseinfo:dicselector name="qssblx" columntype="CSSBLX" id="qdlx" onChange="qdlxChange()" exclude="AA002,AA005"
+						style="width:218px" cssClass="required ui-form-input" type="select" isQuery="select" keyValue="${entity.qssblx}"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">起端设备：</span>
+					<input type="text" class="required ui-form-input" id="Qdmcinput" name="Qdmcinput" onblur="judgeHiddenValue(this,'qdmc')" value='<resinfo:resCommon keyValue="${entity.qssbid}" resType="${entity.qssblx}"></resinfo:resCommon>'/>
+					<input type="hidden" id="qdmc" name="qssbid"/>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">终端设备类型：</span>
+					<baseinfo:dicselector name="zzsblx" columntype="CSSBLX" id="zdlx" onChange="zdlxChange()" exclude="AA002,AA005"
+						style="width:218px" cssClass="required ui-form-input" type="select" isQuery="select" keyValue="${entity.zzsblx}"></baseinfo:dicselector>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">终端设备：</span>
+					<input type="text" class="required ui-form-input" id="Zdmcinput" name="Zdmcinput" onblur="judgeHiddenValue(this,'zdmc')" value='<resinfo:resCommon keyValue="${entity.zzsbid}" resType="${entity.zzsblx}"></resinfo:resCommon>'/>
+					<input type="hidden" id="zdmc" name="zzsbid"/>
+					<span class="ui-form-symbol-color">*</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">&nbsp;</span>
+					<input type="submit" value="保存" onclick="doSubmit('save')" style="width: 80px;">
+					<input type="button" value="局向光纤链路" onclick="jumpJXLL()" style="width: 80px;">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

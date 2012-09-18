@@ -1,0 +1,302 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<script type="text/javascript">
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'autocompleteJs',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'autocompleteCss' ]
+					});
+	In
+			.add(
+					'autocompleteCss',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'
+					});
+	In
+			.add(
+					'wdatepickerjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'ctcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom_nbsp.css'
+					});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+</script>
+<script type="text/javascript">
+	In
+			.ready(
+					'ctcss',
+					'ztreecss',
+					'jggridjs',
+					'jggridlocalejs',
+					'autocompleteJs',
+					'wdatepickerjs',
+					'jqgridcss',
+					'commonjs',
+					'wresize',
+					function() {
+						jQuery(function() {
+							//使用层布局
+							var jqgrid = $("#towergrid")
+									.jqGrid(
+											{
+												url : "${ctx}/res/publicmgr/tower!listdata.action",
+												datatype : "json",
+												mtype : 'GET',
+												rownumbers : true,
+												colNames : [ '站点编号', '站点名称',
+														'铁塔名称', '平台数量',
+														'已使用平台数', '铁塔高度',
+														'铁塔类型', '入网时间', '区域',
+														'代维公司', '操作' ],
+												colModel : [ {
+													name : 'ZDBH',
+													id : 'ZDBH',
+													sortable : false
+												}, {
+													name : 'ZDMC',
+													id : 'ZDMC',
+													sortable : false
+												}, {
+													name : 'TOWERNAME',
+													id : 'TOWERNAME',
+													sortable : false
+												}, {
+													name : 'TOWERPLATFORMNUM',
+													id : 'TOWERPLATFORMNUM',
+													sortable : false
+												}, {
+													name : 'USEPLATFORMNUM',
+													id : 'USEPLATFORMNUM',
+													sortable : false
+												}, {
+													name : 'TOWERHEIGHT',
+													id : 'TOWERHEIGHT',
+													sortable : false
+												}, {
+													name : 'TOWERTYPE',
+													id : 'TOWERTYPE',
+													sortable : false
+												}, {
+													name : 'BUILDDATE',
+													id : 'BUILDDATE',
+													sortable : false
+												}, {
+													name : 'REGIONNAME',
+													id : 'REGIONNAME',
+													sortable : false
+												}, {
+													name : 'MAINTENCE_ID',
+													id : 'MAINTENCE_ID',
+													sortable : false
+												}, {
+													name : 'TOWERID',
+													id : 'TOWERID',
+													sortable : false,
+													formatter : operateFmatter
+												} ],
+												rowNum : 15,
+												autowidth : true,
+												rowList : [ 15, 30, 50 ],
+												pager : '#towerpager',
+												shrinkToFit : true,
+												viewrecords : true,
+												hidegrid : false,
+												prmNames : {
+													page : "pageNo",
+													rows : "rows",
+													sort : "sidx",
+													order : "sord"
+												},
+												jsonReader : {
+													root : "root", // 数据行（默认为：rows） 
+													page : "pageNo", // 当前页 
+													total : "totalPages", // 总页数 
+													records : "total", // 总记录数 
+													repeatitems : false,
+													id : "TOWERID"
+												}
+											}).navGrid('#towerpager', {
+										edit : false,
+										add : false,
+										del : false,
+										search : false,
+										sortable : false
+									});
+							getAutoCompleteValue(false, 'zdmc', 'siteid',
+									'res_zdxx');
+							$(window).wresize(function() {
+								grid_resize(jqgrid);
+							});
+							grid_resize(jqgrid);
+						});
+					});
+
+	//操作按钮
+	function operateFmatter(cellvalue, options, rowObjec) {
+		var view = '<a href="#" style="color: blue;text-decoration: underline;" onclick="view(\''
+				+ cellvalue + '\')">查看</a>';
+		view += '&nbsp;&nbsp;<a href="#" style="color: blue;text-decoration: underline;" onclick="deleteit(\''
+				+ cellvalue + '\')">删除</a>';
+		return view;
+	}
+
+	//编辑
+	function view(towerid) {
+		window.parent.openResourcetreediv('查看铁塔',
+				'${ctx}/res/publicmgr/tower.action?towerid=' + towerid);
+	}
+	//删除
+	function deleteit(towerid) {
+		window.location.href = '${ctx}/res/publicmgr/tower!delete.action?towerid='
+				+ towerid;
+	}
+	//查询
+	function query() {
+		jQuery("#towergrid").jqGrid().setGridParam({
+			postData : {
+				regionid : jQuery("#regionid").val(),
+				orgid : jQuery("#orgid").val(),
+				patrolgroupid : jQuery("#patrolgroupid").val(),
+				siteid : jQuery("#siteid").val(),
+				propertyright : jQuery("#propertyright").val(),
+				towertype : jQuery("#towertype").val(),
+				towername : jQuery("#towername").val(),
+				producter : jQuery("#producter").val(),
+				towerheight : jQuery("#towerheight").val(),
+				builddate : jQuery("#builddate").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+	function add() {
+		window.location.href = '${ctx}/res/publicmgr/tower!input.action';
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">代维公司:</span> <input id="orgid"
+					name="orgid" style="width: 198px" class="ui-form-input" /> <span
+					class="ui-form-input-title">维护组:</span> <input id="patrolgroupid"
+					name="patrolgroupid" style="width: 198px" class="ui-form-input" /><span
+					class="ui-form-input-title">区域:</span>
+				<baseinfo:regiontree widgetId="001" width="220" height="120"
+					defaultValue="${searchCondition.regionid}" cls="ui-form-input"
+					callBackId="regionCallBackId" regionId="${user.regionId}"></baseinfo:regiontree>
+				<input type="hidden" class="required" name="regionid"
+					value="${searchCondition.regionid}">
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">铁塔名称:</span> <input type="text"
+					class="ui-form-input" name="towername" id="towername" /> <span
+					class="ui-form-input-title">铁塔产权:</span>
+				<baseinfo:dicselector name="propertyright"
+					columntype="property_right" type="select" cssClass="ui-form-input"
+					isQuery="query"></baseinfo:dicselector>
+				<span class="ui-form-input-title">铁塔类型:</span>
+				<baseinfo:dicselector name="towertype" columntype="TOWERTYPE"
+					type="select" cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">铁塔厂家:</span> <input type="text"
+					class="ui-form-input" name="producter" id="producter" /> <span
+					class="ui-form-input-title">铁塔高度:</span> <input type="text"
+					class="ui-form-input" name="towerheight" id="towerheight" /><span
+					class="ui-form-input-title">所属站点:</span> <input id="zdmc"
+					class="ui-form-input" type="text"
+					onblur="judgeHiddenValue(this,'siteid')" /><span
+					class="ui-form-symbol-icon"></span> <input size="30" type="hidden"
+					readonly name="siteid" id="siteid" />
+			</div>
+
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">建塔日期:</span> <input type="text"
+					class="required ui-form-input Wdate" name="builddate"
+					id="builddate" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd'})" /> <span
+					class="ui-form-input-title">&nbsp;</span> <input type="button"
+					value="查询" style="width: 80px;" onclick="query();"> <input
+					type="button" value="新增" style="width: 80px;" onclick="add();">
+				<baseinfo:expexcel cls="exprotButton" businessId="towerlist"
+					name="导出excel"></baseinfo:expexcel>
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="towergrid"></table>
+		<div id="towerpager"></div>
+	</div>
+</body>
+</html>

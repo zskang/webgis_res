@@ -1,0 +1,256 @@
+package com.cabletech.res.action.boardfibermgr;
+
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.core.action.BaseAction;
+import com.cabletech.res.entity.boardfibermgr.JxgxllEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllzEntity;
+import com.cabletech.res.service.boardfibermgr.JxgxllService;
+import com.cabletech.res.service.boardfibermgr.JxgxllzService;
+
+/**
+ * 局向光纤链路组
+ * @author Administrator
+ *
+ */
+@SuppressWarnings("serial")
+@Namespace("/res/boardfibermgr")
+@Results( {
+	@Result(name = "query", location = "/res/boardfibermgr/jxgxll/jxgxll_query.jsp"),
+	@Result(name = "list", location = "/res/boardfibermgr/jxgxll/jxgxll_list.jsp"),
+	@Result(name = "llbatchAddPage", location = "/res/boardfibermgr/jxgxll/llbatchAddPage.jsp"),
+	@Result(name = "jxgxmanager", location = "/res/boardfibermgr/jxgxll/jxgxll_list.jsp")})
+@Action("jxgxll")
+public class JxgxllAction extends BaseAction {
+	
+	private JxgxllEntity entity;
+
+	@Resource(name = "jxgxllServiceImpl")
+	private JxgxllService jxgxllservice;
+	
+	@Resource(name = "jxgxllzServiceImpl")
+	private JxgxllzService jxgxllzservice;
+	
+	/**
+	 * 查询链路组
+	 * @return
+	 * @throws Exception
+	 */
+	public String query() throws Exception {
+		UserInfo user = (UserInfo)request.getSession().getAttribute("user");
+		String condition = request.getQueryString();
+		Map<String, Object> decodeCondtionMap = super.getDecodeCondtionMap(condition, user);
+		request.setAttribute("searchCondition", decodeCondtionMap);
+		return "query";
+	}	
+	
+	/**
+	 * 获取链路集合
+	 * @return
+	 * @throws Exception
+	 */
+	public String getJxgxllByllzId() throws Exception{
+		String backurl = request.getParameter("backurl");
+		String llzid = request.getParameter("llzid").replace("?", "");
+		JxgxllzEntity jxgxllz =  jxgxllzservice.getbyid(llzid);
+		Map<String, Object> json = jxgxllservice.queryPageMap("getJxgxllByllzId",llzid, super.getPage("page"), super.getLimit("rows"));
+		request.setAttribute("jxgxllz", jxgxllz);
+		request.setAttribute("map", json);
+		request.setAttribute("backurl", backurl);
+		return "jxgxmanager";
+	}
+	/**
+	 * 获取起始设备树
+	 * @return
+	 * @throws Exception
+	 */
+	public String getTreeNodes()throws Exception{
+		String llzid = request.getParameter("llzid");
+		JxgxllzEntity llzentity = jxgxllzservice.getbyid(llzid);
+		response.setContentType("application/html;charset=UTF-8");
+		response.setHeader("Cache-Control", "no-cache");		
+		PrintWriter out = response.getWriter();		
+		out.print(jxgxllservice.getTreeNodes(llzentity));
+		out.flush();
+		return null;
+	}
+	
+	/**
+	 * 删除
+	 * @return
+	 * @throws Exception
+	 */
+	public String delete()throws Exception{
+		String xtbh = request.getParameter("xtbhs");
+		boolean flag = false;
+		if(xtbh.indexOf(",")==-1){
+			flag = jxgxllservice.delete(xtbh);
+		}else{
+			flag = jxgxllservice.batchDelete(xtbh);
+		}		
+		if(flag){
+			super.outmessage("删除成功！");
+		}else{
+			super.outmessage("删除失败！");
+		}
+		return null;
+	}
+	
+	/**
+	 * 新增局向光纤
+	 * @return
+	 * @throws Exception
+	 */
+	public String add()throws Exception{
+		boolean flag = false;
+		String odmid = request.getParameter("odmid");
+		String portnames = request.getParameter("portnames");
+		JxgxllzEntity llzentity = jxgxllzservice.getbyid(request.getParameter("llzid"));
+		if(portnames.contains(",")){
+			String[] portnamearray = portnames.split(",");
+			flag = jxgxllservice.batchAddJxgxll(odmid, portnamearray, llzentity);
+		}else{
+			flag = jxgxllservice.addJxgxll(odmid, portnames, llzentity);
+		}
+		if(flag){
+			super.outmessage("新增成功！");
+		}else{
+			super.outmessage("新增失败！");
+		}
+		return null;
+	}
+	
+	/**
+	 * 批量新增局向光纤页面
+	 * @return
+	 */	
+	public String tobatchAddPage(){
+		String llzid = request.getParameter("llzid");
+		JxgxllzEntity llzentity = jxgxllzservice.getbyid(llzid);
+		//若是ODF、光交接箱 则需要选择具体的ODM 反正总是有端子
+		List<Map<String, Object>> odmlist = jxgxllservice.getodmlistbysbid(llzentity.getQssbid(), llzentity.getQssblx());
+		Map<String, Object> datamap = new HashMap<String, Object>();
+		if(odmlist!=null && odmlist.size()>0){
+			if(odmlist!=null && odmlist.size()>0){
+				for(Map<String, Object> map:odmlist){
+					datamap.put(map.get("ID").toString(), map.get("NAME").toString());
+				}
+			}
+			request.setAttribute("showodm", true);
+			request.setAttribute("odmdatamap", datamap);
+		}else{
+			List<Map<String, Object>> dzlist = jxgxllservice.getdzlistbyodmid(llzentity.getQssbid(), "", llzentity.getQssblx());
+			if(dzlist!=null && dzlist.size()>0){
+				for(Map<String, Object> map:dzlist){
+					datamap.put(map.get("ID").toString(), map.get("NAME").toString());
+				}
+			}
+			request.setAttribute("showdz", true);
+			request.setAttribute("dzdatamap", datamap);
+		}
+		request.setAttribute("llzentity", llzentity);
+		return "llbatchAddPage"; 
+	}
+	
+	/**
+	 * 批量新增局向光纤
+	 * @return
+	 */		
+	public String batchAdd()throws Exception{
+		String former = request.getQueryString();
+		Map<String, Object> fmap = super.getSerializeForm(former);		
+		JxgxllzEntity llzentity = jxgxllzservice.getbyid(fmap.get("ssllz").toString());
+		List<Map<String, Object>> dzlist = jxgxllservice.getdzlistbyodmid(fmap.get("qssbid").toString(), fmap.get("qssbodm").toString(), fmap.get("qssblx").toString());
+		int qsdzbh = Integer.valueOf(fmap.get("qssbdz").toString());
+		String[] dzbharray = null;
+		int index = 0;
+		if(dzlist!=null && dzlist.size()>0){
+			//获取第一个端子索引
+			for(Map<String, Object> map:dzlist){
+				int id = Integer.valueOf(map.get("ID").toString());
+				if(id == qsdzbh){
+					index = dzlist.indexOf(map);
+				}
+			}
+			//获取端子数量
+			int lang = Integer.valueOf(fmap.get("lang").toString())>dzlist.size()?dzlist.size():Integer.valueOf(fmap.get("lang").toString());
+			dzbharray = new String[lang-index];
+			for(int i=index,j=0; i<lang; i++,j++){
+				int dzbh = Integer.valueOf(dzlist.get(i).get("ID").toString());
+				if(dzbh>=qsdzbh){
+					dzbharray[j] = String.valueOf(dzbh);
+				}
+			}
+		}
+		if(jxgxllservice.batchAddJxgxll(fmap.get("qssbodm").toString(), dzbharray, llzentity)){
+			super.outmessage("新增成功！");
+		}else{
+			super.outmessage("新增失败！");
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据ODM获取端子
+	 * @return
+	 */
+	public String getdzlist(){
+		String llzid = request.getParameter("llzid");
+		String odmid = request.getParameter("odmid");
+		JxgxllzEntity llzentity = jxgxllzservice.getbyid(llzid);
+		super.convertlisttojson(jxgxllservice.getdzlistbyodmid(llzentity.getQssbid(), odmid, llzentity.getQssblx()));
+		return null;
+	}
+	
+	/**
+	 * 请求局向光纤经过的路由段objetid
+	 *
+	 */
+	public void getObjectids(){
+		String ssgldly = request.getParameter("ssgldly");
+		if(StringUtils.isNotBlank(ssgldly)){
+			super.outmessage(jxgxllservice.getObjectids(ssgldly));
+		}
+	}
+	
+
+	@Override
+	public String execute() {
+		return null;
+	}
+
+	@Override
+	public JxgxllEntity getModel() {
+		if(entity == null){
+			entity = new JxgxllEntity();
+		}
+		return entity;
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String id = request.getParameter("id");// 获取资源id
+		request.setAttribute("tipview", super.getParameterValue("tipview"));//tip 视图显示
+		if (StringUtils.isNotBlank(id)) {
+			entity = jxgxllservice.getbyid(id);
+			request.setAttribute("entity", entity);
+		} else {
+			entity = new JxgxllEntity();
+		}		
+	}
+	
+}

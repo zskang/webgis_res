@@ -1,0 +1,47 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.publicmgr.GroupCustomerEntity;
+
+/**
+ * 集客
+ * 
+ * @author wangt
+ * 
+ */
+public interface GroupCustomerService extends BaseService {
+
+	/**
+	 * 保存
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	boolean saveorupdate(GroupCustomerEntity entity);
+
+	/**
+	 * 删除
+	 * 
+	 * @param xtbh
+	 * @return
+	 */
+	boolean delete(String xtbh);
+
+	/**
+	 * 查看
+	 * 
+	 * @param xtbh
+	 * @return
+	 */
+	GroupCustomerEntity getbyid(String xtbh);
+
+	/**
+	 * 设置条件
+	 * 
+	 * @param conditionMap
+	 */
+	void setExportconditionmap(Map<String, Object> conditionMap);
+
+}

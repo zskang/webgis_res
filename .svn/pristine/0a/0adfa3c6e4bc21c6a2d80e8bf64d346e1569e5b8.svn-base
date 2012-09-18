@@ -1,0 +1,20 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+	<div class="ui-form-input-box">
+		<span class="ui-form-input-title">姓名：</span> <span
+			class="ui-form-input-value">${user.userName }</span>
+	</div>
+	<div class="ui-form-input-box">
+		<span class="ui-form-input-title">组织机构：</span> 
+		<span class="ui-form-input-value">${user.orgName }</span>
+	</div>
+	<div class="ui-form-input-box">
+		<span class="ui-form-input-title">维护专业：</span> <span
+			class="ui-form-input-value">
+			<c:forEach items="${user.businessTypes }" var="item">
+				${item.LABLE }&nbsp;
+			</c:forEach>
+		</span>
+	</div>
+ 

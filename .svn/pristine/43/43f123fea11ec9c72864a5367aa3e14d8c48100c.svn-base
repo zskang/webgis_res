@@ -1,0 +1,20 @@
+HTML,BODY{margin:0px;padding:0px;font-size:12px;width:100%;height:99%;background-color:#f2f8fc; }
+.TLEFT{width:30%;height:100%;float:left; }
+.TRIGHT{width:70%;height:100%;float:right;}
+.TLTOP{width:99%;height:50%;border-right:1px solid #e8eaeb; }
+.TLBOTTOM{width:99%;height:50%;border-right:1px solid #e8eaeb;}
+.TRTOP{width:100%;height:6%;}
+.TRBOTTOM{width:100%;height:94%;}
+.TRBTOP{width:100%;height:70%;border-bottom:1px solid #e8eaeb;}
+.TRBBOTTOM{width:100%;height:30%; }
+.ui-gis-right-title-bg INPUT{padding-left:15px;padding-right:15px;height:26px;margin-top:3px;float:right;}
+.mylayer{
+	position:absolute;
+	width:30%;
+	height:100%;
+	top:0px;
+	left:0px;
+    z-index:50;
+	background: url("images/bg_trasn_layer.png") repeat;
+}
+

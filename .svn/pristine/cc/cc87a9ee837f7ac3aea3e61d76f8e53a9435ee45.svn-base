@@ -1,0 +1,79 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.core.common.Page;
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.publicmgr.JfxxEntity;
+
+/**
+ * 机房信息管理
+ * @author wangt 2011-05-11
+ *
+ */
+public interface JfxxService  extends BaseService{
+
+	/**
+	 * 保存
+	 * @param entity 机房实体
+	 * @return 
+	 */
+	public boolean saveorupdate(JfxxEntity entity);
+	/**
+	 * 查看
+	 * @param xtbh 系统编号
+	 * @return 机房实体
+	 */
+	public JfxxEntity getbyid(String xtbh);
+
+	/**
+	 * 删除
+	 * @param entity 机房实体
+	 * @return
+	 */
+	public boolean delete(JfxxEntity entity);
+	
+	
+	/**
+	 * 获取资源相关结点串
+	 * @param entity 机房实体
+	 * @return
+	 */	
+	public String getTreeNodes(JfxxEntity entity);
+	
+	/**
+	 * 机房的批量逻辑删除
+	 * @param xtbh 机房的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean batchDelete(String xtbh);
+	
+	/**
+	 * 机房批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map);		
+	
+	/**
+	 * 获取资源树(连接管理模块需要，吕仁钊添加)
+	 * @param map 表单值
+	 * @return
+	 */
+	public List<Map<String,Object>> getResTree(String xtbh);
+
+	/**
+	 * 获取列表
+	 * @param pam 
+	 * @return
+	 */
+	public List<Map<String,Object>> getJfList(Map<String,Object> pam);
+	
+	/**
+	 * 设置条件
+	 * @param conditionMap  
+	 */
+	void setExportconditionmap(Map<String, Object> conditionMap);
+	
+}

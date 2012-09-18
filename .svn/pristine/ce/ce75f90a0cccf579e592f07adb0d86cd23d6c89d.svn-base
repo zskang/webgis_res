@@ -1,0 +1,180 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>机房详细信息</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script>
+	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+	In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+	In.add('jggridlocalejs',{path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',type : 'js',charset : 'utf-8'	});
+	In.add('jqgridcss',{path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'});
+	In.add('uicss',{path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'});
+	In.add('jggridjs',{path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',type : 'js',charset : 'utf-8',rely : [ 'jqgridcss', 'uicss' ]});
+	In.add('commonjs',{path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+	In.add('wdatepicker',{path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',type : 'js',charset : 'utf-8'});
+	In.add('common', {path : '${ctx}/js/common.js',type : 'js',charset : 'utf-8'});
+	In.add('jfxx_common', {path : '${ctx}/js/res/publicmgr/jfxx_common.js',type : 'js',charset : 'utf-8'});
+	//Ready
+	In.ready(
+					'jggridjs',
+					'jggridlocalejs',
+					'commonjs',
+					'wresize',
+					'common',
+					'jfxx_common',
+					'wdatepicker',
+					function() {
+					
+						var jqgrid = $("#jfxxgrid")
+								.jqGrid(
+										{
+											url : "${ctx}/res/publicmgr/jfxx!listdata.action",
+											datatype : "json",
+											mtype : "GET",
+											rownumbers : true,
+											colNames : [ '系统编号', '资源名称',
+													'产权性质', '机房类型', '所属县区',
+													'采集时间', '所属管理区', '操作' ],
+											colModel : [ {
+												name : 'XTBH',
+												id : 'XTBH',
+												sortable : false
+											}, {
+												name : 'ZYMC',
+												id : 'ZYMC',
+												sortable : false
+											}, {
+												name : 'CQXZ',
+												id : 'CQXZ',
+												sortable : false
+											}, {
+												name : 'JFLX',
+												id : 'JFLX',
+												sortable : false
+											}, {
+												name : 'REGIONID',
+												id : 'REGIONID',
+												sortable : false
+											}, {
+												name : 'CJSJ',
+												id : 'CJSJ',
+												sortable : false
+											}, {
+												name : 'PRECINCT',
+												id : 'PRECINCT',
+												sortable : false
+											}, {
+												name : 'OBJECTID',
+												id : 'OBJECTID',
+												sortable : true,
+												formatter : WaitHandjfxxFmatter
+											} ],
+											rowNum : 15,
+											autowidth : true,
+											rowList : [ 15, 30, 50 ],
+											pager : '#jfxxpager',
+											shrinkToFit : true,
+											viewrecords : true,
+											hidegrid : false,
+											prmNames : {
+												page : "pageNo",
+												rows : "rows",
+												sort : "sidx",
+												order : "sord"
+											},
+											jsonReader : {
+												root : "root", // 数据行（默认为：rows） 
+												page : "pageNo", // 当前页 
+												total : "totalPages", // 总页数 
+												records : "total", // 总记录数 
+												repeatitems : false,
+												id : "OBJECTID"
+							}
+										}).navGrid('#jfxxpager', {
+									edit : false,
+									add : false,
+									del : false,
+									search : false,
+									sortable : false
+								}); 
+						In.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+	                	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+						initRegionTree_001();
+						$('#form1').submit(
+								function() {
+									$('#serializeQueryCondition').val('');
+									$('#serializeQueryCondition').val(
+											$(this).serialize());
+									return true;
+								});
+					});
+	var regionCallBackId = function(id) {
+		$('#regionid').val(id);
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form name="form1" id="form1" method="post"
+			action="${ctx}/res/publicmgr/jfxx!listDwzh.action">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">机房名称：</span> <input type="text"
+					class="required ui-form-input" name="zymc" id="zymc"
+					value="${searchCondition.zymc}" /> <span
+					class="ui-form-input-title">机房类型：</span>
+				<baseinfo:dicselector name="jflx" columntype="JFLX" type="select"
+					keyValue="${searchCondition.jflx}" cssClass="ui-form-input"
+					isQuery="query"></baseinfo:dicselector>
+			</div>
+			
+			<div>
+				<span class="ui-form-input-title">所属区域：</span>
+				<baseinfo:regiontree widgetId="001" width="220" height="120"
+					defaultValue="${searchCondition.regionid}" cls="ui-form-input"
+					callBackId="regionCallBackId" regionId="${user.regionId}"></baseinfo:regiontree>
+				<input type="hidden" class="required" id="regionid" name="regionid"
+					value="${searchCondition.regionid}">
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">产权性质：</span>
+				<baseinfo:dicselector name="cq" columntype="property_right"
+					type="select" keyValue="${searchCondition.cq}"
+					cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">机房编码：</span> <input type="text"
+					class="required ui-form-input" name="jfbm" id="jfbm"
+					value="${searchCondition.jfbm}" /> <span
+					class="ui-form-input-title">所属管理区：</span> <input type="text"
+					class="required ui-form-input" name="precinct" id="precinct"
+					value="${searchCondition.precinct}" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">采集开始时间：</span> <input type="text"
+					class="required ui-form-input Wdate" name="starttime"
+					id="starttime" value="${searchCondition.starttime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> <span
+					class="ui-form-input-title">采集结束时间：</span> <input type="text"
+					class="required ui-form-input Wdate" name="endtime" id="endtime"
+					value="${searchCondition.endtime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">&nbsp;</span> <input type="submit"
+					value="查询" style="width: 80px;">
+			</div>
+		</form>
+	</div>
+	<br />
+	<div id="content" align="center">
+		<table id="jfxxgrid"></table>
+		<div id="jfxxpager"></div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.connectmgr.ConnectMapper">
+	<select id="getPortConnects" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		<if test="zylx == 'AA001'">
+			select 
+			       a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			       fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_odf_conn a where a.sssb=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+		<if test="zylx == 'AA003'">
+			select 
+			       a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			       fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_gjjx_conn a where a.sssb=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+		<if test="zylx == 'AA004'">
+			select a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_gfxx_conn a where a.sssb=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+		<if test="zylx == 'AA006'">
+			select a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_gzdh_conn a where a.sssb=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+		<if test="zylx == 'AD703' and parenttype == 'AA003'">
+			select 
+			       a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			       fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_gjjx_conn a where a.sssb= (select b.sssb from res_odm b where b.xtbh = #{xtbh,jdbcType=VARCHAR} and rownum=1) and a.ssodm=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+		<if test="zylx == 'AD703' and parenttype == 'AA001'">
+			select 
+			       a.portname PNAME,fn_gettypename(a.dzzt) PSTATE,
+			       fn_resinfo(a.to_id,a.to_classid) ZNAME,fn_gettypename(a.to_classid) ZTYPE,a.to_firstunit ZPNAME,#{ctype,jdbcType=VARCHAR} CTYPE,a.to_id ZID,a.XTBH
+			from res_odf_conn a where a.sssb= (select b.sssb from res_odm b where b.xtbh = #{xtbh,jdbcType=VARCHAR} and rownum=1) and a.ssodm=#{xtbh,jdbcType=VARCHAR} and a.connecttype = #{ctype,jdbcType=VARCHAR} order by a.xtbh
+		</if>
+	</select>
+	
+	<select id="getLineConnects" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select 
+			fn_resinfo(a.from_ID,'A33') ANAME,a.from_firstunit ABH,
+			fn_resinfo(a.to_id,'A33') ZNAME,a.to_firstunit ZBH,a.from_ID AID,
+			a.to_ID ZID,'AA202' CTYPE, a.connector_type HTYPE,a.connector_id HID,a.xtbh
+		from res_sb_conn a 
+		where a.connector_id =#{xtbh,jdbcType=VARCHAR} and a.connector_type = #{zylx,jdbcType=VARCHAR} order by a.xtbh
+	</select>
+	
+	<select id="ifHasPorts" resultType="string" parameterType="hashmap" flushCache="true">
+		<if test="zylx == 'AA001'">
+			select count(1) from res_odf_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			select count(1) from res_gjjx_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			select count(1) from res_gfxx_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			select count(1) from res_gzdh_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AD703' and parenttype == 'AA003'">
+			select count(1) from res_gjjx_conn where sssb = #{parentid,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AD703' and parenttype == 'AA001'">
+			select count(1) from res_odf_conn where sssb = #{parentid,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="getDeviceWidth" resultType="string" parameterType="hashmap" flushCache="true">
+		<if test="zylx == 'AA001'">
+			select TWWIDTH*2 from res_odf where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			select TWWIDTH*2 from res_gjjx where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			select TWWIDTH from res_gfxx where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			select TWWIDTH from res_gzdh where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AD703'">
+			select TWWIDTH from res_odm where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<select id="getNodes" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		<if test="zylx == 'AA001'">
+			select zymc NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY from res_odf where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			select zymc NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY from res_gjjx where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			select zymc NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY from res_gfxx where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			select zymc NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY from res_gzdh where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AD703'">
+			select gh NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY,twplfs NODEPLFS from res_odm where sssb = #{xtbh,jdbcType=VARCHAR} and sssbm= #{sssbm,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'ODFPORT'">
+			select portname NODENAME,xtbh NODEID,'16' NODEWIDTH,'16'NODEHEIGHT,twx NODEX,twy NODEY,dzzt NODESTATE from res_odf_conn where sssb = #{xtbh,jdbcType=VARCHAR} and ssodm=#{ssodm,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'GJJXPORT'">
+			select portname NODENAME,xtbh NODEID,'16' NODEWIDTH,'16'NODEHEIGHT,twx NODEX,twy NODEY,dzzt NODESTATE from res_gjjx_conn where sssb = #{xtbh,jdbcType=VARCHAR} and ssodm=#{ssodm,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'GFXXPORT'">
+			select portname NODENAME,xtbh NODEID,'16' NODEWIDTH,'16'NODEHEIGHT,twx NODEX,twy NODEY,dzzt NODESTATE from res_gfxx_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'GZDHPORT'">
+			select portname NODENAME,xtbh NODEID,'16' NODEWIDTH,'16'NODEHEIGHT,twx NODEX,twy NODEY,dzzt NODESTATE from res_gzdh_conn where sssb = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'ODM'">
+			select zymc NODENAME,xtbh NODEID,twwidth NODEWIDTH,twheight NODEHEIGHT,twx NODEX,twy NODEY,twplfs NODEPLFS,SSSB,SSSBLX from res_odm where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'ODMPORT'">
+			select portname NODENAME,xtbh NODEID,'16' NODEWIDTH,'16'NODEHEIGHT,twx NODEX,twy NODEY,dzzt NODESTATE from res_odf_conn where ssodm=#{xtbh,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<insert id="saveODFConn" parameterType="com.cabletech.res.entity.connectmgr.PortEntity">
+		insert into res_odf_conn
+		  (xtbh, sssb, ssodm, dzbh, portname, dzzt, twx, twy)
+		values
+		  (#{xtbh,jdbcType=VARCHAR}, #{sssb,jdbcType=VARCHAR}, #{ssodm,jdbcType=VARCHAR}, #{dzbh,jdbcType=VARCHAR},
+		   #{portname,jdbcType=VARCHAR}, 'AD204', #{twx,jdbcType=VARCHAR}, #{twy,jdbcType=VARCHAR})
+	</insert>
+	<insert id="saveGJJXConn" parameterType="com.cabletech.res.entity.connectmgr.PortEntity">
+		insert into res_gjjx_conn
+		  (xtbh, sssb, ssodm, dzbh, portname, dzzt, twx, twy)
+		values
+		  (#{xtbh,jdbcType=VARCHAR}, #{sssb,jdbcType=VARCHAR}, #{ssodm,jdbcType=VARCHAR}, #{dzbh,jdbcType=VARCHAR},
+		   #{portname,jdbcType=VARCHAR}, 'AD204', #{twx,jdbcType=VARCHAR}, #{twy,jdbcType=VARCHAR})
+	</insert>
+	<insert id="saveGFXXConn" parameterType="com.cabletech.res.entity.connectmgr.PortEntity">
+		insert into res_gfxx_conn
+		  (xtbh, sssb, dzbh, portname, dzzt, twx, twy)
+		values
+		  (#{xtbh,jdbcType=VARCHAR}, #{sssb,jdbcType=VARCHAR}, #{dzbh,jdbcType=VARCHAR},
+		   #{portname,jdbcType=VARCHAR}, 'AD204', #{twx,jdbcType=VARCHAR}, #{twy,jdbcType=VARCHAR})
+	</insert>
+	<insert id="saveGZDHConn" parameterType="com.cabletech.res.entity.connectmgr.PortEntity">
+		insert into res_gzdh_conn
+		  (xtbh, sssb, dzbh, portname, dzzt, twx, twy)
+		values
+		  (#{xtbh,jdbcType=VARCHAR}, #{sssb,jdbcType=VARCHAR}, #{dzbh,jdbcType=VARCHAR},
+		   #{portname,jdbcType=VARCHAR}, 'AD204', #{twx,jdbcType=VARCHAR}, #{twy,jdbcType=VARCHAR})
+	</insert>
+	<select id="getMaxHeight" resultType="string" parameterType="hashmap" flushCache="true">
+		select max(height) from (
+		select decode(bplfs,'AD001',dybs*22,'AD006',dybs*22,'AD004',bdzs*18,'AD005',bdzs*18,'') height from res_odm where gh in 
+		<foreach collection="khs" item="kh" open="("
+			separator="," close=")">
+			#{kh}
+		</foreach>
+		and sssb=#{sssb,jdbcType=VARCHAR} and sssbm=#{sssbm,jdbcType=VARCHAR}
+		)
+	</select>
+	<select id="getMaxWidth" resultType="string" parameterType="hashmap" flushCache="true">
+		select max(width) from (
+		select decode(bplfs,'AD001',bdzs*18,'AD006',bdzs*18,'AD004',dybs*22,'AD005',dybs*22,'') width from res_odm where gh in 
+		<foreach collection="khs" item="kh" open="("
+			separator="," close=")">
+			#{kh}
+		</foreach>
+		and sssb=#{sssb,jdbcType=VARCHAR} and sssbm=#{sssbm,jdbcType=VARCHAR}
+		)
+	</select>
+	<select id="getUsedLines" resultType="string" parameterType="hashmap" flushCache="true">
+		<if test="toptype == 'AA001'">
+			select distinct to_firstunit lines from (
+				select to_firstunit from res_odf_conn where connecttype = 'AA203' and to_classid='A33' and to_id = #{xtbh,jdbcType=VARCHAR} and sssb = #{topid,jdbcType=VARCHAR}
+				union
+				select case when from_id = #{xtbh,jdbcType=VARCHAR} then from_firstunit when to_id = #{xtbh,jdbcType=VARCHAR} then to_firstunit else '-1' end to_firstunit from res_sb_conn where connector_id = #{topid,jdbcType=VARCHAR} and connector_type=#{toptype,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="toptype == 'AA003'">
+			select distinct to_firstunit lines from (
+				select to_firstunit from res_gjjx_conn where connecttype = 'AA203' and to_classid='A33' and to_id = #{xtbh,jdbcType=VARCHAR} and sssb = #{topid,jdbcType=VARCHAR}
+				union
+				select case when from_id = #{xtbh,jdbcType=VARCHAR} then from_firstunit when to_id = #{xtbh,jdbcType=VARCHAR} then to_firstunit else '-1' end to_firstunit from res_sb_conn where connector_id = #{topid,jdbcType=VARCHAR} and connector_type=#{toptype,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="toptype == 'AA004'">
+			select distinct to_firstunit lines from (
+				select to_firstunit from res_gfxx_conn where connecttype = 'AA203' and to_classid='A33' and to_id = #{xtbh,jdbcType=VARCHAR} and sssb = #{topid,jdbcType=VARCHAR}
+				union
+				select case when from_id = #{xtbh,jdbcType=VARCHAR} then from_firstunit when to_id = #{xtbh,jdbcType=VARCHAR} then to_firstunit else '-1' end to_firstunit from res_sb_conn where connector_id = #{topid,jdbcType=VARCHAR} and connector_type=#{toptype,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="toptype == 'AA006'">
+			select distinct to_firstunit lines from (
+				select to_firstunit from res_gzdh_conn where connecttype = 'AA203' and to_classid='A33' and to_id = #{xtbh,jdbcType=VARCHAR} and sssb = #{topid,jdbcType=VARCHAR}
+				union
+				select case when from_id = #{xtbh,jdbcType=VARCHAR} then from_firstunit when to_id = #{xtbh,jdbcType=VARCHAR} then to_firstunit else '-1' end to_firstunit from res_sb_conn where connector_id = #{topid,jdbcType=VARCHAR} and connector_type=#{toptype,jdbcType=VARCHAR}
+			)
+		</if>
+		<if test="toptype == 'AA005'">
+			select distinct to_firstunit lines from (
+				select case when from_id = #{xtbh,jdbcType=VARCHAR} then from_firstunit when to_id = #{xtbh,jdbcType=VARCHAR} then to_firstunit else '-1' end to_firstunit from res_sb_conn where connector_id = #{topid,jdbcType=VARCHAR} and connector_type=#{toptype,jdbcType=VARCHAR}
+			)
+		</if>
+	</select>
+	
+	<insert id="insertLineConnect" parameterType="hashmap">
+		insert into res_sb_conn
+		  (xtbh, connector_id, connector_type, from_id, from_firstunit, to_id, to_firstunit)
+		values
+		  (#{xtbh,jdbcType=VARCHAR}, #{hostid,jdbcType=VARCHAR}, #{hostlx,jdbcType=VARCHAR}, 
+		  #{alyid,jdbcType=VARCHAR}, #{alineid,jdbcType=VARCHAR}, #{blyid,jdbcType=VARCHAR}, #{blineid,jdbcType=VARCHAR})
+	</insert>
+	
+	<select id="getConnect" parameterType="hashmap" resultType="hashmap">
+		<if test="zylx == 'AA001'">
+			select * from res_odf_conn where sssb=#{xtbh,jdbcType=VARCHAR} and portname =#{mc,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			select * from res_gjjx_conn where sssb=#{xtbh,jdbcType=VARCHAR} and portname =#{mc,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			select * from res_gfxx_conn where sssb=#{xtbh,jdbcType=VARCHAR} and portname =#{mc,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			select * from res_gzdh_conn where sssb=#{xtbh,jdbcType=VARCHAR} and portname =#{mc,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<update id="updateConnect" parameterType="hashmap">
+		<if test="zylx == 'AA001'">
+			update res_odf_conn set to_classid=#{zzylx,jdbcType=VARCHAR},to_id=#{zxtbh,jdbcType=VARCHAR},to_firstunit=#{zmc,jdbcType=VARCHAR},connecttype=#{ctype,jdbcType=VARCHAR},dzzt='AD203' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			update res_gjjx_conn set to_classid=#{zzylx,jdbcType=VARCHAR},to_id=#{zxtbh,jdbcType=VARCHAR},to_firstunit=#{zmc,jdbcType=VARCHAR},connecttype=#{ctype,jdbcType=VARCHAR},dzzt='AD203' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			update res_gfxx_conn set to_classid=#{zzylx,jdbcType=VARCHAR},to_id=#{zxtbh,jdbcType=VARCHAR},to_firstunit=#{zmc,jdbcType=VARCHAR},connecttype=#{ctype,jdbcType=VARCHAR},dzzt='AD203' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			update res_gzdh_conn set to_classid=#{zzylx,jdbcType=VARCHAR},to_id=#{zxtbh,jdbcType=VARCHAR},to_firstunit=#{zmc,jdbcType=VARCHAR},connecttype=#{ctype,jdbcType=VARCHAR},dzzt='AD203' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+	</update>
+	
+	<delete id="deleteLineConnect" parameterType="string">
+		delete from res_sb_conn where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<update id="deletePortConnect" parameterType="hashmap">
+		<if test="zylx == 'AA001'">
+			update res_odf_conn set to_classid='',to_id='',to_firstunit='',connecttype='',dzzt='AD204' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			update res_gjjx_conn set to_classid='',to_id='',to_firstunit='',connecttype='',dzzt='AD204' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			update res_gfxx_conn set to_classid='',to_id='',to_firstunit='',connecttype='',dzzt='AD204' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			update res_gzdh_conn set to_classid='',to_id='',to_firstunit='',connecttype='',dzzt='AD204' where xtbh=#{xtbh,jdbcType=VARCHAR}
+		</if>
+	</update>
+	
+	<select id="getConnectZD" parameterType="hashmap" resultType="hashmap">
+		<if test="zylx == 'AA001'">
+			select * from res_odf_conn where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA003'">
+			select * from res_gjjx_conn where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA004'">
+			select * from res_gfxx_conn where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+		<if test="zylx == 'AA006'">
+			select * from res_gzdh_conn where xtbh = #{xtbh,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+</mapper>

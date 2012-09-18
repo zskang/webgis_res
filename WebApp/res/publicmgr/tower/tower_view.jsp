@@ -1,0 +1,84 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<html>
+	<head>
+	<script type="text/javascript">
+	In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+	In.ready('ctcss',function(){
+		In.css('.ui-form-input-title {width: 100px;} .ui-form-input-box {width:100%}');
+		if('${tipview}'){
+			$('.ui-form-input-box:last').css('display','none');
+		}
+	});
+</script>
+	</head>
+	<body>
+		<div class="ui-form-container">
+			<form name="formname" id="formname" method="post"
+				action="${ctx}/res/publicmgr/tower!input.action">
+				<input type="hidden" id="towerid" name="towerid" value="${entity.towerid}" />
+
+			<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属站点:</span>
+					<span class="ui-form-value"><resinfo:resCommon keyValue="${entity.siteid}" 
+					tableName="res_zdxx"></resinfo:resCommon></span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔名称:</span>
+					<span class="ui-form-value">${entity.towername}</span>
+				</div>
+
+				<div class="ui-form-input-box">
+						<span class="ui-form-input-title">铁塔平台数:</span>
+						<span class="ui-form-value">${entity.towerplatformnum}</span>
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">使用平台数:</span>
+					<span class="ui-form-value">${entity.useplatformnum}</span>
+				</div>
+
+					<div class="ui-form-input-box">
+					<span class="ui-form-input-title">塔身高度(米):</span>
+						<span class="ui-form-value">${entity.bodyheight}</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔类型:</span>
+					<span class="ui-form-value">
+					<baseinfo:dicselector name="towertype" columntype="TOWER_TYPE" type="view"
+						cssClass="ui-form-input" keyValue="${entity.towertype }"></baseinfo:dicselector>
+					</span>
+				</div>
+				
+					<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔厂家:</span>
+					<span class="ui-form-value"> 
+					${entity.producter}</span>
+					
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔高度:</span>
+					<span class="ui-form-value"> 
+					${entity.towerheight}</span>
+					
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">建设日期:</span>
+				<span class="ui-form-value">${entity.builddate}</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title"></span><span class="ui-form-value" style="float:right;margin-right:50px">
+						<a href="${ctx}/res/publicmgr/tower!input.action?towerid=${entity.towerid}">编辑</a>
+					</span>	
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

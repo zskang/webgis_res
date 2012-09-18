@@ -1,0 +1,172 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>光缆信息输入</title>
+	<script type="text/javascript">
+	 	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	 	In.add('wdatepickerjs',{path:'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',type:'js',charset:'utf-8'});
+        In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+        In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+        In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+        In.ready('ztreejs','validatejs','wdatepickerjs','ctcss',function(){
+	        	In.css('#formname label.error {margin-left: 10px;width: auto;display: inline;}');
+	        	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+         		$("#formname").validate({});
+         		var xtbh = $('#xtbh').val();
+				if(!xtbh){
+					$('.ui-form-container .ui-form-input-box INPUT:last').css('display','none');
+					}
+         		 //初始化RegionTree
+         		initRegionTree_001();
+        });
+		var regionCallBackId = function(id) {
+			$('#regionid').val(id);
+		}
+	
+		var type = "glxx";
+		function doSubmit(act) {
+			var url = "${ctx}/res/opticcablemgr/{type}!{act}.action";
+			document.forms[0].action = url.replace('{type}', type).replace('{act}',act);
+			if(act == 'view'){
+				document.forms[0].submit();
+			}
+		}
+</script>
+	</head>
+	<body>
+		<div class="ui-form-container">
+	<form name="formname" id="formname" method="post" action="">
+				<input type="hidden" id="actmsg" name="actmsg"
+					value="${entity.actionMessage}" />
+				<input type="hidden" id="xtbh" name="xtbh" value="${entity.xtbh}">		
+				
+				<div class="ui-form-input-box">
+					<span class="required ui-form-input-title">光缆名称：</span>
+					<input type="text" name="zymc" id="zymc"
+						class="required ui-form-input"  value="${entity.zymc}" />
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">光缆编号：</span>
+					<input type="text" name="glbh" id="glbh" class="ui-form-input"
+						value="${entity.glbh}" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">原名称：</span>
+					<input type="text" class="ui-form-input" value="${entity.ymc}"
+						name="ymc" id="ymc" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">固定资产编号：</span>
+					<input type="text" class="ui-form-input" value="${entity.gdzcbh}"
+						name="gdzcbh" id="gdzcbh" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">规格型号：</span>
+					<input type="text" class="ui-form-input" value="${entity.ggxh}"
+						name="ggxh" id="ggxh" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">纤芯数：</span>
+					<input type="text" class="ui-form-input number"
+						value="${entity.qxs}" name="qxs" id="qxs" />
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">业务级别：</span>
+					<baseinfo:dicselector name="ywjb" columntype="CABLETYPE"
+						type="select" keyValue="${entity.ywjb}" style="width:220px" isQuery="query"
+						cssClass="required ui-form-input"></baseinfo:dicselector>
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">产权性质：</span>
+					<baseinfo:dicselector name="cqxz" columntype="property_right"
+						type="select" keyValue="${entity.cqxz}" style="width:220px" isQuery="query"
+						cssClass="required ui-form-input"></baseinfo:dicselector>
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">设施状态：</span>
+					<baseinfo:dicselector name="sszt" columntype="SSZT" type="select" isQuery="query"
+						keyValue="${entity.sszt}" style="width:220px"
+						cssClass="required ui-form-input"></baseinfo:dicselector>
+						 <span class="ui-form-symbol-color">*</span>
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">维护方式：</span>
+					<baseinfo:dicselector name="whfs" columntype="WHFS" type="select" isQuery="query"
+						keyValue="${entity.whfs}" style="width:220px"
+						cssClass="required ui-form-input"></baseinfo:dicselector>
+						 <span class="ui-form-symbol-color">*</span>
+				</div>				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">网元状态：</span>
+					<baseinfo:dicselector name="wyzt" columntype="WYZT" type="select" isQuery="query"
+						keyValue="${entity.wyzt}" style="width:220px"
+						cssClass="ui-form-input"></baseinfo:dicselector>
+				</div>
+					<div class="ui-form-input-box">
+					<span class="ui-form-input-title">光缆类型：</span>
+					<baseinfo:dicselector name="gllx" columntype="QXLJLX" type="select" isQuery="query"
+						keyValue="${entity.gllx}" style="width:220px"
+						cssClass="ui-form-input"></baseinfo:dicselector>
+				</div>
+			
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属工程：</span>
+					<input type="text" class="ui-form-input" value="${entity.ssgc}"
+						name="ssgc" id="ssgc" />
+				</div>
+				 <div class="ui-form-input-box">
+				    <span class="ui-form-input-title">所属区域：</span>
+					<baseinfo:regiontree widgetId="001" defaultValue="${entity.regionid}" 
+					 cls="required ui-form-input" regionId="${user.regionId}" callBackId="regionCallBackId"></baseinfo:regiontree>
+					<input type="hidden" id="regionid" name="regionid" value="${entity.regionid}">
+					 <span class="ui-form-symbol-color">*</span>
+				 </div>		
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">主建单位：</span>
+					<input type="text" value="${entity.zjdw}"
+						class="ui-form-input" name="zjdw" id="zjdw" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">参建单位：</span>
+					<input type="text" class="ui-form-input" value="${entity.cjdw}"
+						name="cjdw" id="cjdw" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">租用单位：</span>
+					<input type="text" class="ui-form-input"
+						value="${entity.zydw}" name="zydw" id="zydw" />
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">使用单位：</span>
+					<input type="text" class="ui-form-input"
+						value="${entity.sydw}" name="sydw" id="sydw" />
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所有权人：</span>
+					<input type="text" class="ui-form-input"
+						value="${entity.syqr}" name="syqr" id="syqr" />
+				</div>
+				
+				<div class="ui-form-input-box">
+				    <span class="ui-form-input-title">竣工时间：</span>
+				      <input type="text" class="ui-form-input Wdate" name="jgsj" id="jgsj" value="${entity.jgsj}" onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+				 </div>	
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">&nbsp;</span>
+					<input type="submit" value="保存" onclick="doSubmit('save')"
+						style="width: 80px;">
+					<input type="button" value="取消" onclick="doSubmit('view')"
+						style="width: 80px;">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

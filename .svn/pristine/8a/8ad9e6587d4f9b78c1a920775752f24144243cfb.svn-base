@@ -1,0 +1,20 @@
+[
+	{name:"管井",url:"/RES/legendIcons/A21.bmp"},
+	{name:"电杆",url:"/RES/legendIcons/A20.bmp"},
+	{name:"标石",url:"/RES/legendIcons/A22.bmp"},
+	{name:"挂墙",url:"/RES/legendIcons/A23.bmp"},
+	{name:"光终端盒",url:"/RES/legendIcons/AA006.bmp"},
+	{name:"光交接箱",url:"/RES/legendIcons/AA003.bmp"},
+	{name:"光分纤箱",url:"/RES/legendIcons/AA004.bmp"},
+	{name:"光接头",url:"/RES/legendIcons/AA005.bmp"},
+	{name:"站点",url:"/RES/legendIcons/zhandian.gif"},
+	{name:"集团客户",url:"/RES/legendIcons/jtkh.gif"},
+	{name:"校园网",url:"/RES/legendIcons/A34.bmp"},
+	{name:"宽带小区",url:"/RES/legendIcons/A35.bmp"},
+	{name:"营业厅",url:"/RES/legendIcons/A30.bmp"},
+	{name:"传输巡检人",url:"/RES/legendIcons/C30.png"},
+	{name:"铁塔巡检人",url:"/RES/legendIcons/C31.png"},
+	{name:"综合覆盖巡检人",url:"/RES/legendIcons/C32.png"},
+	{name:"基站巡检人",url:"/RES/legendIcons/C33.png"},
+	{name:"集团客户巡检人",url:"/RES/legendIcons/C34.png"}
+]

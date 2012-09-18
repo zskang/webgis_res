@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.boardfibermgr.JxgxlyMapper">
+
+	<!-- 获取局向光纤路由信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.boardfibermgr.JxgxlyEntity"
+		parameterType="string" flushCache="true">
+		select * from res_jxgx_ly where id=#{id,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 根据链路组编号获取局向光纤路由 -->
+	<select id="getJxgxlyListByllzid" parameterType="string" resultType="hashmap" flushCache="true">
+		select * from res_jxgx_ly where ssjxgxllz=#{llzid,jdbcType=VARCHAR} order by sn
+	</select>
+	
+	<!-- 根据链路组编号获取局向光纤路由设备集合 -->
+	<select id="getJxgxlySblistByllzid" parameterType="string" resultType="com.cabletech.res.entity.boardfibermgr.JxgxlyEntity" flushCache="true">
+		select * from res_jxgx_ly where lytype!='A33' and ssjxgxllz=#{llzid,jdbcType=VARCHAR} order by sn
+	</select>
+	
+	<!-- 删除局向光纤路由 -->
+	<delete id="delete" parameterType="string" flushCache="true">
+		delete from res_jxgx_ly where id=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 根据链路组编号删除局向光纤路由 -->
+	<delete id="deleteByJxgxllzId" parameterType="string" flushCache="true">
+		delete from res_jxgx_ly where ssjxgxllz=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 新增局向光纤路由 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.boardfibermgr.JxgxlyEntity" flushCache="true">
+		insert into res_jxgx_ly(id,ssjxgxllz,ssgldly,lytype,sn,ssjxgx) 
+		values(#{id,jdbcType=VARCHAR},#{ssjxgxllz,jdbcType=VARCHAR},
+		#{ssgldly,jdbcType=VARCHAR},#{lytype,jdbcType=VARCHAR},#{sn,jdbcType=VARCHAR},#{ssjxgx,jdbcType=VARCHAR})
+	</insert>
+</mapper>

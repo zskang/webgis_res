@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.GqxxMapper">
+
+	<!-- 获取单条挂墙段信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GqxxEntity"
+		parameterType="java.lang.String" flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.ymc,g.dz,g.cqxz,
+		g.sszt,g.whfs,g.yt,g.isdanger,g.ssglq,round(g.lon,6) lon,round(g.lat,6) lat,
+		g.regionid,g.orgid,g.ewm,g.status,
+		g.shape.minx projectx,g.shape.miny projecty from res_gqxx g
+		where g.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 更新挂墙实体 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GqxxEntity"
+		flushCache="true">
+		update res_gqxx set 
+			zymc=#{zymc,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},dz=#{dz,jdbcType=VARCHAR},
+			cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+			yt=#{yt,jdbcType=VARCHAR},isdanger=#{isdanger,jdbcType=VARCHAR},ssglq=#{ssglq,jdbcType=VARCHAR},
+			regionid=#{regionid,jdbcType=VARCHAR},
+			ewm=#{ewm,jdbcType=VARCHAR}
+			where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 不含Simid 查询挂墙信息 条件 名称 设施状态 产权性质 区域 所属管理区 时间段 -->
+	<select id="queryGqxxListNoSimId" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select a.objectid,a.xtbh,a.zymc,a.ymc,a.dz,a.cqxz,
+		a.sszt,a.whfs,a.yt,a.isdanger,a.ssglq,round(a.lon,6) lon,round(a.lat,6) lat,
+		a.regionid,a.orgid,a.ewm,a.status,
+		a.shape.minx projectx,a.shape.miny projecty 
+		from res_gqxx a  where  (a.status != '9' or a.status is null)
+		<if test="zymc != null and zymc != ''">
+			and a.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and a.sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and a.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and a.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and a.ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(a.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(a.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>		
+		</if>
+	</select>
+	
+	<!-- 含Simid 查询挂墙信息 条件 simid 名称 设施状态 产权性质 区域 所属管理区 时间段 -->
+	<select id="queryGqxxList" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select a.objectid,a.xtbh,a.zymc,a.ymc,a.dz,a.cqxz,
+		a.sszt,a.whfs,a.yt,a.isdanger,a.ssglq,round(a.lon,6) lon,round(a.lat,6) lat,
+		a.regionid,a.orgid,a.ewm,a.status,
+		a.shape.minx projectx,a.shape.miny projecty 
+		from res_gqxx a left join res_gprs_record b on a.xtbh = b.resid 
+		where  (a.status != '9' or a.status is null)
+		
+		<if test="simid != null and simid != ''">
+		    and b.restype ='A23'
+			and b.deviceid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and a.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and a.sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and a.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and a.regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and a.ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(a.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(a.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>		
+		</if>
+	</select>
+	<!-- 逻辑删除挂墙信息  -->
+	<update id="deleteGq" parameterType="String">
+		UPDATE res_gqxx SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增挂墙信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.GqxxEntity">
+		INSERT INTO res_gqxx(
+		objectid,xtbh,zymc,ymc,dz,cqxz,sszt,whfs,yt,isdanger,ssglq,lon,lat,
+		regionid,ewm,orgid,shape
+		) VALUES(
+			#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+			#{zymc,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},#{dz,jdbcType=VARCHAR},
+			#{cqxz,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+			#{yt,jdbcType=VARCHAR},#{isdanger,jdbcType=VARCHAR},#{ssglq,jdbcType=VARCHAR},
+			#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+			#{ewm,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	
+	<!-- 获取挂墙信息关联的光缆段路由 -->
+	<select id="getGldlyBygqxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l where (l.adsblx='A23' and  l.adsbmc=#{xtbh,jdbcType=VARCHAR}) 
+		or (l.zdsblx='A23' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})
+		union
+		select l.zymc,l.xtbh from res_relate_jgdwss j,res_gld_ly l where (j.resid=#{xtbh,jdbcType=VARCHAR} and j.restype='A23') and l.xtbh=j.gldid
+	</select>	
+	
+	<!-- 获取挂墙信息关联的挂墙段 -->
+	<select id="getGqdBygqxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gqd l where l.qdgq=#{xtbh,jdbcType=VARCHAR}
+		or l.zdgq=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gqxx set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+</mapper>

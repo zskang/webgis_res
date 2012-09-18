@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.GldxtMapper">
+
+	<!-- 根据资源编号获取杆路系统实体 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GldxtEntity" parameterType="java.lang.String" flushCache="true">
+		select b.xtbh,b.zymc,b.zcd,b.ywjb,b.dgs,b.sszt,b.cqxz,b.whfs,b.regionid,b.jsdw,
+		to_char(b.jgsj,'yyyy/mm/dd HH24:mi:ss') jgsj,b.bz,b.orgid
+		from res_gld_xt b where b.xtbh=#{resId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 更新杆路系统实体 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GldxtEntity" flushCache="true">
+		update res_gld_xt set zymc = #{zymc,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR},jsdw=#{jsdw,jdbcType=VARCHAR},
+		jgsj=to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),
+		bz=#{bz,jdbcType=VARCHAR},zcd=#{zcd,jdbcType=VARCHAR}
+		where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 新增杆路系统实体 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.basemgr.GldxtEntity" flushCache="true">
+		insert into res_gld_xt(xtbh,zymc,ywjb,sszt,cqxz,whfs,
+		regionid,orgid,jsdw,jgsj,bz) 
+		values(#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR}
+		,#{ywjb,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR}
+		,#{cqxz,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR}
+		,#{regionid,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		,#{jsdw,jdbcType=VARCHAR},to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss')
+		,#{bz,jdbcType=VARCHAR})
+	</insert>
+	<!-- 获得电杆数 -->
+	<select id="calcDgs" parameterType="java.lang.String" resultType="java.lang.String" flushCache="true">
+		select count(distinct g) from (
+		select r.qddg g from res_gld r where r.ssglxt=#{xtbh,jdbcType=VARCHAR}
+		union
+		select r.zddg g from res_gld r where r.ssglxt=#{xtbh,jdbcType=VARCHAR})
+	</select>
+	<!-- 跟新杆路段系统包含电杆数 -->
+	<update id="updateDgs" parameterType="hashmap" flushCache="true">
+		update res_gld_xt set dgs=#{dgs,jdbcType=VARCHAR}
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 电杆查询 条件：设施状态 产权性质 区域  名称 -->
+	<select id="queryGldxtList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_gld_xt
+		where (status != '9' or status is null)
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+	<!-- 逻辑删除杆路段系统 -->
+	<update id="deleteGldxt" parameterType="java.lang.String" flushCache="true">
+		update res_gld_xt set status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取杆路段系统关联的杆路段 -->
+	<select id="getGldByGldxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select f.zymc,f.xtbh from res_gld f where f.ssglxt=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取杆路段系统关联的光缆段路由 -->
+	<select id="getGldlyByGldxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select y.zymc,y.xtbh from res_gld f,res_gld_ly_dwss l,res_gld_ly y where
+		f.xtbh=l.segment_id and l.gld_id=y.xtbh and f.ssglxt=#{xtbh,jdbcType=VARCHAR} and restype='AA602'
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gld_xt set sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>				
+</mapper>

@@ -1,0 +1,36 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>信息</title>
+    <style type="text/css">
+		.tab {padding:0px; text-align:left; background:#F7F7F7;margin-top:0;}
+	    .tab ul, li { margin:0px; padding:0px; list-style:none; text-align:left;}
+	    .tab ul li { display: inline-block; zoom: 1; display: inline; background:#59B2F1; color:#fff; text-align:center; padding:5px 10px; cursor:pointer;}
+	    .tab .active{ background:#4b6daa; font-weight:bold;}
+	    .tab_content {text-align:left; border:1px solid #4b6daa; padding:0px;height:212px;}
+    </style>
+    <script type="text/javascript">
+    var url = ["${ctx}/contractor/carinfo!view.action?id=${id}","${ctx}/contractor/carapplydispatch!view.action?id=${id}","${ctx}/contractor/carinfo/carhistory_list.jsp?id=${id}"];
+	In.ready(function() {
+        $(".tab li").click(function(){
+            $(this).addClass("active").siblings("li").removeClass();
+            $(".tab div:eq("+$(this).index()+")").html("<iframe frameborder='0' scrolling='auto' style='width:100%;height:100%;' src='"+url[$(this).index()]+"'></iframe>").show().siblings("div").hide();
+        });
+        $(".tab li:first").addClass("active");
+        $(".tab div:eq(0)").html("<iframe frameborder='0' scrolling='auto' style='width:100%;height:100%;' src='"+url[0]+"'></iframe>");
+        $(".tab div:gt(0)").hide(); 
+	});
+    </script>
+</head>
+
+<body>
+    <div class="tab" style="width:403;height:248;">
+        <ul><li>基本信息</li><li>当前任务</li><li>今日历史任务</li></ul>
+        <div class="tab_content"></div>
+        <div class="tab_content"></div>
+        <div class="tab_content"></div>
+    </div>
+</body>
+</html>

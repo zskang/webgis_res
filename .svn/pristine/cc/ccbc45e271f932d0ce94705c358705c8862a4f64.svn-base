@@ -1,0 +1,272 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<script type="text/javascript">
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'autocompleteJs',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'autocompleteCss' ]
+					});
+	In
+			.add(
+					'autocompleteCss',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'
+					});
+	In
+			.add(
+					'wdatepickerjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('zdxx_common', {
+		path : '${ctx}/js/res/publicmgr/zdxx_common.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+</script>
+
+<script type="text/javascript">
+	In
+			.ready(
+					'wdatepicker',
+					'ztreecss',
+					'jggridjs',
+					'jggridlocalejs',
+					'commonjs',
+					'wresize',
+					'zdxx_common',
+					'wdatepicker',
+					function() {
+						var jqgrid = $("#zdxxgrid")
+								.jqGrid(
+										{
+											url : "${ctx}/res/publicmgr/zdxx!listdata.action",
+											datatype : "json",
+											mtype : "GET",
+											rownumbers : true,
+											colNames : [ '系统编号', '资源名称',
+													'产权性质', '站点类型', '所属县区',
+													'经度', '纬度', '操作' ],
+											colModel : [ {
+												name : 'XTBH',
+												id : 'XTBH',
+												sortable : true,
+												hidden:true
+												
+											}, {
+												name : 'ZDMC',
+												id : 'ZDMC',
+												sortable : true
+											}, {
+												name : 'CQXZ',
+												id : 'CQXZ',
+												sortable : true
+											}, {
+												name : 'ZDLX',
+												id : 'ZDLX',
+												sortable : true
+											}, {
+												name : 'REGIONNAME',
+												id : 'REGIONNAME',
+												sortable : true
+											}, {
+												name : 'LON',
+												id : 'LON',
+												sortable : false
+											}, {
+												name : 'LAT',
+												id : 'LAT',
+												sortable : false
+											}, {
+												name : 'OBJECTID',
+												id : 'OBJECTID',
+												sortable : false,
+												formatter : WaitHandzdxxFmatter
+											} ],
+											rowNum : 15,
+											autowidth : true,
+											rowList : [ 15, 30, 50 ],
+											pager : '#zdxxpager',
+											shrinkToFit : true,
+											viewrecords : true,
+											width : 1000,
+											height : 600,
+											hidegrid : false,
+											prmNames : {
+												page : "pageNo",
+												rows : "rows",
+												sort : "sidx",
+												order : "sord"
+											},
+											jsonReader : {
+												root : "root", // 数据行（默认为：rows） 
+												page : "pageNo", // 当前页 
+												total : "totalPages", // 总页数 
+												records : "total", // 总记录数 
+												repeatitems : false,
+												id : "OBJECTID"
+											}
+										}).navGrid('#zdxxpager', {
+									edit : false,
+									add : false,
+									del : false,
+									search : false,
+									sortable : false
+								});
+						$(window).wresize(function() {
+							grid_resize(jqgrid);
+						});
+						grid_resize(jqgrid);
+						$('#form1').submit(
+								function() {
+									$('#serializeQueryCondition').val('');
+									$('#serializeQueryCondition').val(
+											$(this).serialize());
+									return true;
+								});
+						In
+								.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+						In
+								.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+						initRegionTree_001();
+					});
+	var regionCallBackId = function(id) {
+		$('#regionid').val(id);
+	}
+
+	function query() {
+		jQuery("#zdxxgrid").jqGrid().setGridParam({
+			postData : {
+				regionid : jQuery("#regionid").val(),
+				zdlx : jQuery("#zdlx").val(),
+				cqxz : jQuery("#cqxz").val(),
+				zymc : jQuery("#zdmc").val(),
+				zdbh : jQuery("#zdbh").val(),
+				begintime : jQuery("#begintime").val(),
+				endtime : jQuery("#endtime").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form name="form1" id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">站点类型:</span>
+				<baseinfo:dicselector name="zdlx" columntype="ZDLX" type="select"
+					keyValue="${searchCondition.zdlx}" cssClass="ui-form-input"
+					isQuery="query"></baseinfo:dicselector>
+				<span class="ui-form-input-title">产权性质:</span>
+				<baseinfo:dicselector name="cqxz" columntype="property_right"
+					type="select" keyValue="${searchCondition.cqxz}"
+					cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">站点名称:</span> <input type="text"
+					class="ui-form-input" name="zymc" id="zymc"
+					value="${searchCondition.zymc}" /> <span
+					class="ui-form-input-title">站点编号:</span> <input type="text"
+					class="ui-form-input" name="zdbh" id="zdbh"
+					value="${searchCondition.zdbh}" />
+			</div>
+
+			<div class="ui-form-input-box">
+				<input type="hidden" class="required" id="regionid" name="regionid"
+					value="${searchCondition.regionid }"> <span
+					class="ui-form-input-title">开始时间:</span> <input type="text"
+					class="required ui-form-input" name="begintime" id="begintime"
+					value="${searchCondition.begintime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /> <span
+					class="ui-form-input-title">结束时间:</span> <input type="text"
+					class="required ui-form-input" name="endtime" id="endtime"
+					value="${searchCondition.endtime}"
+					onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">所属区域:</span>
+				<baseinfo:regiontree defaultValue="${searchCondition.regionid}"
+					widgetId="001" width="220" height="120"
+					callBackId="regionCallBackId" regionId="${user.regionId}"
+					cls="ui-form-input"></baseinfo:regiontree>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">&nbsp;</span> <input type="button"
+					value="查询" style="width: 80px;" onclick="query();">
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="zdxxgrid"></table>
+		<div id="zdxxpager"></div>
+	</div>
+</body>
+</html>

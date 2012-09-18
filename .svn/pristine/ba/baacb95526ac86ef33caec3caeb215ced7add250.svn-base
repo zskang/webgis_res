@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.groupcustomsmgr.CampusMapper">
+
+	<!-- 根据资源编号获取校园网实体 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.groupcustomsmgr.CampusEntity" parameterType="java.lang.String" flushCache="true">
+		select c.objectid,c.xtbh,c.camid,c.zymc,c.ymc,c.camaddr,c.regionid,c.countyid,c.jrfs,c.gsjrdmc,
+		c.sbgs,c.status,round(c.x,6) lon,round(c.y,6) lat,
+		c.shape.minx projectx,c.shape.miny projecty from res_campus c where c.xtbh=#{resId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 更新校园网实体 -->
+	<update id="update" parameterType="com.cabletech.res.entity.groupcustomsmgr.CampusEntity" flushCache="true">
+		update res_campus set camid=#{camid,jdbcType=VARCHAR},
+		zymc=#{zymc,jdbcType=VARCHAR},camaddr=#{camaddr,jdbcType=VARCHAR},
+		ymc=#{ymc,jdbcType=VARCHAR},jrfs=#{jrfs,jdbcType=VARCHAR},
+		gsjrdmc=#{gsjrdmc,jdbcType=VARCHAR},sbgs=#{sbgs,jdbcType=VARCHAR}
+		where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 新增校园网实体 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.groupcustomsmgr.CampusEntity" flushCache="true">
+		insert into res_campus c (objectid,xtbh,camid,zymc,camaddr,ymc,jrfs,x,y,gsjrdmc,sbgs,regionid,createtime,c.shape) 
+		values(#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{camid,jdbcType=VARCHAR}
+		,#{zymc,jdbcType=VARCHAR},#{camaddr,jdbcType=VARCHAR}
+		,#{ymc,jdbcType=VARCHAR},#{jrfs,jdbcType=VARCHAR}
+		,#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR}
+		,#{gsjrdmc,jdbcType=VARCHAR},#{sbgs,jdbcType=VARCHAR}
+		,#{regionid,jdbcType=VARCHAR},sysdate
+		,sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR}))
+	</insert>
+	
+	<select id="queryCampusList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select c.objectid,c.xtbh,c.camid,c.zymc,c.ymc,c.camaddr,c.regionid,c.countyid,c.jrfs,c.gsjrdmc,
+		c.sbgs,c.status,round(c.x,6) lon,round(c.y,6) lat from res_campus c
+		where (status != '9' or status is null)
+		<if test="jrfs != null and jrfs != ''">
+			and jrfs=#{jrfs,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+	
+	<update id="deleteCampus" parameterType="java.lang.String" flushCache="true">
+		update res_campus set status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+</mapper>

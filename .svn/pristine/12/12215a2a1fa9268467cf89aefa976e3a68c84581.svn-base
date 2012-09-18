@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.GldMapper">
+
+	<!-- 根据资源编号获取杆路段实体 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GldEntity" parameterType="java.lang.String" flushCache="true">
+		select * from RES_GLD where xtbh=#{resId,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 更新杆路段实体 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GldEntity" flushCache="true">
+		update RES_GLD set zymc = #{zymc,jdbcType=VARCHAR},gldcd = #{gldcd,jdbcType=VARCHAR},
+		ssglxt = #{ssglxt,jdbcType=VARCHAR},qddg=#{qddg,jdbcType=VARCHAR},
+		zddg=#{zddg,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},syqr=#{syqr,jdbcType=VARCHAR},
+		yt=#{yt,jdbcType=VARCHAR},sfgj=#{sfgj,jdbcType=VARCHAR},
+		sfgx=#{sfgx,jdbcType=VARCHAR},orgid=#{orgid,jdbcType=VARCHAR}
+		where xtbh = #{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 新增杆路段实体 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.basemgr.GldEntity" flushCache="true">
+		insert into RES_GLD(objectid,xtbh,zymc,ssglxt,qddg,zddg,sszt,regionid,cqxz,
+		gldcd,whfs,syqr,yt,sfgj,sfgx,orgid,createdate
+		
+		<if test="geostr != null and geostr != ''">
+			,shape
+		</if>
+		) 
+		values(#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR}
+		,#{zymc,jdbcType=VARCHAR},#{ssglxt,jdbcType=VARCHAR}
+		,#{qddg,jdbcType=VARCHAR},#{zddg,jdbcType=VARCHAR}
+		,#{sszt,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR}
+		,#{cqxz,jdbcType=VARCHAR},#{gldcd,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR}
+		,#{syqr,jdbcType=VARCHAR},#{yt,jdbcType=VARCHAR}
+		,#{sfgj,jdbcType=VARCHAR},#{sfgx,jdbcType=VARCHAR}
+		,#{orgid,jdbcType=VARCHAR},sysdate
+		
+		<if test="geostr != null and geostr != ''">
+			,sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR})
+		</if>
+		)
+	</insert>
+	<!-- 杆路段查询 条件  起点电杆 终点电杆 设施状态 产权性质 区域 名称 -->
+	<select id="queryGldList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_gld
+		where (status != '9' or status is null)
+		<if test="qddg != null and qddg != ''">
+			and qddg=#{qddg,jdbcType=VARCHAR}
+		</if>
+		<if test="zddg != null and zddg != ''">
+			and zddg=#{zddg,jdbcType=VARCHAR}
+		</if>				
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+	</select>
+	<!-- 逻辑删除杆路段 -->
+	<update id="deleteGld" parameterType="java.lang.String" flushCache="true">
+		update res_gld set status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!--  置空杆路段的 所属杆路段系统 -->
+	<update id="deleteGldBySsglxt" parameterType="java.lang.String" flushCache="true">
+		update res_gld set ssglxt='' where ssglxt=#{ssglxt,jdbcType=VARCHAR}
+	</update>
+	<!-- 依据起点管井或者终点管井   逻辑删除杆路段 -->
+	<update id="deleteGldByDgXtbh" parameterType="java.lang.String" flushCache="true">
+		update res_gld set status='9' where qddg=#{dgxtbh,jdbcType=VARCHAR} or zddg=#{dgxtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!--获取杆路段关联的电杆信息 -->
+	<select id="getDgxxByGld" parameterType="string" resultType="hashmap" flushCache="true">
+		select s.zymc,s.xtbh  from res_dgxx s where  s.xtbh=(select b.qddg from res_gld b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+		union
+		select s.zymc,s.xtbh  from res_dgxx s where  s.xtbh=(select b.zddg from res_gld b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+	</select>	
+	
+	<!-- 获取杆路段关联的光缆段路由  -->
+	<select id="getGldlyByGld" parameterType="string" resultType="hashmap" flushCache="true">
+			select g.zymc,g.xtbh from res_gld_ly g,res_gld_ly_dwss l where g.xtbh=l.gld_id 
+		and l.restype='AD602' and l.segment_id=#{xtbh,jdbcType=VARCHAR}
+	</select>	
+
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gld set sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+		yt=#{yt,jdbcType=VARCHAR},sfgj=#{sfgj,jdbcType=VARCHAR},sfgx=#{sfgx,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>
+</mapper>

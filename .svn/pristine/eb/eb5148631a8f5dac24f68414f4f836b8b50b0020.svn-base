@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.cabletech.res.mapper.basemgr.GddMapper">
+	
+	<!-- 根据id获取管道段 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GddEntity" parameterType="java.lang.String" flushCache="true">
+		select * from  res_gdd where  xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 跟新管道段 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GddEntity">
+		UPDATE res_gdd SET
+			ssgddxt=#{ssgddxt,jdbcType=VARCHAR},gdzcbh=#{gdzcbh,jdbcType=VARCHAR},qdgj=#{qdgj,jdbcType=VARCHAR},
+			zdgj=#{zdgj,jdbcType=NUMERIC},syqr=#{syqr,jdbcType=VARCHAR},
+			gddcd=#{gddcd,jdbcType=VARCHAR},qdgjms=#{qdgjms,jdbcType=VARCHAR},
+			zdgjms=#{zdgjms,jdbcType=VARCHAR},gdcs=#{gdcs,jdbcType=VARCHAR},gdlx=#{gdlx,jdbcType=VARCHAR},
+			sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},sydw=#{sydw,jdbcType=VARCHAR},
+			sfgj=#{sfgj,jdbcType=VARCHAR},sfgx=#{sfgx,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+			regionid=#{regionid,jdbcType=VARCHAR},orgid=#{orgid,jdbcType=VARCHAR},zymc=#{zymc,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 管道段查询 条件：名称 起点管井 终点管井 设施状态 产权性质 区域  -->
+	<select id="queryGddList" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select * from res_gdd where (status != '9' or status is null)
+		
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="qdgj != null and qdgj != ''">
+			and qdgj=#{qdgj,jdbcType=VARCHAR}
+		</if>
+		<if test="zdgj != null and zdgj != ''">
+			and zdgj=#{zdgj,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		order by createdate desc
+	</select>
+	
+	<!-- 新增管道段 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.GddEntity">
+		INSERT INTO res_gdd(
+		objectid,xtbh,ssgddxt,gdzcbh,qdgj,zdgj,syqr,gddcd,qdgjms,zdgjms,gdcs,
+		gdlx,sszt,cqxz,sydw,sfgj,sfgx,whfs,regionid,orgid,zymc
+		<if test="geostr != null and geostr != ''">
+			,shape
+		</if>
+		) VALUES(
+			#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+			#{ssgddxt,jdbcType=VARCHAR},#{gdzcbh,jdbcType=VARCHAR},#{qdgj,jdbcType=VARCHAR},
+			#{zdgj,jdbcType=VARCHAR},#{syqr,jdbcType=VARCHAR},#{gddcd,jdbcType=VARCHAR},
+			#{qdgjms,jdbcType=VARCHAR},
+			#{zdgjms,jdbcType=VARCHAR},#{gdcs,jdbcType=VARCHAR},#{gdlx,jdbcType=VARCHAR},
+			#{sszt,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{sydw,jdbcType=VARCHAR},
+			#{sfgj,jdbcType=VARCHAR},#{sfgx,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+			#{regionid,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},
+			<if test="geostr != null and geostr != ''">
+				sde.st_geometry(#{geostr,jdbcType=VARCHAR}, #{srid,jdbcType=VARCHAR})
+			</if>
+		)
+	</insert>
+	
+	<!-- 逻辑删除管道段 -->
+	<update id="deleteGdd" parameterType="String">
+		UPDATE res_gdd SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 置空管道段的 所属管道段系统 -->
+	<update id="deleteGddSsgdxt" parameterType="String">
+		UPDATE res_gdd SET ssgddxt='' where ssgddxt=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 管井删除 相应管道段删除 -->
+	<update id="deleteGddByGj" parameterType="String">
+		UPDATE res_gdd SET status='9'  where qdgj=#{xtbh,jdbcType=VARCHAR} or zdgj=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 查询管井是否已存在 -->
+	<select id="getGddIsExist" parameterType="hashmap" resultType="String" flushCache="true">
+		     select count(*) from res_gdd where (qdgj=#{qdgj,jdbcType=VARCHAR} and zdgj=#{zdgj,jdbcType=VARCHAR}) or
+		     (qdgj=#{zdgj,jdbcType=VARCHAR} and zdgj=#{qdgj,jdbcType=VARCHAR})
+	</select>
+	
+	<!-- 获取管道段相关的标石信息 -->
+	<select id="getGddByGjxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select s.zymc,s.xtbh  from res_gjxx s where (s.status != '9' or s.status is null) and s.xtbh=(select b.qdgj from res_gdd b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+		union
+		select s.zymc,s.xtbh  from res_gjxx s where (s.status != '9' or s.status is null) and s.xtbh=(select b.zdgj from res_gdd b where b.xtbh=#{xtbh,jdbcType=VARCHAR})
+	</select>
+	
+	<!-- 获取管道段相关的光缆段路由信息 -->
+	<select id="getGldlyByGdd" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gld_ly g,res_gld_ly_dwss l where (g.status != '9' or g.status is null) and g.xtbh=l.gld_id and l.segment_id=#{xtbh,jdbcType=VARCHAR} and l.restype='AD601'
+	</select>			
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gdd set gdlx=#{gdlx,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		sfgj=#{sfgj,jdbcType=VARCHAR},sfgx=#{sfgx,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+</mapper>

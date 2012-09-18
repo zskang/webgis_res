@@ -1,0 +1,79 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Trace结果</title>
+	<script type="text/javascript">
+			In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+			In.add('giscss',{path:'${ctx}/css/jquery.ct.ui.gis.layout.css'});
+			In.add('commonjs', {path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+			In.ready('ctcss','giscss','commonjs',function(){
+				In.css('.ui-div-list li {width:160px}');
+				In.css('#datatable {padding: 0;margin: 0;border-left:1px solid #C1DAD7}');
+				In.css('#datatable th {font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;color: #4f6b72;border-right: 1px solid #C1DAD7;border-bottom: 1px solid #C1DAD7;border-top: 1px solid #C1DAD7;letter-spacing: 2px;text-transform: uppercase;text-align: left;padding: 6px 6px 6px 12px;background: #CAE8EA  no-repeat;}');
+				In.css('#datatable td {border-right: 1px solid #C1DAD7;border-bottom: 1px solid #C1DAD7;background: #fff;font-size:11px;padding: 6px 6px 6px 12px;color: #4f6b72;}');
+				In.css('#datatable tr:hover{background-color: yellow;}');
+				parent.exchangeDiv('','Trace',700);
+			});
+	</script>
+	</head>
+	<body>
+		<input type="button" value="返回" onclick="parent.exchangeDiv('${ctx}/res/tracemgr/trace/trace_input.jsp','Trace',420);">
+		<div style="float:right;width:auto;height:100%;overflow-x:hidden;overflow-y:auto;">
+			<c:if test="${fn:length(list)>0}">
+			<table id="datatable" cellspacing="0">
+			<thead>
+			  <tr>
+			    <th>起端设备</th>
+				<th>起端ODM</th>
+				<th>起端纤芯</th>
+				<th>起端设备端口</th>
+				<th>终端设备</th>
+				<th>终端ODM</th>
+				<th>终端纤芯</th>
+				<th>终端设备端口</th>
+			  </tr>
+			 </thead>
+			 <tbody>
+			  <c:forEach items="${list}" var="item">
+				  <tr>
+				  	<td>
+				  		<c:choose>
+				  			<c:when test="${empty item.qssbid || empty item.qssblx}">
+					  			无法到达
+				  			</c:when>
+				  			<c:otherwise>
+				  				<resinfo:resCommon keyValue="${item.qssbid}" resType="${item.qssblx}"/>
+				  			</c:otherwise>
+				  		</c:choose>
+				  	</td>
+				  	<td><resinfo:resCommon keyValue="${item.qssbodm}" tableName="res_odm"/></td>
+				    <td>${item.qsxxh}</td>
+				    <td>${item.qssbdz}</td>
+				  	<td>
+				  				<resinfo:resCommon keyValue="${item.zzsbid}" resType="${item.zzsblx}"/>
+				  	</td>				    
+				    <td>
+					    		<resinfo:resCommon keyValue="${item.zzsbodm}" tableName="res_odm"/>
+				    </td>
+				    <td>
+				    			${item.zzxxh}
+				    </td>
+				    <td>
+				    			${item.zzsbdz}
+				    </td>				    				    
+				  </tr>
+			  </c:forEach>
+			</tbody>  
+			</table>
+			</c:if>
+			<c:if test="${fn:length(list)<=0}">
+				       &nbsp;&nbsp;&nbsp;没有数据！
+			</c:if>
+		</div>	
+	</body>
+</html>

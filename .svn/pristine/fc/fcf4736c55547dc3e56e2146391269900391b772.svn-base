@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.YsMapper">
+
+	<!-- 单个引上段查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.YsEntity"
+		parameterType="string" flushCache="true">
+		select * from res_ys where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 引上段更新 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.YsEntity">
+		UPDATE res_ys SET
+		zymc=#{zymc,jdbcType=VARCHAR},ssysxt=#{ssysxt,jdbcType=VARCHAR},
+		qdlx=#{qdlx,jdbcType=NUMERIC},qdmc=#{qdmc,jdbcType=VARCHAR},zdlx=#{zdlx,jdbcType=VARCHAR},
+		zdmc=#{zdmc,jdbcType=VARCHAR},cd=#{cd,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},yt=#{yt,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},
+		sydw=#{sydw,jdbcType=VARCHAR},syqr=#{syqr,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR},
+		sszt=#{sszt,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 引上段查询  条件：名称 起点名称 终点名称 设施状态 产权性质 维护方式 区域 -->
+	<select id="queryYsList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select * from res_ys
+		where (status != '9' or status is null)
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="qdmc != null and qdmc != ''">
+			and qdmc=#{qdmc,jdbcType=VARCHAR}
+		</if>
+		<if test="zdmc != null and zdmc != ''">
+			and zdmc=#{zdmc,jdbcType=VARCHAR}
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="whfs != null and whfs != ''">
+			and whfs=#{whfs,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		order by createdate desc
+	</select>
+	<!-- 单条引上段信息逻辑删除 -->
+	<update id="delete" parameterType="String">
+		UPDATE res_ys SET status='9'
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增引上段 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.YsEntity">
+		INSERT INTO res_ys(
+		objectid,xtbh,zymc,ssysxt,orgid,qdlx,qdmc,
+		zdlx,zdmc,cd,cqxz,whfs,yt,regionid,sydw,syqr,ewm
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{ssysxt,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},
+		#{qdlx,jdbcType=NUMERIC},#{qdmc,jdbcType=VARCHAR},#{zdlx,jdbcType=VARCHAR},
+		#{zdmc,jdbcType=VARCHAR},#{cd,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{whfs,jdbcType=VARCHAR},#{yt,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+		#{sydw,jdbcType=VARCHAR},#{syqr,jdbcType=VARCHAR},#{ewm,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!-- 逻辑删除引上段 （条件：起点或者终点类型为管井 ）管井xtbh -->
+	<update id="deleteYsByGj" parameterType="String">
+		UPDATE res_ys SET status='9' where (qdlx='A21' and qdmc=#{xtbh,jdbcType=VARCHAR}) or(zdlx='A21' and zdmc=#{xtbh,jdbcType=VARCHAR}) 
+	</update>
+	<!-- 逻辑删除引上段 （条件：起点或者终点类型为电杆 ）电杆xtbh -->
+	<update id="deleteYsByDg" parameterType="String">
+		UPDATE res_ys SET status='9' where (qdlx='A20' and qdmc=#{xtbh,jdbcType=VARCHAR}) or(zdlx='A20' and zdmc=#{xtbh,jdbcType=VARCHAR}) 
+	</update>
+	<!-- 逻辑删除引上段 （条件：起点或者终点类型为电杆 ）标石xtbh -->
+	<update id="deleteYsByBs" parameterType="String" flushCache="true">
+		update res_ys set status='9' where (qdlx='A22' and qdmc=#{xtbh,jdbcType=VARCHAR}) or(zdlx='A22' and zdmc=#{xtbh,jdbcType=VARCHAR})
+	</update>
+	<!-- 逻辑删除引上段 （条件：起点或者终点类型为电杆 ）挂墙xtbh -->
+	<update id="deleteYsByGq" parameterType="String" flushCache="true">
+		update res_ys set status='9' where (qdlx='A23' and qdmc=#{xtbh,jdbcType=VARCHAR}) or(zdlx='A23' and zdmc=#{xtbh,jdbcType=VARCHAR})
+	</update>	
+	<!-- 置空 引上段 所属引上系统 -->
+	<update id="deleteSsysxt" parameterType="String">
+		UPDATE res_ys SET ssysxt='' where ssysxt=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 获取连接光缆段 -->
+	<select id="getGldlyByYsbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l 
+		where  (l.status != '9' or l.status is null) and ((l.adsblx='AD605' and  l.adsbmc=#{xtbh,jdbcType=VARCHAR}) 
+		or (l.zdsblx='AD605' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR})) order by zymc
+	</select>
+	<!-- 获取连接起端和终端资源 -->
+	<select id="getQdZdByYsbh" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select q.zymc,q.xtbh,y.qdlx lx from ${qdTableName} q,res_ys y 
+		where (y.status != '9' or y.status is null) and q.xtbh=y.qdmc and y.qdlx=#{qdlx,jdbcType=VARCHAR} and y.xtbh=#{xtbh,jdbcType=VARCHAR}
+		union
+		select z.zymc,z.xtbh,y.zdlx lx from ${zdTableName} z,res_ys y 
+		where (y.status != '9' or y.status is null) and z.xtbh=y.zdmc and y.zdlx=#{zdlx,jdbcType=VARCHAR} and y.xtbh=#{xtbh,jdbcType=VARCHAR}	
+	</select>
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_ys set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},sydw=#{sydw,jdbcType=VARCHAR},
+		syqr=#{syqr,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>
+</mapper>

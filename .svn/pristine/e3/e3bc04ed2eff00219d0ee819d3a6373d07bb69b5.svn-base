@@ -1,0 +1,144 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.business.rest.EsriRestEntity;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.BsdEntity;
+import com.cabletech.res.entity.basemgr.BsxxEntity;
+import com.cabletech.res.mapper.basemgr.BsdMapper;
+import com.cabletech.res.mapper.basemgr.BsxxMapper;
+ 
+/**
+ * 直埋段管理
+ * @author zhanglei 2011-05-11
+ *
+ */
+@Service
+public class BsdServiceImpl extends BaseServiceImpl implements BsdService {
+	
+	@Resource(name = "bsdMapper")
+	private BsdMapper bsdmapper;
+
+	@Resource(name = "bsxxMapper")
+	private BsxxMapper bsxxmapper;
+	/** 
+	 * 保存
+	 * @param entity 直埋段实体
+	 */
+	@Transactional
+	public boolean saveorupdate(BsdEntity entity){
+		try{
+				List<Map<String, String>> points = new ArrayList<Map<String, String>>();
+				EsriRestEntity esrientity = new EsriRestEntity();
+				esrientity.setAttrobj(entity);
+				esrientity.setRestype(super.restservice.LINE);
+				esrientity.setRescode("AD603");
+				BsxxEntity start = bsxxmapper.getbyid(entity.getQdbs());
+				Map<String, String> map = new HashMap<String, String>();
+				map.put("x", start.getLon());
+				map.put("y", start.getLat());
+				points.add(map);
+				BsxxEntity end = bsxxmapper.getbyid(entity.getZdbs());
+				Map<String, String> map2 = new HashMap<String, String>();
+				map2.put("x", end.getLon());
+				map2.put("y", end.getLat());
+				points.add(map2);
+				esrientity.setList(points);
+				if(StringUtils.isBlank(entity.getXtbh())){
+					entity.setXtbh(super.getXTBH());
+				}		
+				if(super.restservice.restPost(esrientity)){
+					return true;
+				}else{
+					return false;
+				}
+			}catch (Exception e) {
+				logger.error("新增或更新直埋段：",e);
+				return false;
+			}
+	}
+	
+	/**
+	 * 查看
+	 * @param xtbh 系统编号
+	 * @return 直埋段实体
+	 */
+	public BsdEntity getbyid(String xtbh){
+		return bsdmapper.getbyid(xtbh);
+	}
+	
+	/**
+	 * 直埋段单条删除
+	 * @param xtbh 系统编号
+	 * @return Boolean 删除成功或者失败
+	 */
+	public boolean delete(String xtbh){
+		try {
+			bsdmapper.delete(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除直埋段：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 标石段实体
+	 */
+	@Override
+	public String getTreeNodes(BsdEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> bsxxlist = bsdmapper.getBsxxByBsd(entity.getXtbh());
+		List<Map<String, Object>> gldlylist = bsdmapper.getGldlyByBsd(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),10));
+		nodes.append(super.getNode(entity.getXtbh(), "9", restype, bsxxlist));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 标石段的批量逻辑删除
+	 * @param xtbhs 标石段的系统编号
+	 * @return true 删除成功 false删除失败
+	 */
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				bsdmapper.delete(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除标石段：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 标石段批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			bsdmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑标石段：",e);
+			return false;
+		}
+	}	
+}

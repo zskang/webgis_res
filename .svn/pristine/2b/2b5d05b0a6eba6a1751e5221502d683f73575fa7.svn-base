@@ -1,0 +1,121 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.GddxtEntity;
+import com.cabletech.res.mapper.basemgr.GddMapper;
+import com.cabletech.res.mapper.basemgr.GddxtMapper;
+
+/**
+ * 承载--管道段系统管理 Service实现
+ * 
+ * @author 吕仁钊 2012/5/11
+ */
+@Service
+public class GddxtServiceImpl extends BaseServiceImpl implements GddxtService {
+
+	@Resource(name = "gddxtMapper")
+	private GddxtMapper gddxtmapper;
+
+	@Resource(name = "gddMapper")
+	private GddMapper gddmapper;
+	/**
+	 * 根据id获取管道段系统
+	 * 
+	 * @param resId 资源ID
+	 */
+	public GddxtEntity getbyid(String resId) {
+		return gddxtmapper.getbyid(resId);
+	}
+
+	/**
+	 * 跟新管道段系统
+	 * @param entity 管道段系统实体
+	 */
+	@Transactional
+	public boolean saveorupdate(GddxtEntity entity) {
+			try{
+				if(StringUtils.isNotBlank(entity.getXtbh())){
+					gddxtmapper.update(entity);
+				}else{
+					entity.setXtbh(super.getXTBH());
+					gddxtmapper.save(entity);
+				}
+				return true;
+			}catch (Exception e) {
+				logger.error("新增或更新管道段系统：",e);
+				return false;
+			}
+	}
+
+	/**
+	 * 管道段系统逻辑删除
+	 * @param xtbh 管道段系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean delete(String xtbh){
+		try {
+			gddxtmapper.deleteGddxt(xtbh);
+			gddmapper.deleteGddSsgdxt(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除管道段系统：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 管道段系统实体
+	 */
+	@Override
+	public String getTreeNodes(GddxtEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gddlist = gddxtmapper.getGddByGddxt(entity.getXtbh());
+		List<Map<String, Object>> gldlylist = gddxtmapper.getGldlyByGddxt(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),8));
+		nodes.append(super.getNode(entity.getXtbh(), "7", restype, gddlist));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 管道段系统的批量逻辑删除
+	 * @param xtbhs 管道段系统的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gddxtmapper.deleteGddxt(xtbh[i]);
+				gddmapper.deleteGddSsgdxt(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除管道段系统：",e);
+			return false;
+		}		
+	}
+	
+	/**
+	 * 管道段系统批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gddxtmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑管道段系统：",e);
+			return false;
+		}
+	}	
+}

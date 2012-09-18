@@ -1,0 +1,123 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.GqdxtEntity;
+import com.cabletech.res.mapper.basemgr.GqdMapper;
+import com.cabletech.res.mapper.basemgr.GqdxtMapper;
+
+/**
+ * 挂墙段系统管理
+ * @author zhanglei 2011-05-11
+ *
+ */
+@Service
+public class GqdxtServiceImpl extends BaseServiceImpl  implements GqdxtService {
+
+	@Resource(name = "gqdxtMapper")
+	private GqdxtMapper gqdxtmapper;
+	
+	@Resource(name = "gqdMapper")
+	private GqdMapper gqdmapper;
+	
+	/**
+	 * 挂墙段系统修改
+	 * @param entity 挂墙段系统实体
+	 */
+	@Transactional
+	public boolean saveorupdate(GqdxtEntity entity){
+		try{
+			if(StringUtils.isNotBlank(entity.getXtbh())){
+				gqdxtmapper.update(entity);
+			}else{
+				entity.setObjectid(super.getObjectID("RES_YS"));
+				entity.setXtbh(super.getXTBH());
+				gqdxtmapper.save(entity);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("新增或更新挂墙段系统实体：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 单条查看挂墙段系统信息
+	 * @param xtbh 系统编号
+	 * @return 单条挂墙段系统实体
+	 */
+	public GqdxtEntity getbyid(String xtbh){
+		return gqdxtmapper.getbyid(xtbh);
+	}
+	
+	/**
+	 * 挂墙段系统单条删除
+	 * @param xtbh 系统编号
+	 * @return Boolean 删除成功或者失败
+	 */
+	public boolean delete(String xtbh){
+		try {
+			gqdxtmapper.deleteGqxt(xtbh);
+			gqdmapper.deleteSsgqxt(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除挂墙段系统：",e);
+			return false;
+		}
+	}
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 挂墙段实体
+	 */
+	@Override
+	public String getTreeNodes(GqdxtEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gldlylist = gqdxtmapper.getGldlyByGldxt(entity.getXtbh());
+		List<Map<String, Object>> Gqdlist = gqdxtmapper.getGqdByGldxt(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),5));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		nodes.append(super.getNode(entity.getXtbh(), "4", restype, Gqdlist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 挂墙系统的批量逻辑删除
+	 * @param xtbhs 挂墙系统的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gqdxtmapper.deleteGqxt(xtbh[i]);
+				gqdmapper.deleteSsgqxt(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除挂墙系统：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 挂墙段系统批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gqdxtmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑挂墙段系统：",e);
+			return false;
+		}
+	}		
+}

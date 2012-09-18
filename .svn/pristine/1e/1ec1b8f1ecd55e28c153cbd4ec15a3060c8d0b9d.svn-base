@@ -1,0 +1,154 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.publicmgr.OdfEntity;
+import com.cabletech.res.mapper.publicmgr.OdfMapper;
+import com.cabletech.res.mapper.publicmgr.OdmMapper;
+
+ 
+/**
+ * odf信息管理
+ * @author zhanglei 2011-05-11
+ *
+ */
+@Service
+public class OdfServiceImpl extends BaseServiceImpl  implements OdfService {
+	
+	@Resource(name = "odfMapper")
+	private OdfMapper odfmapper;
+	
+	@Resource(name = "odmMapper")
+	private OdmMapper odmmapper;	
+	
+
+	/**
+	 * 新增或更新odf系统实体
+	 * @param entity odf实体
+	 */
+	@Transactional
+	public boolean saveorupdate(OdfEntity entity){
+		try{
+			if(StringUtils.isNotBlank(entity.getXtbh())){
+				odfmapper.update(entity);
+			}else{
+				entity.setXtbh(super.getXTBH());
+				odfmapper.save(entity);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("新增或更新odf实体：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 单条查看odf信息
+	 * @param xtbh 系统编号
+	 * @return 单条odf实体
+	 */
+	public OdfEntity getbyid(String xtbh){
+		return odfmapper.getbyid(xtbh);
+	}
+	
+	/**
+	 * odf单条删除
+	 * @param xtbh 系统编号
+	 * @return boolean 删除成功或者失败
+	 */
+	@Transactional
+	public boolean delete(String xtbh){
+		try {
+			odmmapper.deleteOdmByOdfXtbh(xtbh);
+			odfmapper.deleteOdfConnByOdfXtbh(xtbh);
+			odfmapper.deleteOdfDzByOdfXtbh(xtbh);
+			odfmapper.deleteOdf(xtbh);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除odf：",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity odf 实体
+	 */
+	@Override
+	public String getTreeNodes(OdfEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gldlylist = odfmapper.getGldlyByOdf(entity.getXtbh());
+		List<Map<String, Object>> zdxxlist  = odfmapper.getZdxxByOdf(entity.getXtbh());
+		List<Map<String, Object>> jfxxlist  = odfmapper.getJfxxByOdf(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),30));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		nodes.append(super.getNode(entity.getXtbh(), "28", restype, zdxxlist));
+		nodes.append(getFourthNodes(zdxxlist,"27", jfxxlist,"机房"));
+		return nodes.toString();
+	}
+	/**
+	 * 关联树组织3级-4级菜单
+	 * @param Plist 3级菜单的list
+	 * @param key 4级菜单的对应的类型
+	 * @param list 4级菜单list数据
+	 * @param ThirdType 三级菜单的名称
+	 * @return
+	 */
+	public String getFourthNodes(List<Map<String, Object>> Plist,String key,List<Map<String, Object>> list,String ThirdType){
+		StringBuffer node = new StringBuffer();
+		if(Plist != null && Plist.size()>0){
+			for(Map<String,Object> Pmap:Plist){
+				node.append(",{\"id\":\""+key+"\",\"pId\":\""+Pmap.get("XTBH")+"\",\"name\":\""+ThirdType+"（"+list.size()+"）\",\"open\":\"true\"}");
+				for(Map<String,Object> map:list){
+					node.append(",{\"id\":\""+map.get("XTBH")+"\",\"pId\":\""+key+"\",\"name\":\""+map.get("ZYMC")+"\"}");
+				}
+			}
+		}
+		return node.toString();
+	}
+	
+	@Override
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				odmmapper.deleteOdmByOdfXtbh(xtbh[i]);
+				odfmapper.deleteOdfConnByOdfXtbh(xtbh[i]);
+				//odfmapper.deleteOdfDzByOdfXtbh(xtbh[i]);
+				odfmapper.deleteOdf(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除ODF：",e);
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			odfmapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑ODF：",e);
+			return false;
+		}
+	}	
+	
+	/**
+	 * 获取资源树(连接管理模块需要，吕仁钊添加)
+	 * @param map 表单值
+	 * @return
+	 */
+	public List<Map<String,Object>> getResTree(String xtbh){
+		return odfmapper.getResTree(xtbh);
+	}
+	
+}

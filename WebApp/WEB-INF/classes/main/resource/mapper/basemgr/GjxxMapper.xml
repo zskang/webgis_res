@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.basemgr.GjxxMapper">
+
+	<!-- 单个管井信息查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GjxxEntity"
+		parameterType="string" flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.gjbm,g.yymc,g.jlb,
+		g.jlx,g.rjjj,g.jdc,g.jdk,g.jdg,g.lbj,g.jdsd,
+		g.sfh,g.dyj,g.dlmc,g.sfydzs,g.jgcz,g.jgxz,g.sygjbh,
+		g.gjgg,g.gjxh,g.gjyt,g.whfs,g.isdanger,g.sfjqj,
+		g.syqr,g.regionid,g.sszt,g.cqxz,g.ssglq,g.orgid,g.ewm,g.jggg,g.status,
+		round(g.lon,6) lon,round(g.lat,6) lat,
+		g.shape.minx projectx,g.shape.miny projecty from res_gjxx g where
+		g.xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 跟新管井信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GjxxEntity">
+		UPDATE res_gjxx SET
+		zymc=#{zymc,jdbcType=VARCHAR},gjbm=#{gjbm,jdbcType=VARCHAR},yymc=#{yymc,jdbcType=VARCHAR},
+		jlb=#{jlb,jdbcType=VARCHAR},jlx=#{jlx,jdbcType=VARCHAR},rjjj=#{rjjj,jdbcType=VARCHAR},
+		jdc=#{jdc,jdbcType=VARCHAR},jdk=#{jdk,jdbcType=VARCHAR},jdg=#{jdg,jdbcType=VARCHAR},
+		lbj=#{lbj,jdbcType=VARCHAR},jdsd=#{jdsd,jdbcType=VARCHAR},sfh=#{sfh,jdbcType=VARCHAR},
+		dyj=#{dyj,jdbcType=VARCHAR},dlmc=#{dlmc,jdbcType=VARCHAR},sfydzs=#{sfydzs,jdbcType=VARCHAR},
+		jgcz=#{jgcz,jdbcType=VARCHAR},jgxz=#{jgxz,jdbcType=VARCHAR},gjgg=#{gjgg,jdbcType=VARCHAR},gjxh=#{gjxh,jdbcType=VARCHAR},
+		gjyt=#{gjyt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},isdanger=#{isdanger,jdbcType=VARCHAR},
+		sfjqj=#{sfjqj,jdbcType=VARCHAR},syqr=#{syqr,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR},ewm=#{ewm,jdbcType=VARCHAR},
+		sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},ssglq=#{ssglq,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 无simid查询  条件：名称 设施状态 产权性质 区域 所属管理区  道路名称 时间段 -->
+	<select id="queryGjxxList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.gjbm,g.yymc,g.jlb,
+		g.jlx,g.rjjj,g.jdc,g.jdk,g.jdg,g.lbj,g.jdsd,
+		g.sfh,g.dyj,g.dlmc,g.sfydzs,g.jgcz,g.jgxz,g.sygjbh,
+		g.gjgg,g.gjxh,g.gjyt,g.whfs,g.isdanger,g.sfjqj,
+		g.syqr,g.regionid,g.sszt,g.cqxz,g.ssglq,g.orgid,g.ewm,g.jggg,g.status,
+		round(g.lon,6) lon,round(g.lat,6) lat, 
+		g.shape.minx projectx,g.shape.miny projecty from res_gjxx g
+		where (status != '9' or status is null)
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and ssglq like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="dlmc != null and dlmc != ''">
+			and dlmc like '%' || #{dlmc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and ONCREATE >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and ONCREATE <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+		order by oncreate desc
+	</select>
+
+	<!-- 含simid查询  条件：名称 设施状态 simid 产权性质 区域 所属管理区  道路名称 时间段 -->
+	<select id="queryGjxxListWithSimid" parameterType="hashmap"
+		resultType="hashmap" flushCache="true">
+		select g.objectid,g.xtbh,g.zymc,g.gjbm,g.yymc,g.jlb,
+		g.jlx,g.rjjj,g.jdc,g.jdk,g.jdg,g.lbj,g.jdsd,
+		g.sfh,g.dyj,g.dlmc,g.sfydzs,g.jgcz,g.jgxz,g.sygjbh,
+		g.gjgg,g.gjxh,g.gjyt,g.whfs,g.isdanger,g.sfjqj,
+		g.syqr,g.regionid,g.sszt,g.cqxz,g.ssglq,g.orgid,g.ewm,g.jggg,g.status,
+		round(g.lon,6) lon,round(g.lat,6) lat, 
+		g.shape.minx projectx,g.shape.miny projecty ,r.deviceid from res_gjxx g,res_gprs_record r
+		where
+		r.resid=g.xtbh and r.restype='A21' and (g.status != '9' or g.status is
+		null)
+		<if test="sszt != null and sszt != ''">
+			and g.sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and g.cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="simid != null and simid != ''">
+			and r.simid like '%' || #{simid,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and g.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and g.zymc like '%' || #{zymc,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and g.ssglq like '%' || #{ssglq,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="dlmc != null and dlmc != ''">
+			and g.dlmc like '%' || #{dlmc,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="starttime != null and starttime != ''">
+			<![CDATA[
+			and g.ONCREATE >= to_date(#{starttime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and g.ONCREATE <= to_date(#{endtime,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>		
+		</if>	
+		order by oncreate desc
+	</select>
+    <!-- 管井逻辑删除 -->
+	<update id="deleteGj" parameterType="String">
+		UPDATE res_gjxx SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增管井 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.GjxxEntity">
+		INSERT INTO res_gjxx(
+		objectid,xtbh,ssglq,zymc,gjbm,yymc,jlb,jlx,rjjj,jdc,jdk,jdg,lbj,jdsd,sfh,dyj,dlmc,sfydzs,
+		jgcz,jgxz,gjgg,gjxh,gjyt,whfs,isdanger,sfjqj,syqr,lon,lat,regionid,ewm,sszt,cqxz,orgid,shape
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{ssglq,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{gjbm,jdbcType=VARCHAR},#{yymc,jdbcType=VARCHAR},
+		#{jlb,jdbcType=VARCHAR},#{jlx,jdbcType=VARCHAR},#{rjjj,jdbcType=VARCHAR},
+		#{jdc,jdbcType=VARCHAR},#{jdk,jdbcType=VARCHAR},#{jdg,jdbcType=VARCHAR},
+		#{lbj,jdbcType=VARCHAR},#{jdsd,jdbcType=VARCHAR},#{sfh,jdbcType=VARCHAR},
+		#{dyj,jdbcType=VARCHAR},#{dlmc,jdbcType=VARCHAR},#{sfydzs,jdbcType=VARCHAR},
+		#{jgcz,jdbcType=VARCHAR},#{jgxz,jdbcType=VARCHAR},#{gjgg,jdbcType=VARCHAR},
+		#{gjxh,jdbcType=VARCHAR},#{gjyt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+		#{isdanger,jdbcType=VARCHAR},#{sfjqj,jdbcType=VARCHAR},#{syqr,jdbcType=VARCHAR},
+		#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+		#{ewm,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},
+		sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	
+	<!-- 根据管井编号获取相关光缆段 -->
+	<select id="getGldlyByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select l.zymc,l.xtbh from res_gld_ly l 
+		where  (l.status != '9' or l.status is null) and (l.adsblx='A21' and  l.adsbmc=#{xtbh,jdbcType=VARCHAR}) 
+		or (l.zdsblx='A21' and l.zdsbmc=#{xtbh,jdbcType=VARCHAR}) union
+		select l.zymc,l.xtbh from res_relate_jgdwss r,res_gld_ly l
+		where (l.status != '9' or l.status is null) and l.xtbh=r.gldid and r.resid=#{xtbh,jdbcType=VARCHAR} and r.restype='A21' order by zymc	
+	</select>
+	<!-- 根据管井编号获取相关管道段 -->
+	<select id="getGddByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select g.zymc,g.xtbh from res_gdd g 
+		where (g.status != '9' or g.status is null) and (g.qdgj=#{xtbh,jdbcType=VARCHAR} or  g.zdgj=#{xtbh,jdbcType=VARCHAR}) order by zymc
+	</select>
+	<!-- 根据管井编号获取相关光接头 -->
+	<select id="getGjtByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select t.zymc,t.xtbh from res_gjt t where (t.status != '9' or t.status is null) and t.sssslx='A21' and t.ssssmc=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	<!-- 根据管井编号获取相关管井剖面 -->
+	<select id="getGjpmByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select p.zymc,p.xtbh from res_gj_pm p where  (p.status != '9' or p.status is null) and p.gjbh=#{xtbh,jdbcType=VARCHAR} order by zymc
+	</select>
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gjxx set jlb=#{jlb,jdbcType=VARCHAR},jlx=#{jlx,jdbcType=VARCHAR},sfydzs=#{sfydzs,jdbcType=VARCHAR},
+		jgcz=#{jgcz,jdbcType=VARCHAR},jgxz=#{jgxz,jdbcType=VARCHAR},gjgg=#{gjgg,jdbcType=VARCHAR},gjxh=#{gjxh,jdbcType=VARCHAR},
+		gjyt=#{gjyt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},isdanger=#{isdanger,jdbcType=VARCHAR},sfjqj=#{sfjqj,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>
+	<!-- 获取光缆盘留关联的管井 -->
+	<select id="getGjxxByglplbh" parameterType="string" resultType="hashmap" flushCache="true">
+		<!-- select g.xtbh,g.zymc from res_glpl p, res_gld_ly l, res_gjxx g
+		where (l.status!='9' or l.status is null) and (g.status!='9' or g.status is null)
+		and p.szsslx='A21' and g.xtbh=p.szssmc and p.ssgld=l.xtbh and p.xtbh=#{xtbh,jdbcType=VARCHAR}-->
+		select g.xtbh,g.zymc from res_glpl p,res_gjxx g where 
+       (g.status!='9' or g.status is null) and p.szsslx='A21' and g.xtbh=p.szssmc  and p.xtbh=#{xtbh,jdbcType=VARCHAR} and (p.status!='9' or p.status is null)
+	</select>
+	<!-- 根据管井编号获取相关联的光缆盘留 -->
+	<select id="getGlplByGjbh" parameterType="string" resultType="hashmap" flushCache="true">
+		select p.xtbh,p.zymc from res_glpl p, res_gjxx g
+		where (p.status!='9' or p.status is null) and g.xtbh=p.szssmc and p.szsslx='A21' and p.szssmc=#{xtbh,jdbcType=VARCHAR}		
+	</select>		
+</mapper>

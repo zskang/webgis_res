@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.cabletech.contractor.mapper.gisextend.OilengineMapper">
+
+	<!-- 搜索油机 -->
+	<select id="searchOilengines" resultType="hashmap"
+		parameterType="hashmap" flushCache="true">
+		select distinct o.* from oe_oilengine o,view_org p
+		where o.maintenance_id=p.id and o.oilengine_state=#{ostatus,jdbcType=VARCHAR}
+		and o.oilengine_code like #{oilenginecode,jdbcType=VARCHAR}
+		<if test="rationpower != null and rationpower != ''">
+			and o.ration_power >= #{rationpower,jdbcType=INTEGER}
+		</if>
+		<if test="orgIds !=null">
+			and p.id in
+			<foreach item="orgid" collection="orgIds" open="("
+				separator="," close=")">
+				#{orgid}
+			</foreach>
+		</if>
+		<if test="regionIds !=null">
+			and p.regionid in
+			<foreach item="regionid" collection="regionIds" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>		
+	</select>
+	
+	<select id="getOilengine" resultType="hashmap"
+		parameterType="string" flushCache="true">
+		select o.oilengine_code oilenginecode,o.oilengine_model oilenginemodel,
+		fn_getnamebycode(o.oil_type,'OIL_TYPE') oiltype,o.producer,o.ration_power,
+		standard_oilwear,fn_getnamebycode(o.oilengine_type,'OIL_ENGINE_TYPE') oilenginetype,
+		oilengine_weight,property_right,fn_getnamebycode(o.oilengine_state,'oliengine_state') oilenginestate,
+		fn_getnamebycode(o.state,'oliengine_use') statename,o.state,r.regionname district,
+		v.name stationname,p.name maintenancename,o.principal,o.phone,o.address,o.remark,o.ct_x x,o.ct_y y
+		from oe_oilengine o,base_region r,view_org p,rs_resourcerecord_v v
+		where v.type=o.station_type and v.id=o.station_id and o.district=r.regionid 
+		and p.id=o.maintenance_id and o.id=#{id,jdbcType=VARCHAR}
+	</select>
+</mapper>

@@ -1,0 +1,289 @@
+package com.cabletech.core.service;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.ibatis.session.RowBounds;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.log4j.Logger;
+
+import com.cabletech.baseinfo.business.rest.EsriRestService;
+import com.cabletech.core.entity.config.GlobalConfigInfo;
+import com.cabletech.core.mapper.BaseMapper;
+
+/**
+ * Service基类，结合Spring进行控制管理 <br />
+ * 
+ * @author cqp
+ * 
+ * 
+ */
+public class BaseServiceImpl implements BaseService {
+	public Logger logger = Logger.getLogger(this.getClass());
+	
+	@Resource(name = "esriRestService")
+	public EsriRestService restservice;		
+
+	@Resource(name = "globalConfigInfo")
+	protected GlobalConfigInfo config;
+
+	@Resource(name = "sqlSession")
+	public SqlSession session;
+
+	@Resource(name = "baseMapper")
+	public BaseMapper mapper;
+
+	/**
+	 * 获取一个随机ID
+	 * 
+	 * @return String
+	 */
+	public String getUUID() {
+		return UUID.randomUUID().toString();
+	}
+
+	/**
+	 * 获取XTBH
+	 * 
+	 * @return String
+	 */
+	public String getXTBH() {
+		return mapper.getXTBH();
+	}
+
+	/**
+	 * 获取SDE OBJECTID
+	 * 
+	 * @param tableName
+	 *            获取序列的表名称
+	 * @return String objectid序列
+	 */
+	public int getObjectID(String tableName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tablename", tableName);
+		map.put("tablespacename", config.getTablespacename());
+		return mapper.getObjectID(map);
+	}
+
+	/**
+	 * 获取SDE插入几何字段时需要的SRID
+	 * 
+	 * @param tableName
+	 *            表名称
+	 */
+	public String getSRID(String tableName) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("tablename", tableName);
+		map.put("tablespacename", config.getTablespacename());
+		return mapper.getSRID(map);
+	}
+
+	/**
+	 * 组合两点之间的线段shape
+	 * 
+	 * @param sx
+	 *            起点x
+	 * @param sy
+	 *            起点y
+	 * @param ex
+	 *            终点x
+	 * @param ey
+	 *            终点y
+	 * @return
+	 */
+	public String getLineStr(String sx, String sy, String ex, String ey) {
+		String lineStr = "";
+		if(StringUtils.isBlank(sx) || StringUtils.isBlank(sy) || StringUtils.isBlank(ex) || StringUtils.isBlank(ey)){
+			return lineStr;
+		}
+		if (isNumber(sx) && isNumber(sy) && isNumber(ex) && isNumber(ey) && (!sx.equals(ex) && !sy.equals(ey))) {
+			lineStr = "linestring (" + sx + " " + sy + "," + ex + " " + ey + ")";
+		}
+		return lineStr;
+	}
+	
+	/**
+	 * 根据多点获取线段的shape
+	 * @param points 传入点的集合
+	 */
+	public String getLineStr(List<String[]> points) {
+		String lineStr = "";
+		return lineStr;
+	}
+   
+	/**
+	 * 通用分页查询方法
+	 * @param mapId  对应Mapper文件中的ID，如searchAllRegion等
+	 * @param parameter   查询条件，传递对应ID的查询条件
+	 * @param page   页数
+	 * @param pagesize 每页记录数
+	 * @return List<Map<String, Object>>
+	 */
+	@SuppressWarnings("unchecked")
+	private List<Map<String, Object>> queryPage(String mapId, Object parameter,
+			int page, int pagesize) {
+		List<Map<String, Object>> list = session.selectList(mapId, parameter,
+				new RowBounds(page, pagesize));
+		return list;
+	}
+
+	/**
+	 * 获取总的记录数
+	 * 
+	 * @param mapId  对应Mapper文件中的ID，如searchAllRegion等
+	 * @param parameter 查询条件，传递对应mapId的查询条件
+	 * @return int 页数
+	 */
+	@SuppressWarnings("unchecked")
+	public int getRecordCounts(String mapId, Object parameter) {
+		List<Map<String, Object>> list = session.selectList(mapId, parameter,
+				new RowBounds(-4, -4));
+		int count = Integer.parseInt(list.get(0).get("TOTAL").toString());
+		return count;
+	}
+
+	/**
+	 * 返回总记录数和当前页数的记录列表
+	 * 
+	 * @param mapId 对应Mapper文件中的ID，如searchAllRegion等
+	 * @param parameter  查询条件，传递对应ID的查询条件
+	 * @param page  页数
+	 * @param pagesize  每页记录数
+	 * @return Map<String, Object>
+	 */
+	public Map<String, Object> queryPageMap(String mapId, Object parameter,
+			int page, int pagesize) {
+		// logger.info("Mapper Time: " + mapId);
+		Date start = new Date();
+		List<Map<String, Object>> list = this.queryPage(mapId, parameter, page,
+				pagesize);
+		Date end = new Date();
+		logger.info(mapId + "时间： " + (end.getTime() - start.getTime()));
+		int counts = this.getRecordCounts(mapId, parameter);
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("rows", list);
+		map.put("total", counts);
+
+		return map;
+	}
+	
+	/**
+	 * 判断是否整数
+	 * 
+	 * @param number 数字
+	 * 
+	 */
+	public boolean isNumber(String number) {
+		int index = number.indexOf(".");
+		if (index < 0) {
+			return StringUtils.isNumeric(number);
+		} else {
+			String num1 = number.substring(0, index);
+			String num2 = number.substring(index + 1);
+
+			return StringUtils.isNumeric(num1) && StringUtils.isNumeric(num2);
+		}
+	}
+	
+	/**
+	 * 获取资源根结点
+	 * @param id 资源编号
+	 * @param name 资源名称
+	 * @return node串
+	 * @param key 序列中资源位置
+	 */
+	public String getRootNode(String id, String name, int key){
+		
+		return "{\"id\":\""+id+"\",\"keyid\":\""+key+"\",\"pId\":0,\"name\":\""+name+"\",\"open\":\"true\"}";
+	}
+	
+	/**
+	 * 获取每一类资源所属结点
+	 * @param xtbh 系统编号
+	 * @param key 资源结点编号
+	 * @param restype 相关资源分类
+	 * @param list 结点数据集合
+	 * @return 该类型的node串
+	 */
+	public String getNode(String xtbh, String key, Map<String, Object> restype, List<Map<String, Object>> list){
+		StringBuffer node = new StringBuffer();
+		if(list != null && list.size()>0){
+			node.append(",{\"id\":\""+key+"\",\"pId\":\""+xtbh+"\",\"name\":\""+restype.get(key)+"（"+list.size()+"）\",\"open\":\"true\"}");
+			for(Map map:list){
+				node.append(",{\"id\":\""+map.get("XTBH")+"\",\"pId\":\""+key+"\",\"name\":\""+map.get("ZYMC")+"\"}");
+			}
+		}else{
+			node.append(",{\"id\":\""+key+"\",\"pId\":\""+xtbh+"\",\"name\":\""+restype.get(key)+"\",\"open\":\"true\"}");
+		}
+		return node.toString();
+	}
+	
+	/**
+	 * 获取类型
+	 * @return
+	 */
+	public Map<String, Object> getResourceType(){
+		String[] res = {"引上","引上系统","挂墙","挂墙段","挂墙段系统","管井","管道段","管道段系统","标石","直埋段","直埋段系统","电杆","杆路段","杆路段系统","光缆段","光接头","管道闸","光终端盒","光缆信息","光分纤箱","光交接箱","光缆段路由","集团客户","宽带小区","校园网","营业厅","机房信息","站点信息","ODM","ODF","地下接线室","纤芯","光缆盘留"};
+		Map<String, Object> restype = new HashMap<String, Object>();
+		for(int i=0; i<res.length; i++){
+			restype.put(String.valueOf(i+1), res[i]);
+		}
+		return restype;
+	}
+	
+	
+	public List<Map<String, String>> getPoints(String qdlx, String qdid, String zdlx, String zdid){
+		List<Map<String, String>> list = new ArrayList<Map<String, String>>();
+		Map<String, String> startmap = new HashMap<String, String>();
+		startmap.put("tablename", getTableNameBylx(qdlx));
+		startmap.put("xtbh", qdlx.equals("AA001")?getResXtbh(qdid):qdid);
+		Map<String, String> map = mapper.getPointXY(startmap);
+		startmap.put("x", String.valueOf(map.get("PROJECTX")));
+		startmap.put("y", String.valueOf(map.get("PROJECTY")));
+		list.add(startmap);
+		Map<String, String> endmap = new HashMap<String, String>();
+		endmap.put("tablename", getTableNameBylx(zdlx));
+		endmap.put("xtbh", zdlx.equals("AA001")?getResXtbh(zdid):zdid);
+		Map<String, String> map2 = mapper.getPointXY(endmap);
+		endmap.put("x", String.valueOf(map2.get("PROJECTX")));
+		endmap.put("y", String.valueOf(map2.get("PROJECTY")));		
+		list.add(endmap);
+		return list;
+	}
+	
+	/**
+	 * 获取资源表名
+	 * @param lx 资源类型
+	 * @return 资源表名称
+	 */
+	public String getTableNameBylx(String lx){
+		String[] restypes = {"A20","A21","A22","A23","AD701","AD702","AD703","AD704","AD706","AA001","AA003","AA004","AA005","AA006"};
+		String[] restables = {"res_dgxx","res_gjxx","RES_BSXX","RES_GQXX","RES_JF","RES_ODF","RES_ODM","RES_DXJXS","RES_GLPL","RES_ODF","RES_GJJX","RES_GFXX","RES_GJT","RES_GZDH"};
+		String temptablename = "";
+		if(lx.equals("AA001")){//odf设备
+			return "res_zdxx";
+		}
+		for(int i=0; i<restypes.length; i++){
+			if(lx.toUpperCase().equals(restypes[i])){
+				temptablename = restables[i];break;
+			}
+		}
+		return temptablename;
+	}
+	
+	/**
+	 * 获取所属站点系统编号
+	 * @param id odf 设备系统编号
+	 * @return 站点系统编号
+	 */
+	public String getResXtbh(String id){
+		return mapper.getSSZD(id);
+	}
+}

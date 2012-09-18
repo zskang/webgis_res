@@ -1,0 +1,53 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.Map;
+
+import com.cabletech.core.service.BaseService;
+import com.cabletech.res.entity.basemgr.GddEntity;
+
+/**
+ * 承载--管道段管理 Service
+ * 
+ * @author 吕仁钊  2012/5/11
+ */
+public interface GddService extends BaseService {
+	/**
+	 * 根据xtbh获取管道段信息
+	 * @param xtbh 资源xtbh
+	 */
+	public GddEntity getbyid(String xtbh);
+	
+	/**
+	 * 更新管道段信息
+	 * @param entity 管道段信息实体
+	 */
+	public boolean saveorupdate(GddEntity entity);
+	
+	/**
+	 * 逻辑删除管道段
+	 * @param xtbh 管道段编号
+	 * @return
+	 */
+    public boolean delete(String xtbh); 
+	
+	/**
+	 * 获取资源相关结点串
+	 * @param entity 管道段
+	 * @return
+	 */	
+	public String getTreeNodes(GddEntity entity);
+	
+	/**
+	 * 管道段的批量逻辑删除
+	 * @param xtbh 管道段的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	public boolean batchDelete(String xtbh);	
+	
+	/**
+	 * 管道段批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map);	
+}

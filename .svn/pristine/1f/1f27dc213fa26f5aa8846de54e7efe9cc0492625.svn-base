@@ -1,0 +1,49 @@
+package com.cabletech.contractor.action.patrolmaninfo;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.struts2.convention.annotation.Action;
+import org.apache.struts2.convention.annotation.Namespace;
+import org.apache.struts2.convention.annotation.Result;
+import org.apache.struts2.convention.annotation.Results;
+import com.cabletech.core.action.BaseAction;
+
+/**
+ * 巡检人员信息Action
+ */
+@Namespace("/contractor")
+@Results({
+		@Result(name = "data", location = "/contractor/patrolmaninfo/patrolmandata_info.jsp")})
+@Action("patrolmaninfo")
+public class PatrolmanInfoAction extends BaseAction {
+
+	private static final long serialVersionUID = 1L;
+	
+	@Override
+	public String execute() {
+		// TODO Auto-generated method stub
+		return "data";
+	}
+
+	@Override
+	public Object getModel() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	protected void prepareSaveModel() throws Exception {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void prepareViewModel() throws Exception {
+		String id = request.getParameter("id");
+		if(StringUtils.isNotBlank(id)){
+			request.setAttribute("id", id);
+		}else{
+		}
+
+	}
+
+}

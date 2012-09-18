@@ -1,0 +1,48 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Insert title here</title>
+		<script type="text/javascript">
+			In.add('topocss',{path:'${ctx }/css/topo.css'});
+			In.add('layout',{path:'${ctx}/css/jquery.ct.ui.gis.layout.css'}); 			
+			In.add('uicss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'});
+			In.add('jqgridcss',{path:'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'});
+			In.add('jggridjs',{path:'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',type:'js',charset:'utf-8',rely:['jqgridcss','uicss']});
+			In.add('jggridlocalejs',{path:'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',type:'js',charset:'utf-8'});
+	        In.add('commonjs', {path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',type : 'js',charset : 'utf-8'});
+			//Ready
+			In.ready('topocss','layout','jggridjs','jggridlocalejs','commonjs',function(){
+				
+			});
+		</script>
+	</head>
+	<body>
+		<div class="TLEFT">
+			<div class="TLTOP">
+				<div class="ui-gis-right-title-bg">
+					<span style="display:block;float:left;margin-top:9px;margin-left:10px;">统计输入条件</span>
+	   		    </div>
+				
+			</div>
+			<div class="TLBOTTOM">
+				<div class="ui-gis-right-title-bg">
+					<span style="display:block;float:left;margin-top:9px;margin-left:10px;">统计选择模板</span>
+	   		    </div>
+				
+			</div>
+		</div>
+		<div class="TRIGHT">
+			<div class="TRTOP">
+				<div class="ui-gis-right-title-bg">
+					<input id="btn_all" type="button" value="统计" onclick="" />
+	   		    </div>
+			</div>
+			<div class="TRBOTTOM">
+				
+			</div>
+		</div>
+	</body>
+</html>

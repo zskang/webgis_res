@@ -1,0 +1,184 @@
+package com.cabletech.contractor.mapper.onlinedata;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * 查询在线数据
+ * 
+ * @author chenqp
+ * 
+ */
+public interface OnlineDataMapper {
+	/**
+	 * 查询今天在线人员
+	 * 
+	 * @param map 查询条件
+	 * @return
+	 */
+	public List<Map<String, Object>> queryTodayOnlineMan(Map<String, Object> map);
+	
+	
+	/**
+	 * 首页统计在线人员计数（当移动用户登录时）
+	 * @param regionid 当前登录人员区域编号
+	 * @return
+	 */
+	public String getOnlineManCountLoginMobile(String regionid);
+	
+	/**
+	 * 首页统计在线人员计数（当代维用户登录时）
+	 * @param regionid 当前登录人员组织机构编号
+	 * @return
+	 */
+	public String getOnlineManCountLoginContractor(String orgid);	
+	
+	
+	/**
+	 * 按区域分类 （当移动用户登录时）
+	 * @param regionid 省用户区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getRegionsLoginMobile(String regionid);
+	
+	/**
+	 * 按区域分类 （当代维用户登录时）
+	 * @param orgid 组织机构编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getRegionsLoginContractor(String orgid);
+
+	/**
+	 * 按代维分类：区域编号获取代维单位（当移动用户登录时）
+	 * @param regionid 区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getContractorsLoginMobile(String regionid);
+	
+	/**
+	 * 按代维分类：组织机构编号获取代维单位（当代维用户登录时）
+	 * @param orgid 组织机构编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getContractorsLoginContractor(String orgid);
+	
+	/**
+	 * 按区域编号获取在线人员数量（当移动用户登录时）
+	 * @param regionid 区域编号
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinemanByRegionLoginMobile(String regionid);
+	
+	/**
+	 * 按组织机构编号获取在线人员数量
+	 * @param map 区域编号、 当前登录人的组织机构编号
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinemanByRegionLoginContractor(Map<String, Object> map);
+	
+	/**
+	 * 按组织机构编号获取在线人员数量（当省移动用户登录时）
+	 * @param map 组织机构编号、当前登录人的区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinemanByOrgProvinceMobile(Map<String, Object> map);	
+	
+	/**
+	 * 按组织机构编号获取在线人员数量（当市移动用户登录时）
+	 * @param map 组织机构编号、当前登录人的区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinemanByOrgCityMobile(Map<String, Object> map);
+	
+	/**
+	 * 按组织机构编号获取在线人员数量（当区县移动用户登录时）
+	 * @param map 组织机构编号、当前登录人的区域编号
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinemanByOrgCountyMobile(Map<String, Object> map);
+	
+	/**
+	 * 按组织机构编号获取在线人员数量（当代维用户登录时）
+	 * @param orgid 区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinemanByContractor(String orgid);	
+	
+	/**
+	 * 首页统计在线车辆计数（当移动用户登录时）
+	 * @param regionid 区域编号
+	 * @return
+	 */
+	public String getOnlineCarCountLoginMobile(String regionid);
+	
+	/**
+	 * 首页统计在线车辆计数（当代维用户登录时）
+	 * @param regionid 区域编号
+	 * @return
+	 */
+	public String getOnlineCarCountLoginContractor(String orgid);
+	
+	/**
+	 * 按区域分、区域编号获取在线人员车辆（当移动用户登录时）
+	 * @param regionid 区域编号
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinecarByRegionLoginMobile(String regionid);
+	
+	/**
+	 * 按区域分、区域编号获取在线人员车辆（当代维用户登录时）
+	 * @param map 区域编号、当前登录人的组织机构编号
+	 * @return
+	 */	
+	public List<Map<String, Object>> getOnlinecarByRegionLoginContractor(Map<String, Object> map);	
+	
+	/**
+	 * 按代维分、省移动区域编号获取在线车辆数量
+	 * @param map 组织机构编号、当前登录人的区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinecarByOrgProvinceMobile(Map<String, Object> map);
+	
+	/**
+	 * 按市移动区域编号获取在线车辆数量
+	 * @param map 组织机构编号、当前登录人的区域编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinecarByOrgCityMobile(Map<String, Object> map);	
+	
+	/**
+	 * 按代维组织机构编号获取在线车辆数量
+	 * @param orgid 组织机构编号
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlinecarByContractor(String orgid);
+	
+	/**
+	 * 获取整点在线人数量（当移动用户登录时）
+	 * @param map 时间段、区域
+	 * @return
+	 */
+	public List<Map<String, Object>> getTotalOnlineManCountLoginMobile(Map<String, Object> map);
+	
+	/**
+	 * 获取整点在线人数量（当代维用户登录时）
+	 * @param map 时间段、区域
+	 * @return
+	 */
+	public List<Map<String, Object>> getTotalOnlineManCountLoginContractor(Map<String, Object> map);
+	
+	/**
+	 * 获取整点在线车辆数量（当移动用户登录时）
+	 * @param map 时间段、区域
+	 * @return
+	 */
+	public String getTotalOnlineCarCountLoginMobile(Map<String, Object> map);
+	
+	/**
+	 * 获取整点在线车辆数量（当代维用户登录时）
+	 * @param map 时间段、区域
+	 * @return
+	 */
+	public String getTotalOnlineCarCountLoginContractor(Map<String, Object> map);	
+	
+}

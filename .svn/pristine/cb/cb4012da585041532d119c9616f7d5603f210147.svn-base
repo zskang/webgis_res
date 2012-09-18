@@ -1,0 +1,129 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript">
+	 	In.add('validatejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.validate.min.js',type:'js',charset:'utf-8'});
+	 	In.add('autocompleteJs',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',type:'js',charset:'utf-8',rely:['autocompleteCss']});
+	    In.add('autocompleteCss',{path:'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'});
+        In.add('ctcss',{path:'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom.css'});
+        In.add('ztreejs',{path:'http://${config.webliburl}/cabletech/ui/js/jquery.ztree.all-3.1.min.js',type:'js',charset:'utf-8',rely:['ztreecss']});
+        In.add('wdatepickerjs',{path:'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',type:'js',charset:'utf-8'});
+        In.add('ztreecss',{path:'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'});
+        In.ready('ztreejs','validatejs','autocompleteJs','wdatepickerjs','ctcss',function(){
+	        	In.css('#formname label.error {margin-left: 10px;width: auto;display: inline;}');
+	        	In.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+         		$("#formname").validate({});
+         		getAutoCompleteValue(false,'zdmc','siteid','res_zdxx');
+         		var towerid = $('#towerid').val();
+				if(!towerid){
+					$('.ui-form-container .ui-form-input-box INPUT:last').css('display','none');
+					}
+		});
+
+			var type = "tower";
+			function doSubmit(act){
+				var url ="${ctx}/res/publicmgr/{type}!{act}.action";
+				document.forms[0].action=url.replace('{type}',type).replace('{act}',act);
+				if(act == 'view'){
+					document.forms[0].submit();
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div class="ui-form-container">
+			<form id="formname" name="formname" method="post" action="">
+				<input type="hidden" id="actmsg" name="actmsg"
+					value="${entity.actionMessage}" />
+				<input type="hidden" id="towerid" name="towerid" value="${entity.towerid}">
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">所属站点:</span>
+					<span class="ui-form-value">
+					<input id="zdmc" name="zdmc" class="required ui-form-input" type="text" 
+					onblur="judgeHiddenValue(this,'siteid')" value='<resinfo:resCommon keyValue="${entity.siteid}" 
+					tableName="res_zdxx"></resinfo:resCommon>'/>
+					<span class="ui-form-symbol-icon">
+					</span><span class="ui-form-symbol-color">*</span>
+					</span>
+					<input type="hidden" name="siteid" id="siteid" value="${entity.siteid }">
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔名称:</span>
+					<span class="ui-form-value">
+					<input id="towername" name="towername" class="required ui-form-input" type="text" value="${entity.towername}"/>
+					<span class="ui-form-symbol-color">*</span>
+					</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔平台数：</span>
+					<span class="ui-form-value">
+					<input id="towerplatformnum" name="towerplatformnum" class="required number ui-form-input" type="text" value="${entity.towerplatformnum}"/>
+					<span class="ui-form-symbol-color">*</span>
+					</span>
+				</div>
+
+				<div class="ui-form-input-box">
+						<span class="ui-form-input-title">使用平台数:</span>
+						<span class="ui-form-value">
+						<input id="useplatformnum" name="useplatformnum" class="number ui-form-input" type="text" value="${entity.useplatformnum}"/>
+						</span>
+				</div>
+				
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">塔身高度(米):</span>
+					<span class="ui-form-value">
+					<input id="bodyheight" name="bodyheight" class="number ui-form-input" type="text" value="${entity.bodyheight}"/>
+					</span>
+				</div>
+
+					<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔类型：</span>
+						<span class="ui-form-value">
+						<baseinfo:dicselector name="towertype" columntype="TOWERTYPE" type="select" isQuery="query" keyValue="${entity.towertype }"></baseinfo:dicselector>
+						</span>
+				</div>
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔厂家：：</span>
+					<span class="ui-form-value">
+					<input id="producter" name="producter" class="ui-form-input" type="text" value="${entity.producter}"/>
+					</span>
+				</div>
+				
+					<div class="ui-form-input-box">
+					<span class="ui-form-input-title">铁塔高度：</span>
+					<span class="ui-form-value"> 
+					<input id="towerheight" name="towerheight" class="number ui-form-input" type="text" value="${entity.towerheight}"/>
+					</span>
+					
+				</div>
+
+
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">建设日期:</span>
+				<span class="ui-form-value">
+				<input type="text" class="required ui-form-input Wdate" name="builddate"
+						id="builddate" value="${entity.builddate}"
+						onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" />
+				</span>
+				
+				</div>
+				<div class="ui-form-input-box">
+					<span class="ui-form-input-title">&nbsp;</span>
+					<input type="submit" value="保存" onclick="doSubmit('save')"
+						style="width: 80px;">
+					<input type="button" value="取消" onclick="doSubmit('view')"
+						style="width: 80px;">
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

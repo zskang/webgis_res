@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.index.NoticeMapper">
+	
+	<insert id="saveorupdate" parameterType="com.cabletech.res.entity.index.NoticeEntity">
+		insert into res_notice
+		  (id, title, type, content, regionid, issueperson, issuedate)
+		values
+		  (#{id,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{type,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR},
+		  #{regionid,jdbcType=VARCHAR}, #{issueperson,jdbcType=VARCHAR},sysdate)
+	</insert>
+	
+	<select id="getNotices" parameterType="hashmap" resultType="hashmap">
+		select ID XTBH,(select lable from base_sysdictionary@base b where b.codevalue = a.type and rownum=1) TYPE,TITLE,to_char(ISSUEDATE,'YYYY/MM/DD') DT,issueperson MAN,(SELECT count(1) FROM res_notice_isread b where b.noticeid = a.id and userid = #{userid,jdbcType=VARCHAR}) IFREAD 
+			from res_notice a 
+			where 1=1  
+			<if test="title != null and title != ''">
+				and title like '%' || #{title,jdbcType=VARCHAR} || '%'
+			</if>
+			<if test="type != null and type != ''">
+				and type = #{type,jdbcType=VARCHAR}
+			</if>	
+		order by a.issuedate desc
+	</select>
+	
+	<select id="getUnReadNotices" parameterType="hashmap" resultType="int">
+		select count(1) from res_notice a  where a.id not in (select distinct noticeid from res_notice_isread b where b.userid = #{userid,jdbcType=VARCHAR}) and a.regionid like rtrim(#{regionid,jdbcType=VARCHAR},'0')||'%' 
+	</select>
+	
+	<select id="getById" parameterType="string" resultType="com.cabletech.res.entity.index.NoticeEntity">
+		select id, title, type,  content,  regionid, issuedate from res_notice where id = #{id,jdbcType=VARCHAR}
+	</select>
+	
+	<insert id="setRead" parameterType="hashmap">
+		insert into res_notice_isread
+		  (userid, noticeid)
+		values
+		  (#{userid,jdbcType=VARCHAR}, #{noticeid,jdbcType=VARCHAR})
+	</insert>
+	
+	<delete id="delNotice" parameterType="string">
+		delete from res_notice where id = #{id,jdbcType=VARCHAR}
+	</delete>
+</mapper>

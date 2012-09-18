@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.TowerMapper">
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.TowerEntity"
+		parameterType="string" flushCache="true">
+		select n.tower_id
+		towerid,n.tower_name towername,n.tower_platform_num
+		towerplatformnum,n.use_platform_num useplatformnum,n.body_height
+		bodyheight,
+		n.tower_type towertype,producter,n.property_right
+		propertyright,
+		n.tower_height
+		towerheight,to_char(n.build_date,'yyyy-MM-dd hh24:mi:ss')
+		builddate,n.site_id siteid
+		from RES_TOWER n where
+		tower_id=#{towerid,jdbcType=VARCHAR}
+	</select>
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.TowerEntity">
+		UPDATE RES_TOWER SET
+		site_id=#{siteid,jdbcType=VARCHAR},tower_name=#{towername,jdbcType=VARCHAR},tower_platform_num=#{towerplatformnum,jdbcType=VARCHAR},
+		use_platform_num=#{useplatformnum,jdbcType=VARCHAR},body_height=#{bodyheight,jdbcType=VARCHAR},tower_type=#{towertype,jdbcType=VARCHAR},
+		producter=#{producter,jdbcType=VARCHAR},property_right=#{propertyright,jdbcType=VARCHAR},tower_height=#{towerheight,jdbcType=VARCHAR},
+		build_date=to_date(#{builddate,jdbcType=VARCHAR},'yyyy-MM-dd
+		hh24:mi:ss')
+		WHERE tower_id=#{towerid,jdbcType=VARCHAR}
+	</update>
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.TowerEntity"
+		flushCache="true">
+		insert into
+		RES_TOWER(tower_id,site_id,tower_name,tower_platform_num,use_platform_num,body_height,
+		tower_type,producter,property_right,tower_height,build_date)
+		values(#{towerid,jdbcType=VARCHAR}
+		,#{siteid,jdbcType=VARCHAR},#{towername,jdbcType=VARCHAR}
+		,#{towerplatformnum,jdbcType=VARCHAR},#{useplatformnum,jdbcType=VARCHAR},#{bodyheight,jdbcType=VARCHAR}
+		,#{towertype,jdbcType=VARCHAR},#{producter,jdbcType=VARCHAR},#{propertyright,jdbcType=VARCHAR},#{towerheight,jdbcType=VARCHAR}
+		,to_date(#{builddate,jdbcType=VARCHAR},'yyyy-MM-dd hh24:mi:ss'))
+	</insert>
+	<select id="queryTowerList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select n.tower_id towerid,n.tower_name towername,n.tower_platform_num
+		towerplatformnum,n.use_platform_num useplatformnum,n.body_height
+		bodyheight,
+		n.tower_type,fn_getnamebycode(n.tower_type,'TOWER_TYPE')
+		TOWERTYPE,producter,n.property_right
+		propertyright,
+		n.tower_height
+		towerheight,to_char(n.build_date,'yyyy-MM-dd hh24:mi:ss')
+		builddate,n.site_id siteid,d.zymc,d.zdbh,
+		g.regionname,
+		m.maintenance_id,o.NAME
+		orgname,p.NAME patrolgroupname
+		from RES_TOWER
+		n left join res_zdxx d on
+		n.site_id = d.xtbh left join res_maintenance
+		m on
+		d.xtbh=m.rs_id and
+		m.rs_type='C33'
+		left join view_org o on
+		m.maintenance_id=o.ID
+		left join
+		view_patrolgroup p on
+		p.ID=m.patrol_group_id
+		left join
+		view_region g on
+		d.regionid =g.regionid
+		where 1=1
+		<if test="zdmc != null and zdmc != ''">
+			and d.zymc '%' || #{zdmc,jdbcType=VARCHAR}
+			|| '%'
+		</if>
+		<if test="towertype != null and towertype != ''">
+			and n.tower_type = #{towertype,jdbcType=VARCHAR}
+		</if>
+		<if test="towername != null and towername != ''">
+			and n.tower_name like '%' || #{towername,jdbcType=VARCHAR}
+			|| '%'
+		</if>
+		<if test="producter != null and producter != ''">
+			and n.producter like '%' || #{producter,jdbcType=VARCHAR}
+			|| '%'
+		</if>
+		<if test="propertyright != null and propertyright != ''">
+			and n.property_right = #{propertyright,jdbcType=VARCHAR}
+		</if>
+		<if test="towerheight != null and towerheight != ''">
+			and n.tower_height = #{towerheight,jdbcType=VARCHAR}
+		</if>
+		<if test="startbuilddate != null and startbuilddate != ''">
+			<![CDATA[
+			and n.build_date >= to_date(#{startbuilddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+			]]>
+		</if>
+		<if test="endbuilddate != null and endbuilddate != ''">
+			<![CDATA[
+			and n.build_date <= to_date(#{endbuilddate,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')+1
+			]]>		
+		</if>	
+		<if test="regionids != null and regionids != ''">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="orgids != null and orgids != ''">
+			and m.maintenance_id in
+			<foreach collection="orgids" item="orgid" open="(" separator=","
+				close=")">
+				#{orgid,jdbcType=VARCHAR}
+			</foreach>
+			and r.rs_id=n.xtbh and r.rs_type='C33')
+		</if>
+		<if test="patrolgroupid != null and patrolgroupid != ''">
+			and m.patrol_group_id =
+			#{patrolgroupid,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<update id="delete" parameterType="String">
+		delete from RES_TOWER where
+		tower_id=#{towerid,jdbcType=VARCHAR}
+	</update>
+</mapper>

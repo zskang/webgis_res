@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.cabletech.res.mapper.basemgr.GddxtMapper">
+	
+	<!-- 根据id获取管道系统信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.basemgr.GddxtEntity" parameterType="java.lang.String" flushCache="true">
+		select * from res_gdd_xt where  xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 跟新管道段系统 -->
+	<update id="update" parameterType="com.cabletech.res.entity.basemgr.GddxtEntity">
+		UPDATE res_gdd_xt SET
+			zymc=#{zymc,jdbcType=VARCHAR},zcd=#{zcd,jdbcType=VARCHAR},gjs=#{gjs,jdbcType=VARCHAR},
+			ywjb=#{ywjb,jdbcType=NUMERIC},sszt=#{sszt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+			cqxz=#{cqxz,jdbcType=VARCHAR},jsdw=#{jsdw,jdbcType=VARCHAR},
+			regionid=#{regionid,jdbcType=VARCHAR},bz=#{bz,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 管道段系统查询   条件： 名称 设施状态 产权性质 区域 -->
+	<select id="queryGddxtList" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select * from res_gdd_xt
+		where (status != '9' or status is null)
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt=#{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz=#{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="(" separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 单条管道段系统逻辑删除 -->
+	<update id="deleteGddxt" parameterType="String">
+		UPDATE res_gdd_xt SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 新增管道段系统 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.basemgr.GddxtEntity">
+		INSERT INTO res_gdd_xt(
+		xtbh,zymc,zcd,gjs,ywjb,sszt,whfs,cqxz,jsdw,regionid,bz,orgid
+		) VALUES(
+			#{xtbh,jdbcType=VARCHAR},
+			#{zymc,jdbcType=VARCHAR},#{zcd,jdbcType=VARCHAR},#{gjs,jdbcType=VARCHAR},
+			#{ywjb,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+			#{cqxz,jdbcType=VARCHAR},#{jsdw,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},
+			#{bz,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		)
+	</insert>
+	
+	<!-- 获取管道段系统关联的管道段 -->
+	<select id="getGddByGddxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select f.zymc,f.xtbh from res_gdd f where f.ssgddxt=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 获取管道段系统关联光缆段路由 -->
+	<select id="getGldlyByGddxt" parameterType="string" resultType="hashmap" flushCache="true">
+		select y.zymc,y.xtbh from res_gdd f,res_gld_ly_dwss l,res_gld_ly y where
+		f.xtbh=l.segment_id and l.gld_id=y.xtbh and f.ssgddxt=#{xtbh,jdbcType=VARCHAR} and restype='AA601'
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_gddxt set cqxz=#{cqxz,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>			
+</mapper>

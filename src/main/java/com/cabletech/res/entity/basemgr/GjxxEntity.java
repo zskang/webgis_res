@@ -1,0 +1,339 @@
+package com.cabletech.res.entity.basemgr;
+
+/**
+ * 管井信息实体类
+ * 
+ * @author zhanglei 2012-05-09
+ */
+public class GjxxEntity extends BaseEntity{
+
+	private static final long serialVersionUID = 1L;
+
+	private String gjbm; // 管井编码
+	private String yymc; // 原有名称
+	private String jlb; // 井类别
+	private String jlx; // 井类型
+	private String rjjj; // 人井结构
+	private String jdc; // 井底长
+	private String jdg; // 井底高
+	private String jdk; // 井底宽
+	private String lbj; // 路边距
+	private String jdsd; // 井底深度
+	private String sfh; // 上覆厚
+	private String dyj; // 多眼井
+	private String dlmc; // 道路名称
+	private String sfydzs; // 是否有电子锁
+	private String jgcz; // 井盖材质
+	private String jgxz; // 井盖形状
+	private String jggg; // 井盖规格
+	private String gjgg; // 管井规格
+	private String gjxh; // 管井型号
+	private String gjyt; // 管井用途
+	private String whfs; // 管井维护方式
+	private String isdanger; // 是否危险点
+	private String sfjqj; // 是否局前井
+	private String syqr; // 所有权人
+	private String lon; // 经度
+	private String lat; // 纬度
+	private String regionid; // 所属地市
+	private String sszt; // 设施状态
+	private String cqxz; // 产权性质
+	private String ssglq; // 所属管理区
+	private String ewm;// 二维码
+	private String orgid;//组织ID
+	private String oncreate;//创建时间
+
+	private String simid;//SIM卡号
+	
+	private String starttime; //采集开始时间｛查询用｝
+	private String endtime; //采集结束时间｛查询用｝	
+	
+	public String getOrgid() {
+		return orgid;
+	}
+
+	public void setOrgid(String orgid) {
+		this.orgid = orgid;
+	}
+
+	public String getGjbm() {
+		return gjbm;
+	}
+
+	public void setGjbm(String gjbm) {
+		this.gjbm = gjbm;
+	}
+
+	public String getYymc() {
+		return yymc;
+	}
+
+	public void setYymc(String yymc) {
+		this.yymc = yymc;
+	}
+
+	public String getJlb() {
+		return jlb;
+	}
+
+	public void setJlb(String jlb) {
+		this.jlb = jlb;
+	}
+
+	public String getJlx() {
+		return jlx;
+	}
+
+	public void setJlx(String jlx) {
+		this.jlx = jlx;
+	}
+
+	public String getRjjj() {
+		return rjjj;
+	}
+
+	public void setRjjj(String rjjj) {
+		this.rjjj = rjjj;
+	}
+
+	public String getJdc() {
+		return jdc;
+	}
+
+	public void setJdc(String jdc) {
+		this.jdc = jdc;
+	}
+
+	public String getJdg() {
+		return jdg;
+	}
+
+	public void setJdg(String jdg) {
+		this.jdg = jdg;
+	}
+
+	public String getJdk() {
+		return jdk;
+	}
+
+	public void setJdk(String jdk) {
+		this.jdk = jdk;
+	}
+
+	public String getLbj() {
+		return lbj;
+	}
+
+	public void setLbj(String lbj) {
+		this.lbj = lbj;
+	}
+
+	public String getJdsd() {
+		return jdsd;
+	}
+
+	public void setJdsd(String jdsd) {
+		this.jdsd = jdsd;
+	}
+
+	public String getSfh() {
+		return sfh;
+	}
+
+	public void setSfh(String sfh) {
+		this.sfh = sfh;
+	}
+
+	public String getDyj() {
+		return dyj;
+	}
+
+	public void setDyj(String dyj) {
+		this.dyj = dyj;
+	}
+
+	public String getDlmc() {
+		return dlmc;
+	}
+
+	public void setDlmc(String dlmc) {
+		this.dlmc = dlmc;
+	}
+
+	public String getSfydzs() {
+		return sfydzs;
+	}
+
+	public void setSfydzs(String sfydzs) {
+		this.sfydzs = sfydzs;
+	}
+
+	public String getJgcz() {
+		return jgcz;
+	}
+
+	public void setJgcz(String jgcz) {
+		this.jgcz = jgcz;
+	}
+
+	public String getJgxz() {
+		return jgxz;
+	}
+
+	public void setJgxz(String jgxz) {
+		this.jgxz = jgxz;
+	}
+
+	public String getJggg() {
+		return jggg;
+	}
+
+	public void setJggg(String jggg) {
+		this.jggg = jggg;
+	}
+
+	public String getGjgg() {
+		return gjgg;
+	}
+
+	public void setGjgg(String gjgg) {
+		this.gjgg = gjgg;
+	}
+
+	public String getGjxh() {
+		return gjxh;
+	}
+
+	public void setGjxh(String gjxh) {
+		this.gjxh = gjxh;
+	}
+
+	public String getGjyt() {
+		return gjyt;
+	}
+
+	public void setGjyt(String gjyt) {
+		this.gjyt = gjyt;
+	}
+
+	public String getWhfs() {
+		return whfs;
+	}
+
+	public void setWhfs(String whfs) {
+		this.whfs = whfs;
+	}
+
+	public String getIsdanger() {
+		return isdanger;
+	}
+
+	public void setIsdanger(String isdanger) {
+		this.isdanger = isdanger;
+	}
+
+	public String getSfjqj() {
+		return sfjqj;
+	}
+
+	public void setSfjqj(String sfjqj) {
+		this.sfjqj = sfjqj;
+	}
+ 
+ 	public String getSyqr() {
+		return syqr;
+	}
+
+	public void setSyqr(String syqr) {
+		this.syqr = syqr;
+	}
+
+	public String getLon() {
+		return lon;
+	}
+
+	public void setLon(String lon) {
+		this.lon = lon;
+	}
+
+	public String getLat() {
+		return lat;
+	}
+
+	public void setLat(String lat) {
+		this.lat = lat;
+	}
+
+	public String getRegionid() {
+		return regionid;
+	}
+
+	public void setRegionid(String regionid) {
+		this.regionid = regionid;
+	}
+
+	public String getSszt() {
+		return sszt;
+	}
+
+	public void setSszt(String sszt) {
+		this.sszt = sszt;
+	}
+
+	public String getCqxz() {
+		return cqxz;
+	}
+
+	public void setCqxz(String cqxz) {
+		this.cqxz = cqxz;
+	}
+
+	public String getSsglq() {
+		return ssglq;
+	}
+
+	public void setSsglq(String ssglq) {
+		this.ssglq = ssglq;
+	}
+
+	public String getEwm() {
+		return ewm;
+	}
+ 
+	public void setEwm(String ewm) {
+		this.ewm = ewm;
+	}
+
+	public String getEndtime() {
+		return endtime;
+	}
+
+	public void setEndtime(String endtime) {
+		this.endtime = endtime;
+	}
+
+	public String getSimid() {
+		return simid;
+	}
+
+	public void setSimid(String simid) {
+		this.simid = simid;
+	}
+
+	public String getStarttime() {
+		return starttime;
+	}
+
+	public void setStarttime(String starttime) {
+		this.starttime = starttime;
+	}
+
+	public String getOncreate() {
+		return oncreate;
+	}
+
+	public void setOncreate(String oncreate) {
+		this.oncreate = oncreate;
+	}
+
+}

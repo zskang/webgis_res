@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.core.mapper.BaseMapper">
+	
+	<!-- 获取业务表空间注册编号 -->
+	<select id="getObjectID" parameterType="hashmap" resultType="Integer" flushCache="true">
+		select sde.version_user_ddl.next_row_id(#{tablespacename,jdbcType=VARCHAR},
+		(SELECT REGISTRATION_ID regid FROM sde.TABLE_REGISTRY WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{tablespacename,jdbcType=VARCHAR})
+		) id from dual
+	</select>
+	
+	<!-- 获取业务表空间生成字段所需的参数srid -->
+	<select id="getSRID" parameterType="hashmap" resultType="String" flushCache="true">
+		SELECT srid FROM sde.st_geometry_columns 
+		WHERE TABLE_NAME=#{tablename,jdbcType=VARCHAR} AND OWNER=#{tablespacename,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getPointXY" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select s.shape.minx projectx,s.shape.miny projecty from ${tablename} s where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	
+	<select id="getSSZD" parameterType="string" resultType="string" flushCache="true">
+		select distinct j.sszd from res_odf f,res_jf j where f.ssjf=j.xtbh and f.xtbh=#{id,jdbcType=VARCHAR}
+	</select>
+</mapper>

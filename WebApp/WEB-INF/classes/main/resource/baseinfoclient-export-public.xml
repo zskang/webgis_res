@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BASEINFOCLIENT 属性配置 -->
+<!-- 维修作业计划模块 EXCEL导出配置 -->
+<items>
+	<export>
+		<excel key="groupcustomerlist" name="集客列表 " dataService="groupCustomerServiceImpl">
+			<column name="客户编号" datakey="GROUPID"></column>
+			<column name="客户名称" datakey="GROUPNAME"></column>
+			<column name="客户地址" datakey="GROUPADDR"></column>
+			<column name="客户级别" datakey="KHJB"></column>
+			<column name="客户服务等级" datakey="GRADEOFSERVICE"></column>
+			<column name="客户行业" datakey="INDUSTRY"></column>
+			<column name="客户联系人" datakey="LINKMAN"></column>
+			<column name="客户联系电话" datakey="PHONE"></column>
+			<column name="客户经理" datakey="KHJL"></column>
+			<column name="客户经理联系电话" datakey="KHJLDH"></column>
+			<column name="区域" datakey="REGIONNAME"></column>
+			<column name="代维公司" datakey="MAINTENANCE_ID"></column>
+		</excel>
+		<excel key="btssitelist" name="BTSSite列表 " dataService="BTSSiteServiceImpl">
+			<column name="站点编号" datakey="ZDBH"></column>
+			<column name="站点名称" datakey="ZDMC"></column>
+			<column name="网元名称" datakey="NE_NAME"></column>
+			<column name="中文名称" datakey="CN_NAME"></column>
+			<column name="基站级别" datakey="BS_LEVELENAME"></column>
+			<column name="所属机房" datakey="JFMC"></column>
+			<column name="区域" datakey="REGIONNAME"></column>
+			<column name="入网时间" datakey="OPENINGTIME"></column>
+			<column name="代维公司" datakey="ORGNAME"></column>
+		</excel>
+		<excel key="nodeblist" name="NodeB列表 " dataService="nodeBServiceImpl">
+			<column name="站点编号" datakey="ZDBH"></column>
+			<column name="站点名称" datakey="ZDMC"></column>
+			<column name="网元名称" datakey="NE_NAME"></column>
+			<column name="中文名称" datakey="CN_NAME"></column>
+			<column name="VIP基站" datakey="BS_LEVEL"></column>
+			<column name="所属机房" datakey="JFMC"></column>
+			<column name="区域" datakey="REGIONNAME"></column>
+			<column name="入网时间" datakey="OPENINGTIME"></column>
+			<column name="代维公司" datakey="MAINTENCE_ID"></column>
+		</excel>
+		<excel key="towerlist" name="铁塔列表 " dataService="towerServiceImpl">
+			<column name="站点编号" datakey="ZDBH"></column>
+			<column name="站点名称" datakey="ZDMC"></column>
+			<column name="铁塔名称" datakey="TOWERNAME"></column>
+			<column name="平台数量" datakey="TOWERPLATFORMNUM"></column>
+			<column name="已使用平台数" datakey="USEPLATFORMNUM"></column>
+			<column name="铁塔高度" datakey="TOWERHEIGHT"></column>
+			<column name="铁塔类型" datakey="TOWERTYPE"></column>
+			<column name="入网时间" datakey="BUILDDATE"></column>
+			<column name="区域" datakey="REGIONNAME"></column>
+			<column name="代维公司" datakey="MAINTENCE_ID"></column>
+		</excel>
+
+		<excel key="zdlist" name="站点列表 " dataService="zdxxServiceImpl">
+			<column name="站点编号" datakey="ZDBH"></column>
+			<column name="站点名称" datakey="ZYMC"></column>
+			<column name="站点类型" datakey="ZDLX"></column>  
+			<column name="业务级别" datakey="YWJB"></column>
+			<column name="产权性质" datakey="CQXZ"></column> 
+			<column name="所属区域" datakey="REGIONNAME"></column>
+			<column name="承重" datakey="CZ"></column>
+			<column name="所属管理区" datakey="SSGLQ"></column>
+			<column name="创建日期" datakey="CREATEDATE"></column>
+			<column name="采集单位" datakey="ORGID"></column>
+			<column name="二维码" datakey="EWM"></column>
+			<column name="状态" datakey="STATE"></column>
+			<column name="经度" datakey="LOT"></column>
+			<column name="纬度" datakey="LAT"></column>
+		</excel>
+		<excel key="jflist" name="机房列表 " dataService="jfxxServiceImpl">
+			<column name="资源名称" datakey="ZYMC"></column>
+			<column name="所属站点" datakey="SSZD"></column>
+			<column name="机房类型" datakey="JFLX_NAME"></column>
+			<column name="产权性质" datakey="CQXZ"></column>
+			<column name="采集时间" datakey="CJSJ"></column>
+			<column name="所属区域" datakey="REGIONNAME"></column>
+			<column name="所属管理区" datakey="PRECINCT"></column>
+		</excel>
+		<excel key="wlanlist" name="Wlan列表 " dataService="wlanServiceImpl">
+			<column name="热点名称" datakey="HOSTNAME"></column>
+			 <column name="所属站点" datakey="ZYMC"></column>
+			<column name="热点类型" datakey="HOSTTYPE"></column>
+			<column name="传输类型" datakey="TRANSTYPE"></column>
+			<column name="AP数量" datakey="APNUM"></column>
+			<column name="NAS-ID" datakey="NASID"></column>
+			<column name="设备厂家" datakey="PRODUCT"></column>
+		</excel>
+		<excel key="prepeaterlist" name="直放站列表 " dataService="prepeaterServiceImpl">
+			<column name="直放站名称" datakey="REPEATERNAME"></column>
+			 <column name="所属站点" datakey="ZYMC"></column>
+			<column name="直放站类型" datakey="REPEATERTYPE"></column>
+			<column name="覆盖类型" datakey="COVERTYPE"></column>
+			<column name="信号接收方式" datakey="SIGNALRECEIVEMODE"></column>
+			<column name="制造商" datakey="PRODUCER"></column>
+		</excel>
+
+	</export>
+</items>

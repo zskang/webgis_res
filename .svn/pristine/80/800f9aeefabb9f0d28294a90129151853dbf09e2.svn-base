@@ -1,0 +1,15 @@
+[
+	{name:"管井",url:"/ResWebGIS/legendIcons/A21.bmp"},
+	{name:"电杆",url:"/ResWebGIS/legendIcons/A20.bmp"},
+	{name:"标石",url:"/ResWebGIS/legendIcons/A22.bmp"},
+	{name:"挂墙",url:"/ResWebGIS/legendIcons/A23.bmp"},
+	{name:"光终端盒",url:"/ResWebGIS/legendIcons/AA006.bmp"},
+	{name:"光交接箱",url:"/ResWebGIS/legendIcons/AA003.bmp"},
+	{name:"光分纤箱",url:"/ResWebGIS/legendIcons/AA004.bmp"},
+	{name:"光接头",url:"/ResWebGIS/legendIcons/AA005.bmp"},
+	{name:"站点",url:"/ResWebGIS/legendIcons/zhandian.gif"},
+	{name:"集团客户",url:"/ResWebGIS/legendIcons/jtkh.gif"},
+	{name:"校园网",url:"/ResWebGIS/legendIcons/A34.bmp"},
+	{name:"宽带小区",url:"/ResWebGIS/legendIcons/A35.bmp"},
+	{name:"营业厅",url:"/ResWebGIS/legendIcons/A30.bmp"}
+]

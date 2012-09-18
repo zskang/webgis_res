@@ -1,0 +1,345 @@
+package com.cabletech.res.service.tracemgr;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.boardfibermgr.DzConnEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxllzEntity;
+import com.cabletech.res.entity.boardfibermgr.JxgxlyEntity;
+import com.cabletech.res.entity.opticcablemgr.GldlyEntity;
+import com.cabletech.res.mapper.boardfibermgr.JxgxllMapper;
+import com.cabletech.res.mapper.opticcablemgr.GldlyMapper;
+import com.cabletech.res.mapper.tracemgr.TraceMapper;
+
+/**
+ * Trace 端子 Service 实现
+ * @author Administrator
+ *
+ */
+@Service
+public class TraceServiceImpl extends BaseServiceImpl implements TraceService {
+
+	@Resource(name="traceMapper")
+	private TraceMapper tracemapper;
+	
+	@Resource(name="jxgxllMapper")
+	private JxgxllMapper jxgxllmapper;	
+	
+	@Resource(name="gldlyMapper")
+	private GldlyMapper gldlymapper;	
+	
+	//光交资源类型
+	private String []types = {"AA001","AA003","AA004","AA006"};
+	//光交资源对应成端表
+	private String []restableconnname = {"res_odf_conn","res_gjjx_conn","res_gfxx_conn","res_gzdh_conn"};
+	
+	@Override
+	public List<Map<String, Object>> getAlldzList(String sblx, String sbid){
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("tableconnname", getTableConnName(sblx));
+		param.put("sssb", sbid);
+		List<Map<String, Object>> list = tracemapper.getAllDzbysssbid(param);
+		return list;
+	}
+	
+	@Override
+	public List<JxgxllEntity> traceByDz(DzConnEntity entity) {
+		List<JxgxllEntity> list = new ArrayList<JxgxllEntity>();
+		entity.setTableconnname(getTableConnName(entity.getSssblx()));
+		if(StringUtils.isNotBlank(entity.getPortname())){
+			JxgxllEntity ll = getJxgxll(entity);
+			if(ll != null){
+				list.add(ll);
+			}
+		}else{
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("sssb", entity.getSssb());
+			map.put("odmid", entity.getSsodm());
+			map.put("tableconnname", getTableConnName(entity.getSssblx()));
+			List<Map<String, Object>> dzlist = jxgxllmapper.getdzlistbyodmid(map);
+			if(dzlist!=null && dzlist.size()>0){
+				for(Map<String, Object> m : dzlist) {
+					entity.setPortname(m.get("ID").toString());
+					JxgxllEntity ll = getJxgxll(entity);
+					if(ll != null){
+						list.add(ll);
+					}
+				}
+			}
+		}
+		return list;
+	}
+	
+	@Override
+	public List<JxgxlyEntity> traceBySB(JxgxllzEntity entity) {
+		List<JxgxlyEntity> list = new ArrayList<JxgxlyEntity>();
+		List<Map<String, Object>> azlist = tracemapper.getlybyadsbid(entity.getQssbid());//正向
+		String index = pyramid(entity, azlist);
+		list = getJxgxlyEntityList(index, entity, azlist);
+		for (JxgxlyEntity ly : list) {
+			logger.info(ly.getId()+"===="+ly.getLytype()+"===="+ly.getSsgldly()+"====="+ly.getSsjxgxllz()+"====="+ly.getSn());
+		}
+		return list;
+	}
+	
+	public List<JxgxlyEntity> getJxgxlyEntityList(String index,JxgxllzEntity entity,List<Map<String, Object>> zlist){
+		List<JxgxlyEntity> list = new ArrayList<JxgxlyEntity>();
+		if(StringUtils.isNotBlank(index)){
+			String[] subindex = index.split("#");//起端设备、终端设备对应索引
+			int start = Integer.valueOf(subindex[0]);
+			int end = Integer.valueOf(subindex[1]);
+			//一条
+			list.add(copyA(entity, zlist.get(start), 1));
+			list.add(copyL(entity, zlist.get(start), 2));
+			list.add(copyZ(entity, zlist.get(start), 3));
+			int sn = 4;
+			for(int j=start+1; j<=end; j++,sn++){//多条
+				list.add(copyL(entity, zlist.get(j), sn));
+				list.add(copyZ(entity, zlist.get(j), sn+1));					
+			}				
+		}
+		return list;
+	}
+	
+	@Override
+	public DzConnEntity getDzConnEntity(JxgxlyEntity ly, DzConnEntity dzconn){
+		DzConnEntity nexus = null;
+		String lytype = ly.getLytype();
+		dzconn.setGld(dzconn.getTo_id());//光缆段系统编号
+		dzconn.setUnit(dzconn.getTo_firstunit());//光缆纤芯号
+		if(lytype.equals("AA001") || lytype.equals("AA003") || lytype.equals("AA004") || lytype.equals("AA006")){
+			//根据路由设备类型获取对应设备成端表
+			dzconn.setSssb(ly.getSsgldly());
+			dzconn.setPortname("");
+			dzconn.setTableconnname(getTableConnName(lytype));
+			nexus = tracemapper.getDzConn(dzconn);
+		}//光接头盒 熔纤表
+		else if(lytype.equals("AA005") ){
+			nexus = tracemapper.getSbConn(dzconn);
+		}
+		return nexus;
+	}
+	
+	public JxgxllEntity getJxgxll(DzConnEntity entity){
+		boolean flag = true;
+		JxgxllEntity ll = null;		
+		//获取起始设备、端子对应的成端关系
+		DzConnEntity nexus = tracemapper.getDzConn(entity);//光缆段、纤芯号
+		if(nexus != null){
+			ll = new JxgxllEntity();
+			ll.setQssbid(entity.getSssb());
+			ll.setQssblx(entity.getSssblx());
+			ll.setQsxxh(nexus.getTo_firstunit());
+			ll.setQssbdz(entity.getPortname());
+			ll.setQssbodm(nexus.getSsodm());
+		}else{
+			return ll;
+		}
+		String sssb = null,gld = nexus.getTo_id(),xxh = nexus.getTo_firstunit();
+		while(flag){
+			if(nexus != null){
+				//获取经过光缆段
+				GldlyEntity gldly = gldlymapper.getbyid(gld);
+				nexus.setGld(gld);
+				nexus.setUnit(xxh);
+				String zdid = gldly.getZdsbmc();
+				String zdlx = gldly.getZdsblx();
+				if(nexus.getSssb() != null){
+					sssb = nexus.getSssb();
+				}
+				if(zdid.equals(sssb)){//相对的光缆端起端 和 终端
+					zdid = gldly.getAdsbmc();
+					zdlx = gldly.getAdsblx();
+				}
+				nexus.setSssb(zdid);
+				//终止设备资源类型
+				if(strInArray(zdlx, types)){
+					nexus.setPortname("");
+					nexus.setTableconnname(getTableConnName(zdlx));
+					nexus = tracemapper.getDzConn(nexus);
+					if(nexus == null){
+						flag = false;
+						break;
+					}
+					gld = nexus.getTo_id();//获取对应光缆段
+					xxh = nexus.getTo_firstunit();//获取对应纤芯号
+					ll.setZzsbid(zdid);
+					ll.setZzsblx(zdlx);
+					ll.setZzxxh(xxh);
+					ll.setZzsbdz(nexus.getPortname());
+					ll.setZzsbodm(nexus.getSsodm());
+					flag = false;
+					break;
+				}else if("AA005".equals(zdlx)){
+					//从熔纤表取光缆段和纤芯号(获取熔纤信息不区分from to)
+					nexus = tracemapper.getSbConn(nexus);
+					if(nexus == null){
+						flag = false;
+						break;						
+					}
+					//如果成端获得的光缆段编号和熔纤获得的To光缆段编号相等（相对的获取From光缆段及纤芯号）
+					if(gld.equals(nexus.getTo_id())){
+						gld = nexus.getFrom_id();
+						xxh = nexus.getFrom_firstunit();
+					}else{
+						gld = nexus.getTo_id();
+						xxh = nexus.getTo_firstunit();						
+					}
+					sssb = nexus.getConnector_id();
+				}else{
+					flag = false;
+					break;
+				}
+			}else{
+				flag = false;
+				break;
+			}
+		}
+		if(nexus == null){
+			ll.setZzxxh(null);
+			ll.setZzsbdz(null);
+			ll.setZzsbodm(null);
+		}
+		return ll;		
+	}
+	
+	/**
+	 * 判断是否存在于数组中
+	 * @param str
+	 * @param strarry
+	 * @return
+	 */
+	public boolean strInArray(String str,String[] strarry){ 
+		if(str == null)
+			return false;
+		if(strarry == null || strarry.length == 0) 
+			return false; 
+		for(int i = 0; i<strarry.length; i++){
+			if(strarry[i] == null)
+				continue;
+			if(str.equals(strarry[i])) 
+				return true; 
+		}
+		return false;
+	}
+	
+	/**
+	 * 根据类型获取对应成端表
+	 * @param restype
+	 * @return
+	 */
+	public String getTableConnName(String restype){
+		String conntable = "";
+		for(int i=0; i<types.length; i++){
+			if(restype.equals(types[i])){
+				conntable = restableconnname[i];
+				break;
+			}
+		}
+		return conntable;
+	}
+	
+	/**
+	 * 获取起始和终止连续索引组合
+	 * @param entity 链路组实体
+	 * @param list 路由集合
+	 */
+	public String pyramid(JxgxllzEntity entity, List<Map<String, Object>> list){
+		String index = "";
+		List<Integer> indexlist = new ArrayList<Integer>();
+		List<Integer> endlist = new ArrayList<Integer>();
+		for(int i=0; i<list.size(); i++){
+			Map<String, Object> m = list.get(i);
+			if(entity.getQssbid().equals(m.get("ADSBMC"))){//以a分割
+				indexlist.add(i);
+			}
+			if(entity.getZzsbid().equals(m.get("ZDSBMC"))){//以b分割
+				endlist.add(i);
+			}
+		}
+		//获取差值集合
+		List<String> g = new ArrayList<String>();
+		for(int i=0; i<endlist.size(); i++){
+			for(int j=0; j<indexlist.size(); j++){
+				if(indexlist.get(j)<=endlist.get(i)){
+					int tolerance = endlist.get(i) - indexlist.get(j);
+					logger.info("容差： "+tolerance + "  起始：  "+indexlist.get(j)+"  终止：  "+endlist.get(i));
+					g.add(tolerance+"-"+indexlist.get(j)+"#"+endlist.get(i));
+				}
+			}
+		}
+		
+		//迭代获取最小容差值的索引
+		if(g.size()>0){
+			int min = 0;
+			for(int i=0; i<g.size()-1; i++){
+				min = i;
+				for(int j=i+1; j<g.size(); j++){
+					int pre = Integer.valueOf(g.get(i).replaceAll("-", "").replaceAll("#", "")).intValue();
+					int next = Integer.valueOf(g.get(j).replaceAll("-", "").replaceAll("#", "")).intValue();
+					if(next < pre){
+						min = j;
+					}
+				}
+			}
+			index = g.get(min).split("-")[1];
+		}
+		logger.info(index);
+		return index;
+	}
+
+	/**
+	 * 拷贝路由对应起始设备
+	 * @param entity 链路组实体
+	 * @param map 传入结果
+	 * @param sn 序号
+	 * @return
+	 */
+	public JxgxlyEntity copyA(JxgxllzEntity entity, Map<String, Object> map, int sn){
+		JxgxlyEntity ly = new JxgxlyEntity();
+		ly.setSsjxgxllz(entity.getId());
+		ly.setSn(String.valueOf(sn));
+		ly.setLytype(map.get("ADSBLX").toString());
+		ly.setSsgldly(map.get("ADSBMC").toString());
+		return ly;
+	}
+	
+	/**
+	 * 拷贝路由对应光缆段
+	 * @param entity 链路组实体
+	 * @param map 传入结果
+	 * @param sn 序号
+	 * @return
+	 */
+	public JxgxlyEntity copyL(JxgxllzEntity entity, Map<String, Object> map, int sn){
+		JxgxlyEntity ly = new JxgxlyEntity();
+		ly.setSsjxgxllz(entity.getId());
+		ly.setSn(String.valueOf(sn));
+		ly.setLytype("A33");
+		ly.setSsgldly(map.get("XTBH").toString());
+		return ly;
+	}
+	
+	/**
+	 * 拷贝路由对应终止设备
+	 * @param entity 链路组实体
+	 * @param map 传入结果
+	 * @param sn 序号
+	 * @return
+	 */
+	public JxgxlyEntity copyZ(JxgxllzEntity entity, Map<String, Object> map, int sn){
+		JxgxlyEntity ly = new JxgxlyEntity();
+		ly.setSsjxgxllz(entity.getId());
+		ly.setSn(String.valueOf(sn));
+		ly.setLytype(map.get("ZDSBLX").toString());
+		ly.setSsgldly(map.get("ZDSBMC").toString());
+		return ly;
+	}		
+	
+}

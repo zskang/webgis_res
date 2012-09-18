@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.boardfibermgr.JxgxllMapper">
+
+	<!-- 获取局向光纤 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.boardfibermgr.JxgxllEntity"
+		parameterType="string" flushCache="true">
+		select * from res_jxgx_info where id=#{id,jdbcType=VARCHAR}
+	</select>
+	
+	<!-- 删除局向光纤 -->
+	<delete id="delete" parameterType="string" flushCache="true">
+		delete from res_jxgx_info where id=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 删除局向光纤 -->
+	<delete id="deleteByEntity" parameterType="com.cabletech.res.entity.boardfibermgr.JxgxllEntity" flushCache="true">
+		delete from res_jxgx_info where ssllz=#{ssllz,jdbcType=VARCHAR} 
+		and qsxxh=#{qsxxh,jdbcType=VARCHAR} and qssbdz=#{qssbdz,jdbcType=VARCHAR}
+		<if test="qssbodm!=null and qssbodm!=''">
+			and qssbodm=#{qssbodm,jdbcType=VARCHAR}
+		</if>
+	</delete>	
+	
+	<!-- 根据链路组编号删除局向光纤 -->
+	<delete id="deleteByllzid" parameterType="string" flushCache="true">
+		delete from res_jxgx_info where ssllz=#{xtbh,jdbcType=VARCHAR}
+	</delete>
+	
+	<!-- 根据链路组编号获取局向光纤 -->
+	<select id="getJxgxllByllzId" parameterType="string" resultType="hashmap" flushCache="true">
+		select * from res_jxgx_info where ssllz=#{llzid,jdbcType=VARCHAR} order by qssbdz
+	</select>
+	
+	<!-- 根据设备编号、设备成端表名获取端子 -->
+	<select id="getDzByTypeAndId" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select xtbh,dzbh,portname,dzzt from ${tableconnname} where sssb=#{xtbh} order by dzbh
+	</select>
+	
+	<!-- 根据设备编号、设备表名获取设备信息 -->
+	<select id="getDeviceInfo" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select xtbh,zymc from ${tablename} where xtbh=#{xtbh}
+	</select>
+	
+	<!-- 根据设备编号、设备表名获取设备A面的ODM -->
+	<select id="getOdmContainA" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select m.xtbh,m.zymc from ${tablename} t,res_odm m
+		where t.xtbh=m.sssb and sssbm='AE301' and m.sssb=#{xtbh,jdbcType=VARCHAR} order by gh
+	</select>
+	
+	<!-- 根据设备编号、设备表名获取设备B面的ODM -->
+	<select id="getOdmContainB" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select m.xtbh,m.zymc from ${tablename} t,res_odm m 
+		where t.xtbh=m.sssb and m.sssbm='AE302' and m.sssb=#{xtbh,jdbcType=VARCHAR}	order by gh
+	</select>
+		
+	<!-- 根据ODM编号、设备端子表名获取端子 -->
+	<select id="getDzByOdmXtbh" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select c.xtbh,c.dzbh,c.portname,c.dzzt from ${tableconnname} c,res_odm m
+		where c.ssodm=m.xtbh and m.xtbh=#{odmid,jdbcType=VARCHAR} order by dzbh
+	</select>
+	
+	<!-- 根据所属设备编号、设备端子表名获取端子 -->
+	<select id="getDzBySbXtbh" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select c.xtbh,c.dzbh,c.portname,c.dzzt from ${tableconnname} c
+		where c.sssb=#{xtbh,jdbcType=VARCHAR} order by dzbh
+	</select>
+	
+	<!-- 端子是否已存在局向光纤关系 -->
+	<select id="isAlreayExist" parameterType="hashmap" resultType="Integer" flushCache="true">
+		select count(*) from res_jxgx_info 
+		where ssllz=#{llzid,jdbcType=VARCHAR} and qssbdz=#{dzbh,jdbcType=VARCHAR}
+		<if test="odmid != null and odmid != ''">
+			and qssbodm=#{odmid,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<!-- 新增局向光纤 -->
+	<insert id="insert" parameterType="com.cabletech.res.entity.boardfibermgr.JxgxllEntity" flushCache="true">
+		insert into res_jxgx_info(id,ssllz,qsxxh,qssbodm,qssbdz,zzxxh,zzsbodm,zzsbdz,length)
+		values(#{id,jdbcType=VARCHAR},#{ssllz,jdbcType=VARCHAR},#{qsxxh,jdbcType=VARCHAR},
+		#{qssbodm,jdbcType=VARCHAR},#{qssbdz,jdbcType=VARCHAR},#{zzxxh,jdbcType=VARCHAR},
+		#{zzsbodm,jdbcType=VARCHAR},#{zzsbdz,jdbcType=VARCHAR},#{length,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 根据起始设备系统编号获取ODM -->
+	<select id="getodmlistbysbid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select xtbh id,zymc name from res_odm
+		where sssb=#{sssb, jdbcType=VARCHAR} and sssblx=#{sssblx, jdbcType=VARCHAR} order by gh
+	</select>
+	
+	<!-- 根据起始设备系统编号获取端子 -->
+	<select id="getdzlistbyodmid" parameterType="hashmap" resultType="hashmap" flushCache="true">
+		select dzbh id, dzbh name from ${tableconnname} where sssb=#{sssb,jdbcType=VARCHAR}
+		<if test="odmid!=null and odmid!=''">
+			and ssodm=#{odmid,jdbcType=VARCHAR}
+		</if>
+		order by dzbh
+	</select>
+	
+</mapper>

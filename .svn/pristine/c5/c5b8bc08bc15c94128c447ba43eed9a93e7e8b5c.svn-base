@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.ZdxxMapper">
+
+	<!-- 查询站点信息列表 周刚 20120712 -->
+	<select id="getZdListByYD" parameterType="hashmap" resultType="hashmap">
+		select
+		zd.objectid,zd.zymc,zd.xtbh,zd.zdbh,zd.ymc,zd.jtgfmc,zd.dz,zd.dlmc,FN_GETNAMEBYCODE(zd.zdlx,'ZDLX')
+		zdlx,round(zd.lon,6)
+		lon,round(zd.lat,6) lat,
+		zd.ywjb,
+		FN_GETNAMEBYCODE(zd.cqxz,'property_right')
+		cqxz,zd.mphm,zd.fwjg,zd.zydw,zd.cz,zd.ssglq,zd.regionid,zd.bz,zd.orgid,zd.ewm,zd.status,r.regionname
+		from RES_ZDXX zd join view_region r on zd.regionid=r.regionid where
+		(zd.status is null or zd.status != '9')
+
+		<if test="zymc != null and zymc != ''">
+			and zd.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdbh != null and zdbh != ''">
+			and zd.ZDBH like '%' || #{zdbh,jdbcType=VARCHAR} || '%'
+		</if>
+		 
+		<if test="zdlx != null and zdlx != ''">
+			and zd.ZDLX = #{zdlx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and zd.CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and zd.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="orgids != null and orgids != ''">
+			<![CDATA[
+			and  exists (select 1 from res_maintenance r where 
+			r.maintenance_id in 
+				<foreach collection="orgids" item="orgid" open="(" separator="," close=")">
+					#{orgid}
+				</foreach>
+			 and r.rs_id=zd.xtbh)	
+			]]>
+		</if>
+		ORDER BY zd.createdate desc
+	</select>
+	<!-- 查询站点信息列表 周刚 20120712 -->
+	<select id="getZdListByDW" parameterType="hashmap" resultType="hashmap">
+		select
+		zd.objectid,zd.xtbh,zd.zdmc,zd.zdbh,zd.ymc,zd.jtgfmc,zd.dz,zd.dlmc,FN_GETNAMEBYCODE(zd.zdlx,'ZDLX')
+		zdlx,round(zd.lon,6)
+		lon,round(zd.lat,6) lat,
+		zd.ywjb,FN_GETNAMEBYCODE(zd.cqxz,'property_right')
+		cqxz,zd.mphm,zd.fwjg,zd.zydw,zd.cz,zd.ssglq,zd.regionid,zd.bz,zd.orgid,zd.ewm,zd.status
+		,r.regionname
+		from RES_ZDXX zd join view_region r on
+		zd.regionid=r.regionid
+		where (zd.status is null or zd.status != '9')
+		<if test="zymc != null and zymc != ''">
+			and zd.zdmc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdbh != null and zdbh != ''">
+			and zd.ZDBH like '%' || #{zdbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and zd.SSGLQ like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdlx != null and zdlx != ''">
+			and zd.ZDLX = #{zdlx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and zd.CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and zd.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+			<if test="orgids != null and orgids != ''">
+			<![CDATA[
+			and  exists (select 1 from res_maintenance r where 
+			r.maintenance_id in 
+				<foreach collection="orgids" item="orgid" open="(" separator="," close=")">
+					#{orgid}
+				</foreach>
+			 and r.rs_id=zd.xtbh)	
+			]]>
+		</if>
+		ORDER BY zd.createdate desc
+	</select>
+
+
+	<!-- 插入站点信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.ZdxxEntity">
+		INSERT INTO RES_ZDXX(
+		OBJECTID,XTBH,zymc,ZDBH,YMC,JTGFMC,SX,DZ,DLMC,ZDLX,YWJB,CQXZ,MPHM,FWJG,ZYDW,CZ,SSGLQ,LON,LAT,REGIONID,BZ,ORGID,CREATEDATE,EWM,
+		shape
+		) VALUES(
+		#{objectid,jdbcType=VARCHAR},#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{zdbh,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+		#{jtgfmc,jdbcType=VARCHAR},#{sx,jdbcType=VARCHAR},#{dz,jdbcType=VARCHAR},#{dlmc,jdbcType=VARCHAR},
+		#{zdlx,jdbcType=VARCHAR},#{ywjb,jdbcType=VARCHAR},
+		#{cqxz,jdbcType=VARCHAR},#{mphm,jdbcType=VARCHAR},#{fwjg,jdbcType=VARCHAR},#{zydw,jdbcType=VARCHAR},
+		#{cz,jdbcType=VARCHAR},#{ssglq,jdbcType=VARCHAR},#{pointX,jdbcType=VARCHAR},#{pointY,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{bz,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR},sysdate,
+		#{ewm,jdbcType=VARCHAR},sde.st_geometry(#{geostr,jdbcType=VARCHAR},#{srid,jdbcType=VARCHAR})
+		)
+	</insert>
+	<!-- 更新站点信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.ZdxxEntity">
+		UPDATE RES_ZDXX SET
+		zymc=#{zymc,jdbcType=VARCHAR},ZDBH=#{zdbh,jdbcType=VARCHAR},YMC=#{ymc,jdbcType=VARCHAR},
+		JTGFMC=#{jtgfmc,jdbcType=VARCHAR},SX=#{sx,jdbcType=VARCHAR},
+		DZ=#{dz,jdbcType=VARCHAR},DLMC=#{dlmc,jdbcType=VARCHAR},ZDLX=#{zdlx,jdbcType=VARCHAR},
+		YWJB=#{ywjb,jdbcType=VARCHAR},
+		CQXZ=#{cqxz,jdbcType=VARCHAR},MPHM=#{mphm,jdbcType=VARCHAR},FWJG=#{fwjg,jdbcType=VARCHAR},
+		ZYDW=#{zydw,jdbcType=VARCHAR},CZ=#{cz,jdbcType=VARCHAR},
+		SSGLQ=#{ssglq,jdbcType=VARCHAR},
+		REGIONID=#{regionid,jdbcType=VARCHAR},
+		BZ=#{bz,jdbcType=VARCHAR},EWM=#{ewm,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	<!-- 查看站点信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.ZdxxEntity"
+		parameterType="string" flushCache="true">
+		select
+		zd.objectid,zd.xtbh,zd.zymc,zd.zdbh,zd.ymc,zd.jtgfmc,zd.dz,zd.dlmc,zd.zdlx,zd.sx,round(zd.lon,6)
+		lon,round(zd.lat,6)
+		lat,zd.ywjb,zd.cqxz,zd.mphm,zd.fwjg,zd.zydw,zd.cz,zd.ssglq,zd.regionid,zd.bz,zd.orgid,zd.ewm,zd.status,
+		zd.shape.minx projectx,zd.shape.miny projecty
+		from RES_ZDXX zd where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+	<!-- 查询站点信息 -->
+	<select id="queryZdxxList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select
+		zd.objectid,zd.xtbh,zd.zymc,zd.zdbh,zd.ymc,zd.jtgfmc,zd.dz,zd.dlmc,zd.zdlx,round(zd.lon,6)
+		lon,round(zd.lat,6) lat,
+		zd.ywjb,zd.cqxz,zd.mphm,zd.fwjg,zd.zydw,zd.cz,zd.ssglq,zd.regionid,zd.bz,zd.orgid,zd.ewm,zd.status
+		from RES_ZDXX zd
+		left join res_gprs_record r
+		on zd.xtbh = r.resid and
+		r.restype ='A29'
+		where 1=1 and ( zd.status is null or zd.status != '9'
+		)
+		<if test="simid != null and simid != ''">
+			and r.simid like '%' || #{simid,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="zymc != null and zymc != ''">
+			and zd.zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdbh != null and zdbh != ''">
+			and zd.ZDBH like '%' || #{zdbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and zd.SSGLQ like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdlx != null and zdlx != ''">
+			and zd.ZDLX = #{zdlx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and zd.CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and zd.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		ORDER BY zd.createdate desc
+	</select>
+	<!-- 查询站点信息（无sim卡号） -->
+	<select id="queryZdxxListNoSimid" parameterType="hashmap"
+		resultType="hashmap" flushCache="true">
+		select
+		zd.objectid,zd.xtbh,zd.zymc,zd.zdbh,zd.ymc,zd.jtgfmc,zd.dz,zd.dlmc,zd.zdlx,
+		round(zd.lon,6) lon,round(zd.lat,6) lat,
+		zd.ywjb,zd.cqxz,zd.mphm,zd.fwjg,zd.zydw,zd.cz,zd.ssglq,zd.regionid,zd.bz,zd.orgid,zd.ewm,zd.status
+		from RES_ZDXX zd
+		where 1=1 and ( status is null or status !=
+		'9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdbh != null and zdbh != ''">
+			and ZDBH like '%' || #{zdbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="ssglq != null and ssglq != ''">
+			and SSGLQ like '%' || #{ssglq,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="zdlx != null and zdlx != ''">
+			and ZDLX = #{zdlx,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and CQXZ = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		<if test="begintime != null and begintime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') >= #{begintime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		<if test="endtime != null and endtime != ''">
+			<![CDATA[
+			and to_char(zd.createdate,'yyyy-mm-dd HH24:mi:ss') <= #{endtime,jdbcType=VARCHAR}
+			]]>
+		</if>
+		ORDER BY zd.createdate desc
+	</select>
+	<!-- 删除站点信息 -->
+	<update id="delete" parameterType="String">
+		UPDATE RES_ZDXX SET
+		status='9'
+		where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 根据站点编号获取相关机房 -->
+	<select id="getJfxxByZd" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select j.zymc,j.xtbh from res_jf j where
+		j.sszd=#{xtbh,jdbcType=VARCHAR} and status is null
+	</select>
+	<!-- 根据站点编号获取相关地下接线室 -->
+	<select id="getDxjxsByZd" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select d.zymc,d.xtbh from res_dxjxs d where
+		d.sszd=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 根据站点编号获取相关光缆段路由 -->
+	<select id="getGldlyByZd" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select l.zymc,l.xtbh from res_odf o,res_jf j,res_gld_ly l
+		where o.ssjf=j.xtbh and (l.adsblx='AD702' and l.adsbmc=o.xtbh and
+		j.sszd =#{xtbh,jdbcType=VARCHAR}) and o.status is null and l.status is
+		null and j.status is null
+		union
+		select l.zymc,l.xtbh from
+		res_odf
+		o,res_jf j,res_gld_ly l where
+		o.ssjf=j.xtbh and
+		(l.adsblx='AD702' and
+		l.zdsbmc=o.xtbh and j.sszd
+		=#{xtbh,jdbcType=VARCHAR}) and o.status is
+		null and l.status is null and j.status is null
+	</select>
+
+	<!-- 根据机房编号获取相关光终端盒 -->
+	<select id="getOdfByZd" parameterType="string" resultType="hashmap"
+		flushCache="true">
+		select g.zymc,g.xtbh from ${table} g where
+		g.ssjf=#{xtbh,jdbcType=VARCHAR} and (status!='9' or status is null)
+	</select>
+
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_zdxx set
+		zdlx=#{zdlx,jdbcType=VARCHAR},ywjb=#{ywjb,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		where xtbh in
+		<foreach collection="xtbhlist" item="xtbh" open="(" separator=","
+			close=")">
+			#{xtbh}
+		</foreach>
+	</update>
+</mapper>

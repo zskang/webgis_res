@@ -1,0 +1,40 @@
+package com.cabletech.contractor.service.carinfo;
+
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Service;
+
+import com.cabletech.contractor.entity.carinfo.CarInfoEntity;
+import com.cabletech.contractor.mapper.carinfo.CarInfoMapper;
+import com.cabletech.contractor.mapper.carinfo.HistorypositionCarMapper;
+import com.cabletech.core.service.BaseServiceImpl;
+
+@Service
+public class CarInfoServiceImpl extends BaseServiceImpl implements CarInfoService {
+
+	@Resource(name="carInfoMapper")
+	private CarInfoMapper mapper;
+	@Resource(name="historypositionCarMapper")
+	private HistorypositionCarMapper historypositionCarMapper;
+	@Override
+	public CarInfoEntity getbyid(String id) {
+		CarInfoEntity carInfoEntity= mapper.getbyid(id);
+		int distance=0;
+		Map<String,Object> map=historypositionCarMapper.getSumDistanceBySimid(carInfoEntity.getSimid());
+		if(map!=null)
+		{
+			String maxDistance=map.get("maxDistance").toString();
+			String minDistance=map.get("minDistance").toString();
+			int p=Integer.valueOf(maxDistance);
+			int p2=Integer.valueOf(minDistance);
+			distance=p-p2;	
+		}
+		carInfoEntity.setDistance(String.valueOf(distance));
+		return carInfoEntity;
+	}
+
+
+
+}

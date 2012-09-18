@@ -1,0 +1,265 @@
+package com.cabletech.contractor.service.gisextend;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import com.cabletech.baseinfo.business.Service.BaseInfoProvider;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.contractor.entity.gisextend.GisExtendEntity;
+import com.cabletech.contractor.entity.gisextend.OilengineInfo;
+import com.cabletech.contractor.mapper.gisextend.GisExtendMapper;
+import com.cabletech.contractor.mapper.gisextend.OilengineMapper;
+import com.cabletech.contractor.service.sublineinfo.SublineInfoService;
+import com.cabletech.core.entity.config.GlobalConfigInfo;
+import com.cabletech.core.service.BaseServiceImpl;
+
+/**
+ * Gis扩展Service实现
+ * @author Administrator
+ *
+ */
+@Service
+public class GisExtendServiceImpl extends BaseServiceImpl implements GisExtendService {
+	
+	@Resource(name="globalConfigInfo")
+	private GlobalConfigInfo configInfo;
+	
+  	@Resource(name = "baseInfoProvider")
+	private BaseInfoProvider baseInfoProvider;
+  	
+  	@Resource(name = "sublineInfoServiceImpl")
+	private SublineInfoService sublineInfoServiceImpl; 
+  	
+	@Resource(name="oilengineMapper")
+	private OilengineMapper oilengineMapper;  	
+
+	@Resource(name="gisExtendMapper")
+	private GisExtendMapper mapper;
+	
+	private final String REGIONTYPE = "regionid";
+	private final String ORGID = "orgid";
+	private final String GROUPID = "groupid";
+	
+	
+	/**
+	 * 获取点X Y
+	 * @param planid 计划编号
+	 * @param taskid 任务编号
+	 * @return
+	 */	
+	public String getPointsXY(String planid, String taskid) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("planid", planid);
+		map.put("taskid", taskid);
+		try {
+			return getXY(mapper.getPointsXY(map));
+		} catch (Exception e) {
+			logger.error("获取信息异常！",e);
+		}
+		return null;
+	}
+	
+	/**
+	 * 返回shape字段
+	 * @param tablename 业务表名
+	 * @param keycolumn 主键字段名
+	 * @param keyvalue 主键值
+	 * @return
+	 */	
+	public String getTableShapeReturnClob(String tablename, String keycolumn, String keyvalue){
+		try {
+			String sql = "select sde.st_astext(s.shape) st from "+tablename+" s where "+keycolumn+"='"+keyvalue+"'";
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("sql", sql);
+			return mapper.getTableShapeReturnClob(map);
+		} catch (Exception e) {
+			logger.error("获取信息异常！",e);
+		}
+		return null;
+	}
+	
+	/**
+	 * 返回XY 串值 9930028.939 4844594.0348,28340483.09 238449643.4564
+	 * @param list 坐标集合
+	 * @return
+	 */
+	public String getXY(List<Map<String, Object>> list){
+		StringBuffer sb = new StringBuffer();
+		if(list != null && list.size()!=0){
+			for(Map<String, Object> m:list){
+				sb.append(m.get("X").toString()+" "+m.get("Y").toString()+",");
+			}
+			return sb.toString().substring(0, sb.length()-1);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * 保存绘制信息
+	 * @param entity ｛tablename keycolumn titlecolumn remarkcolumn graphictype xy｝
+	 */	
+	public boolean saveDrawInfo(Map<String, Object> param){
+		try {
+			GisExtendEntity entity = new GisExtendEntity();
+			entity.setKeycolumn(param.get("keycolumn").toString());
+			entity.setRemarkcolumn(param.get("remarkcolumn").toString());
+			entity.setRemarkcolumnValue(param.get("remarkcolumnvalue").toString());
+			entity.setTablename(param.get("tablename").toString());
+			entity.setTitlecolumn(param.get("titlecolumn").toString());
+			entity.setTitlecolumnValue(param.get("titlecolumnvalue").toString());
+			entity.setGraphictype(param.get("graphictype").toString());
+			entity.setXy(param.get("geo").toString());
+			entity.setUserid(param.get("userid").toString());
+			//获取序列值
+			entity.setKeycolumnValue(baseInfoProvider.getSequens(entity.getTablename()));
+			//获取业务表空间生成字段所需的参数srid
+			String srid = sublineInfoServiceImpl.getSRID(entity.getTablename(), configInfo.getTablespacename().toUpperCase());
+			//获取表空间注册编号
+			String regid = sublineInfoServiceImpl.getRegId(entity.getTablename(), configInfo.getTablespacename().toUpperCase());
+			
+			if(entity.getGraphictype().equals("1")){
+				entity.setGraphictype("point");
+			}else if(entity.getGraphictype().equals("2")){
+				entity.setGraphictype("linestring");
+			}else if(entity.getGraphictype().equals("3")){
+				entity.setGraphictype("polygon");
+			}
+			
+			String extendsql = "";
+			String extendvalue = "";
+			if(entity.getTablename().toLowerCase().equals("lp_watch_polygon")){
+				UserInfo ui = baseInfoProvider.getUserInfoByUserId(entity.getUserid());
+				extendsql = ",contractorid,regionid,createtime";
+				extendvalue = ",'"+ui.getOrgId()+"','"+ui.getRegionId()+"',sysdate";
+			}
+			
+			StringBuffer sql = new StringBuffer("insert into "+entity.getTablename()+"(objectid,"
+			+entity.getKeycolumn()+","+entity.getTitlecolumn()+","
+			+entity.getRemarkcolumn()+",shape"+extendsql+") values("
+			+"sde.version_user_ddl.next_row_id('"+configInfo.getTablespacename().toUpperCase()+"',"+regid+"),"//生成objectid
+			+"'"+entity.getKeycolumnValue()+"','"+entity.getTitlecolumnValue()+"',"
+			+"'"+entity.getRemarkcolumnValue()+"',");
+			if(entity.getGraphictype().equals("polygon")){
+				sql.append("sde.st_geomfromtext('"+entity.getGraphictype()+" (("+entity.getXy()+"))',"+srid+")");
+			}else{
+				sql.append("sde.st_geomfromtext('"+entity.getGraphictype()+" ("+entity.getXy()+")',"+srid+")");
+			}
+			
+			sql.append(extendvalue + ")");
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("sql", sql.toString());
+			mapper.saveDrawInfo(map);
+			return true;
+		} catch (Exception e) {
+			logger.error("获取信息异常！",e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 显示计划漏检点
+	 * @param tablename 业务表名
+	 * @param pid 编号
+	 */
+	public List<Map<String, Object>> getPlanPoints(String tablename, String pid){
+		try{
+			List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+			String sql = "select p.shape.minx x,p.shape.miny y "+
+			" from "+tablename+" ps,pointinfo p where ps.pointid=p.pointid" +
+			" and ps.planid='"+pid+"'";
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("sql", sql);		
+			list = mapper.getPlanPoints(map);
+			return list;
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据查询类型获取在线巡检人员
+	 * @param id 编号
+	 * @param type 传入类型
+	 * @return
+	 */
+	public List<Map<String, Object>> getOnlineMen(String id, String type){
+		List<Map<String, Object>> list = null;
+		if(type.equals(REGIONTYPE)){
+			list = mapper.getOnlineMenByRegionid(id);
+		}else if(type.equals(ORGID)){
+			list = mapper.getOnlineMenByOrgid(id);
+		}else if(type.equals(GROUPID)){
+			list = mapper.getOnlineMenByGroupid(id);
+		}
+		return list;
+	}
+	
+	/**
+	 * 默认显示正常油机
+	 * @param id 资源编号
+	 * @param type 资源类型
+	 * @param userid 当前登录用户
+	 * @return　{返回List 包含资源点！及所有正常油机}
+	 */
+	public Map<String, Object> loadAllOeoilengines(String id, String type, String userid){
+		Map<String, Object> map = new HashMap<String, Object>();
+		UserInfo user = baseInfoProvider.getLoginUserService().getUserInfoByUserId(userid);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("id", id);
+		param.put("type", type);
+		List<Map<String, Object>> resourcelist = mapper.getResouceInfo(param);
+		List<Map<String, Object>> olienginelist = mapper.getAllOeoilengines(user.getOrgId());
+		map.put("resourcelist", resourcelist);
+		map.put("olienginelist", olienginelist);
+		return map;
+	}
+	
+	/**
+	 * 通用处理过程（轨迹）
+	 * @param id 单号
+	 * @param type 流程类型（表名）
+	 * @return
+	 */
+	public List<Map<String, Object>> getUniversalProcessLocus(String id, String type){
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("id", id);
+		map.put("type", type);
+		return mapper.getUniversalProcessLocus(map);
+	}
+	
+	/**
+	 * 油机发电记录轨迹
+	 * @param id 任务编号
+	 * @return
+	 */
+	public Map<String, Object> getOilenginePosition(String id){
+		Map<String, Object> map = new HashMap<String, Object>();
+		//获取任务记录
+		Map<String, Object> oilengineRecords = mapper.getOeoilengineRecordByTaskId(id);
+		if(oilengineRecords == null){
+			return null;
+		}
+		//获取油机信息
+		Map<String, Object> oilengineInfo = oilengineMapper.getOilengine(oilengineRecords.get("OILENGINE_ID").toString());
+		//获取该任务的轨迹
+		List<Map<String, Object>> positionlist = mapper.getOeoilenginePosition(oilengineRecords);
+		map.put("oilengineInfo", oilengineInfo);
+		map.put("positionlist", positionlist);
+		return map;
+	}
+
+	@Override
+	public List<Map<String, Object>> getHistoryPositionByCar(Map<String, Object> map) {
+		return mapper.getHistoryPositionByCar(map);
+	}
+
+	@Override
+	public List<Map<String, Object>> getHistoryPositionByMan(Map<String, Object> map) {
+		return mapper.getHistoryPositionByMan(map);
+	}
+}

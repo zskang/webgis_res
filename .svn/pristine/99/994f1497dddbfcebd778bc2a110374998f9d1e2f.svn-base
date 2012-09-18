@@ -1,0 +1,298 @@
+package com.cabletech.contractor.service.onlinedata;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.springframework.stereotype.Service;
+import com.cabletech.baseinfo.business.Service.BaseInfoProvider;
+import com.cabletech.baseinfo.business.entity.UserInfo;
+import com.cabletech.contractor.mapper.onlinedata.OnlineDataMapper;
+import com.cabletech.core.service.BaseServiceImpl;
+
+/**
+ * 在线实时数据 Service 实现
+ * 
+ * @author cqp
+ * 
+ */
+@Service
+public class OnlineDataServiceImpl extends BaseServiceImpl implements
+		OnlineDataService {
+
+	@Resource(name="baseInfoProvider")
+	private BaseInfoProvider baseInfoProvider;
+	
+	@Resource(name = "onlineDataMapper")
+	private OnlineDataMapper mapper;
+	
+	public String tdate = new SimpleDateFormat("yyyy/MM/dd").format(new java.util.Date());
+	
+	//整点时间
+	public String[] times = {"8:00:00","9:00:00","10:00:00","11:00:00","12:00:00","13:00:00","14:00:00","15:00:00","16:00:00","17:00:00","18:00:00","19:00:00","20:00:00"};
+	
+
+	/**
+	 * 查询今日全部在线巡检员
+	 * 
+	 * @param map
+	 *            查询条件
+	 * @return list
+	 */
+	@Override
+	public List<Map<String, Object>> queryTodayOnlineMan(Map<String, Object> map) {
+		return mapper.queryTodayOnlineMan(map);
+	}
+	
+	@Override
+	public List<Map<String, Object>> getRegions(UserInfo user) {
+		List<Map<String, Object>> list = null;
+		if(user.isMobile()){
+			list = mapper.getRegionsLoginMobile(user.getRegionId());
+			if(list==null || list.size()==0){//如果是区县移动用户
+				list = baseInfoProvider.getRegionService().getAllRegionList(user.getRegionId());
+			}
+		}else{
+			list = mapper.getRegionsLoginContractor(user.getOrgId());
+		}
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getContractors(UserInfo user) {
+		List<Map<String, Object>> list = null;
+		if(user.isMobile()){
+			list = mapper.getContractorsLoginMobile(user.getRegionId());
+		}else{
+			list = mapper.getContractorsLoginContractor(user.getOrgId());
+		}
+		return list;
+	}	
+	
+	@Override
+	public String getOnlineMan(UserInfo user) {
+		if(user.isMobile()){
+			return mapper.getOnlineManCountLoginMobile(user.getRegionId());
+		}else{
+			return mapper.getOnlineManCountLoginContractor(user.getOrgId());
+		}
+	}	
+	
+	@Override
+	public List<Map<String, Object>> getOnlinemanRealdataByRegion(String regionids, UserInfo user){
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		Map<String, Object> param = new HashMap<String, Object>();
+		String[] rergionid = regionids.split(",");
+		param.put("orgid", user.getOrgId());
+		//按区域编号
+		for(String id:rergionid){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			List<Map<String, Object>> temp = null;
+			if(user.isMobile()){
+				temp = mapper.getOnlinemanByRegionLoginMobile(id);
+			}else{
+				param.put("regionid", id);
+				temp = mapper.getOnlinemanByRegionLoginContractor(param);
+			}
+			//计算改区域下的人数
+			if(temp != null && temp.size()>0){
+				for(Map m: temp){
+					if(user.isCityMobile()){//若是市移动用户
+						if(id.equals(m.get("REGIONID").toString())){
+							cnt += Integer.parseInt(m.get("CNT").toString());
+						}
+					}else{
+						cnt += Integer.parseInt(m.get("CNT").toString());
+					}
+				}
+			}
+			element.put("REGIONID", id);
+			element.put("CNT", cnt);
+			list.add(element);
+		}
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOnlinemanRealdataByOrg(String orgids, UserInfo user){
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		Map<String, Object> param = new HashMap<String, Object>();
+		String[] orgid = orgids.split(",");
+		param.put("regionid", user.getRegionId());
+		for(String id:orgid){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			List<Map<String, Object>> temp = null;
+			param.put("orgid", id);
+			if(user.isProvinceMobile()){//省移动
+				temp = mapper.getOnlinemanByOrgProvinceMobile(param);
+			}else if(user.isCityMobile()){//市移动
+				temp = mapper.getOnlinemanByOrgCityMobile(param);
+				if(temp==null || temp.size()==0){//如果是区县移动用户
+					temp = mapper.getOnlinemanByOrgCountyMobile(param);
+				}
+			}else{
+				temp = mapper.getOnlinemanByContractor(id);
+			}
+			//计算改组织机构下的人数
+			if(temp != null && temp.size()>0){
+				for(Map m: temp){
+					cnt += Integer.parseInt(m.get("CNT").toString());
+				}
+			}
+			element.put("ORGID", id);
+			element.put("CNT", cnt);
+			list.add(element);
+		}
+		return list;
+	}
+
+	@Override
+	public String getOnlineCar(UserInfo user) {
+		if(user.isMobile()){
+			return mapper.getOnlineCarCountLoginMobile(user.getRegionId());
+		}else{
+			return mapper.getOnlineCarCountLoginContractor(user.getOrgId());
+		}
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOnlinecarRealdataByRegion(String regionids, UserInfo user){
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		Map<String, Object> param = new HashMap<String, Object>();
+		String[] rergionid = regionids.split(",");
+		param.put("orgid", user.getOrgId());
+		//按区域编号
+		for(String id:rergionid){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			List<Map<String, Object>> temp = null;
+			if(user.isMobile()){//为移动用户
+				temp = mapper.getOnlinecarByRegionLoginMobile(id);
+			}else{//为代维用户
+				param.put("regionid", id);
+				temp = mapper.getOnlinecarByRegionLoginContractor(param);
+			}
+			//计算改区域下的人数
+			if(temp != null && temp.size()>0){
+				for(Map m: temp){
+					if(user.isCityMobile()){//若是市移动用户
+						if(id.equals(m.get("REGIONID").toString())){
+							cnt += Integer.parseInt(m.get("CNT").toString());
+						}
+					}else{
+						cnt += Integer.parseInt(m.get("CNT").toString());
+					}
+				}
+			}
+			element.put("REGIONID", id);
+			element.put("CNT", cnt);
+			list.add(element);			
+		}
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOnlinecarRealdataByOrg(String orgids, UserInfo user) {
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		Map<String, Object> param = new HashMap<String, Object>();
+		String[] orgid = orgids.split(",");
+		param.put("regionid", user.getRegionId());
+		for(String id:orgid){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			List<Map<String, Object>> temp = null;
+			param.put("orgid", id);
+			if(user.isProvinceMobile()){//省移动
+				temp = mapper.getOnlinecarByOrgProvinceMobile(param);
+			}else if(user.isCityMobile()){//市移动
+				temp = mapper.getOnlinecarByOrgCityMobile(param);
+			}else{
+				temp = mapper.getOnlinecarByContractor(id);
+			}
+			//计算改组织机构下的人数
+			if(temp != null && temp.size()>0){
+				for(Map m: temp){
+					cnt += Integer.parseInt(m.get("CNT").toString());
+				}
+			}
+			element.put("ORGID", id);
+			element.put("CNT", cnt);
+			list.add(element);
+		}
+		return list;
+	}
+	
+	/**
+	 * 获取查询时间段参数
+	 * @param i 时间段索引
+	 * @return
+	 */
+	public Map<String, Object> getDateParam(int i){
+		Map<String, Object> param = new HashMap<String, Object>();
+		if(i==0){
+			param.put("begindate", tdate+" 00:00:00");
+			param.put("enddate", tdate+" "+times[i]);
+		}else{
+			param.put("begindate", tdate+" "+times[i-1]);
+			param.put("enddate", tdate+" "+times[i]);
+		}
+		return param;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOnlineManCounts(UserInfo user){
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		for(int i=0; i<13; i++){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			Map<String, Object> param = getDateParam(i);			
+			List<Map<String, Object>> temp = null;
+			if(user.isMobile()){
+				param.put("regionid", user.getRegionId());
+				temp = mapper.getTotalOnlineManCountLoginMobile(param);
+			}else{
+				param.put("orgid", user.getOrgId());
+				temp = mapper.getTotalOnlineManCountLoginContractor(param);
+			}
+			if(temp != null && temp.size()>0){
+				for(Map<String, Object> m:temp){
+					cnt += Integer.parseInt(m.get("CNT").toString());
+				}
+			}
+			element.put("timekey", times[i]);
+			element.put("timecnt", cnt);
+			list.add(element);
+		}		
+		return list;
+	}
+	
+	@Override
+	public List<Map<String, Object>> getOnlineCarCounts(UserInfo user){
+		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		for(int i=0; i<13; i++){
+			int cnt = 0;
+			Map<String, Object> element = new HashMap<String, Object>();
+			Map<String, Object> param = getDateParam(i);			
+			String count = null;
+			if(user.isMobile()){
+				param.put("regionid", user.getRegionId());
+				count = mapper.getTotalOnlineCarCountLoginMobile(param);
+			}else{
+				param.put("orgid", user.getOrgId());
+				count = mapper.getTotalOnlineCarCountLoginContractor(param);
+			}
+			if(count != null){
+				cnt = Integer.parseInt(count);
+			}
+			element.put("timekey", times[i]);
+			element.put("timecnt", cnt);
+			list.add(element);
+		}		
+		return list;	
+	}
+	
+}

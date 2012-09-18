@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper
+	namespace="com.cabletech.contractor.mapper.gisextend.GisExtendMapper">
+
+	<!-- 获取点XY信息 -->
+	<select id="getPointsXY" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select pi.shape.minx x,pi.shape.miny y 
+		from plan p,taskinfo t, plantasklist ptl,subtaskinfo s,pointinfo pi
+		where p.id=ptl.planid and t.id=ptl.taskid and pi.pointid=s.objectid
+		and s.taskid=t.id and p.id=#{planid}
+		<if test="taskid != null and taskid !=''">
+			and t.id=#{taskid}
+		</if> 
+	</select>
+	
+	<!-- 获取shape clob 字段值 -->
+	<select id="getTableShapeReturnClob" resultType="string" parameterType="hashmap" flushCache="true">
+		${sql}
+	</select>
+	
+	<!-- 保存绘制信息 -->
+	<insert id="saveDrawInfo" parameterType="hashmap" flushCache="true">
+		${sql}
+	</insert>
+	
+	<!-- 获取空间注册编号 -->
+    <select id="getSrid" resultType="int" parameterType="hashmap" flushCache="true">
+		SELECT 
+		    srid 
+        FROM 
+            sde.st_geometry_columns 
+        WHERE 
+            table_name=#{tablename}
+            AND owner=#{owner}
+    </select>
+    
+    <!-- 获取计划漏检点或巡检点 -->
+    <select id="getPlanPoints" resultType="hashmap" parameterType="hashmap" flushCache="true">
+    	${sql}
+    </select>
+    
+    <select id="getOnlineMenByRegionid" resultType="hashmap" parameterType="string" flushCache="true">
+	   select v.name,v.id,v.businesstype,DICTIONARY_TO_STR(o.businesstype,'businesstype') patroltype,o.ct_x x,o.ct_y y
+	   from view_patrolgroupperson v, onlineman o
+	   where v.id = o.patrolman_id and v.regionid=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getOnlineMenByOrgid" resultType="hashmap" parameterType="string" flushCache="true">
+	   select v.name,v.id,v.businesstype,DICTIONARY_TO_STR(o.businesstype,'businesstype') patroltype,o.ct_x x,o.ct_y y 
+	   from view_patrolgroupperson v, onlineman o
+	   where v.id = o.patrolman_id and v.orgid=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <select id="getOnlineMenByGroupid" resultType="hashmap" parameterType="string" flushCache="true">
+	   select v.name,v.id,v.businesstype,DICTIONARY_TO_STR(o.businesstype,'businesstype') patroltype,o.ct_x x,o.ct_y y
+	   from view_patrolgroupperson v, onlineman o
+	   where v.id = o.patrolman_id and v.parentid=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 获取当前资源空间信息 -->
+    <select id="getResouceInfo" resultType="hashmap" parameterType="hashmap" flushCache="true">
+	   select xtbh id,zymc name,z.shape.minx x,z.shape.miny y from res_zdxx z where xtbh=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 获取正常油机 -->
+    <select id="getAllOeoilengines" resultType="hashmap" parameterType="string" flushCache="true">
+	   select * from oe_oilengine o where o.oilengine_state='O21' and maintenance_id = #{orgid,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 通用处理过程（轨迹） -->
+    <select id="getUniversalProcessLocus" resultType="hashmap" parameterType="hashmap" flushCache="true">
+	 SELECT p.*,bp.NAME AS PERSON_NAME, 
+	 fn_getnamebycode(p.PROCESS_STATE,'scene_status') AS PROCESS_STATE_DIS, 
+	 to_char(p.PROCESS_TIME,'yyyy-mm-dd hh24:mi:ss') AS t 
+	 FROM WLOCALE_PROCESS p,BASE_PERSON bp 
+	 WHERE p.PROCESSER=bp.ID
+	 AND p.TASK_ID=#{id,jdbcType=VARCHAR}
+	 AND p.TASK_TYPE=#{type,jdbcType=VARCHAR}
+	 and p.x >0 and p.y >0
+	 order by p.PROCESS_TIME
+    </select>
+    
+    <!-- 获取油机记录 -->
+    <select id="getOeoilengineRecordByTaskId" resultType="hashmap" parameterType="string" flushCache="true">
+	   select r.TASK_ID,r.OILENGINE_ID,TO_CHAR(r.SETOUT_TIME,'yyyy/mm/dd HH24:mi:ss') STARTTIME,
+	   TO_CHAR(r.END_TIME,'yyyy/mm/dd HH24:mi:ss') ENDTIME 
+	   from OE_OILENGINERECORD r
+		where r.TASK_ID=#{id,jdbcType=VARCHAR}
+    </select>
+    
+    <!-- 获取油机轨迹 -->
+    <select id="getOeoilenginePosition" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		SELECT h.CT_X X,h.CT_Y Y,TO_CHAR(h.ACTIVETIME,'yyyy/mm/dd HH24:mi:ss') ACTIVETIME 
+		FROM HISTORYPOSITION h where h.taskid=#{TASK_ID,jdbcType=VARCHAR} and h.activetime between
+		to_date(#{STARTTIME,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') and
+		to_date(#{ENDTIME,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss')
+		ORDER BY h.ACTIVETIME		
+    </select>
+    
+	<!-- 获取车辆轨迹信息 -->
+	<select id="getHistoryPositionByCar" parameterType="hashmap" resultType="hashmap">
+		select h.ct_x x,h.ct_y y,
+		to_char(h.activetime,'yyyy/mm/dd HH24:mi:ss')t
+		 from historyposition_car h 
+		where h.simid=#{simid,jdbcType=VARCHAR}
+		<if test="businesstype=='C35'">
+			and h.businesstype=#{businesstype,jdbcType=VARCHAR}
+		</if>
+		and h.activetime between
+		to_date(#{begin,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') and
+		to_date(#{end,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') order
+		by h.activetime
+	</select>
+
+	<!-- 获取人员轨迹信息 -->
+	<select id="getHistoryPositionByMan" parameterType="hashmap" resultType="hashmap">
+		select h.ct_x x,h.ct_y y,
+		to_char(h.activetime,'yyyy/mm/dd HH24:mi:ss')t
+		 from historyposition h where 1=1
+		<choose>
+			<!-- 此处注释部分为广东特殊情况 -->
+			<when test="opencatholic == 1 and businesstype=='C30'">
+				and h.simid=#{simid,jdbcType=VARCHAR}
+			</when>
+			<otherwise>
+				<if test="patrolid != null and patrolid !=''">
+					and h.patrolman_id=#{patrolid,jdbcType=VARCHAR}
+				</if>
+			</otherwise>
+		</choose>
+		and h.activetime between
+		to_date(#{begin,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') and
+		to_date(#{end,jdbcType=VARCHAR},'yyyy/mm/dd HH24:mi:ss') order
+		by h.activetime
+	</select>    
+</mapper>

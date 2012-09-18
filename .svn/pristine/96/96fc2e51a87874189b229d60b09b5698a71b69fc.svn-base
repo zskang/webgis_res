@@ -1,0 +1,29 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ taglib prefix="s" uri="/struts-tags"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<div class="ui-form-container">
+	<div class="ui-title-banner-bg">
+    	<div class="ui-title-banner-text">
+    		代维车辆搜索列表
+    	</div>
+	</div>
+</div>
+<input type="hidden" id="locatejson" value='${locatejson}'>
+<input type="hidden" id="total" name="total" value="${map['total']}">
+<c:forEach items="${map['rows']}" var="item">
+	<div class="ui-div-list">
+		<ul>
+			<li>车牌号：${item.LABEL }</li>
+			<li>司机：${item.MENTOR }</li>
+			<li>司机电话：${item.PHONE }</li>
+			<li>组织机构：${item.ORGNAME }</li>
+			<li>最后一次发送时间：${item.ACTIVETIME }</li>
+		</ul>
+		<ul>
+			<li><a href='javascript:void(0);'>今日轨迹</a>&nbsp;&nbsp;<a href='javascript:void(0);'>历史轨迹	</a>&nbsp;&nbsp;<a href='javascript:void(0);'>调度</a></li>
+		</ul>
+	</div>
+</c:forEach>

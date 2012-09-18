@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.opticcablemgr.GlxxMapper">
+
+	<!-- 插入光缆信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.opticcablemgr.GlxxEntity">
+		INSERT INTO RES_GLXX(
+		xtbh,zymc,glbh,ymc,gdzcbh,ggxh,qxs,ywjb,sszt,cqxz,whfs,wyzt,gllx,
+		ssgc,zjdw,cjdw,zydw,sydw,jgsj,syqr,regionid,orgid
+		)
+		VALUES(
+		#{xtbh,jdbcType=VARCHAR},#{zymc,jdbcType=VARCHAR},#{glbh,jdbcType=VARCHAR},#{ymc,jdbcType=VARCHAR},
+		#{gdzcbh,jdbcType=VARCHAR},#{ggxh,jdbcType=VARCHAR},#{qxs,jdbcType=VARCHAR},
+		#{ywjb,jdbcType=VARCHAR},#{sszt,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{whfs,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{gllx,jdbcType=VARCHAR},
+		#{ssgc,jdbcType=VARCHAR},#{zjdw,jdbcType=VARCHAR},#{cjdw,jdbcType=VARCHAR},
+		#{zydw,jdbcType=VARCHAR},#{sydw,jdbcType=VARCHAR},to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),
+		#{syqr,jdbcType=VARCHAR},#{regionid,jdbcType=VARCHAR},#{orgid,jdbcType=VARCHAR}
+		)
+	</insert>
+	<!-- 更新光缆信息 -->
+	<update id="update" parameterType="com.cabletech.res.entity.opticcablemgr.GlxxEntity">
+		UPDATE RES_GLXX SET
+		zymc=#{zymc,jdbcType=VARCHAR},glbh=#{glbh,jdbcType=VARCHAR},ymc=#{ymc,jdbcType=VARCHAR},
+		gdzcbh=#{gdzcbh,jdbcType=VARCHAR},ggxh=#{ggxh,jdbcType=VARCHAR},qxs=#{qxs,jdbcType=VARCHAR},
+		ywjb=#{ywjb,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},cqxz=#{cqxz,jdbcType=VARCHAR},
+		whfs=#{whfs,jdbcType=VARCHAR},wyzt=#{wyzt,jdbcType=VARCHAR},gllx=#{gllx,jdbcType=VARCHAR},
+		ssgc=#{ssgc,jdbcType=VARCHAR},zjdw=#{zjdw,jdbcType=VARCHAR},cjdw=#{cjdw,jdbcType=VARCHAR},
+		zydw=#{zydw,jdbcType=VARCHAR},sydw=#{sydw,jdbcType=VARCHAR},jgsj=to_date(#{jgsj,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'),
+		syqr=#{syqr,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 查看光缆信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.opticcablemgr.GlxxEntity"
+		parameterType="string" flushCache="true">
+		select * from RES_GLXX where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询光缆信息 条件 名称 设施状态  产权性质 业务级别 网元状态 区域 -->
+	<select id="queryGlxx" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select * from RES_GLXX
+		where ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="sszt != null and sszt != ''">
+			and sszt = #{sszt,jdbcType=VARCHAR}
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="ywjb != null and ywjb != ''">
+			and ywjb = #{ywjb,jdbcType=VARCHAR}
+		</if>
+		<if test="wyzt != null and wyzt != ''">
+			and wyzt = #{wyzt,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+	</select>
+	
+	<!-- 逻辑删除光缆信息-->
+	<update id="deleteGlxx" parameterType="String">
+		UPDATE res_glxx SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 获取光缆信息关联树中 光缆段路由  -->
+	<select id="getGldlyByGlxx" parameterType="string" resultType="hashmap" flushCache="true">
+		select zymc,xtbh from res_gld_ly where ssgl=#{xtbh,jdbcType=VARCHAR} and status is null
+	</select>
+	
+	<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_glxx set ywjb=#{ywjb,jdbcType=VARCHAR},sszt=#{sszt,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},wyzt=#{wyzt,jdbcType=VARCHAR},
+		regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>				
+</mapper>

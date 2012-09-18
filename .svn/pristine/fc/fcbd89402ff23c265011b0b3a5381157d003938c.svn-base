@@ -1,0 +1,21 @@
+package com.cabletech.res.mapper.index;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.cabletech.res.entity.analyse.AnalyseEntity;
+import com.cabletech.res.entity.basemgr.BsdEntity;
+
+/**
+ * 通告管理
+ * @author 吕仁钊 2012-08-11
+ *
+ */
+public interface NoticeMapper {
+	
+	public List<Map<String,Object>> getNotices(Map<String,Object> params);
+	
+	public int getUnReadNotices(Map<String,Object> params);
+	
+}

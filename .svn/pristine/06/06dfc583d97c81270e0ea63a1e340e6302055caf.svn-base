@@ -1,0 +1,82 @@
+package com.cabletech.res.service.publicmgr;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.annotation.Resource;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.cabletech.baseinfo.excel.ExportSupport;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.publicmgr.NodeBEntity;
+import com.cabletech.res.mapper.publicmgr.NodeBMapper;
+import com.cabletech.res.service.common.MainTenceService;
+
+/**
+ * NodeB 业务接口实现类
+ * 
+ * @author wangt
+ * 
+ */
+@Service
+public class NodeBServiceImpl extends BaseServiceImpl implements NodeBService,
+		ExportSupport {
+
+	@Resource(name = "nodeBMapper")
+	private NodeBMapper mapper;
+	@Resource(name = "mainTenceServiceImpl")
+	private MainTenceService service;
+
+	private Map<String, Object> exportconditionmap = new HashMap<String, Object>();
+
+	@Override
+	public void setExportconditionmap(Map<String, Object> map) {
+		exportconditionmap = map;
+	}
+
+	@Override
+	public NodeBEntity view(String nodeid) {
+		// TODO Auto-generated method stub
+		return mapper.getbyid(nodeid);
+	}
+
+	@Override
+	public boolean delete(String nodeid) {
+		try {
+			mapper.delete(nodeid);
+			return true;
+		} catch (Exception e) {
+			logger.error("删除nodeb：", e);
+			return false;
+		}
+
+	}
+
+	@Override
+	@Transactional
+	public boolean save(NodeBEntity entity) {
+		try {
+			if (StringUtils.isNotBlank(entity.getNodeid())) {
+				mapper.update(entity);
+			} else {
+				entity.setNodeid(super.getXTBH());
+				mapper.save(entity);
+			}
+			service.save(entity.getSiteid(), "A37", "C31");
+			return true;
+		} catch (Exception e) {
+			logger.error("新增或更新NodeBEntity：", e);
+			return false;
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public List getExportDatas(Map<String, Object> paramet) {
+		return mapper.queryNodeBList(exportconditionmap);
+	}
+}

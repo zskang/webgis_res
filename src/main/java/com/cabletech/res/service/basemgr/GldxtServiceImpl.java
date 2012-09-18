@@ -1,0 +1,134 @@
+package com.cabletech.res.service.basemgr;
+
+import java.util.List;
+import java.util.Map;
+import javax.annotation.Resource;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import com.cabletech.core.service.BaseServiceImpl;
+import com.cabletech.res.entity.basemgr.GldxtEntity;
+import com.cabletech.res.mapper.basemgr.GldMapper;
+import com.cabletech.res.mapper.basemgr.GldxtMapper;
+
+/**
+ * 承载--杆路段系统管理 Service实现
+ * 
+ * @author zhb @date 2012/5/11
+ */
+@Service
+public class GldxtServiceImpl extends BaseServiceImpl implements GldxtService {
+
+	@Resource(name = "gldxtMapper")
+	private GldxtMapper gldxtMapper;
+	
+	@Resource(name = "gldMapper")
+	private GldMapper gldMapper;	
+	
+	/**
+	 * 获得电杆的数量
+	 * @param xtbh 系统编号
+	 * @return
+	 */
+	public String calcDgs(String xtbh)
+	{
+		return gldxtMapper.calcDgs(xtbh);
+		
+	}
+	/**
+	 * 获取杆路段系统实体
+	 * @param resId 资源编号
+	 * @return entity
+	 */	
+	public GldxtEntity getbyid(String resId){
+		return gldxtMapper.getbyid(resId);
+	}
+	
+	/**
+	 * 新增或更新杆路段系统实体
+	 * @param entity 杆路系统实体
+	 */
+	public boolean saveorupdate(GldxtEntity entity){
+		try{
+			entity.setDgs(gldxtMapper.calcDgs(entity.getXtbh()));
+			if(StringUtils.isNotBlank(entity.getXtbh())){
+				gldxtMapper.update(entity);
+			}else{
+				entity.setXtbh(super.getXTBH());
+				gldxtMapper.insert(entity);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("新增或更新杆路段系统：",e);
+			return false;
+		}
+	}
+
+	/**
+	 * 逻辑删除杆路段系统
+	 * @param entity 杆路系统实体
+	 */
+	@Transactional
+	public boolean delete(GldxtEntity entity){
+		try {
+			gldxtMapper.deleteGldxt(entity.getXtbh());
+			gldMapper.deleteGldBySsglxt(entity.getXtbh());
+			return true;
+		} catch (Exception e) {
+			logger.error("删除杆路段系统：",e);
+			return false;
+		}
+	}
+	
+	
+	/**
+	 * 获取Ztree的结构数据
+	 * @param entity 杆路段系统
+	 */
+	@Override
+	public String getTreeNodes(GldxtEntity entity){
+		Map<String, Object> restype = super.getResourceType();
+		StringBuffer nodes = new StringBuffer();
+		List<Map<String, Object>> gldlist = gldxtMapper.getGldByGldxt(entity.getXtbh());
+		List<Map<String, Object>> gldlylist = gldxtMapper.getGldlyByGldxt(entity.getXtbh());
+		nodes.append(super.getRootNode(entity.getXtbh(), entity.getZymc(),14));
+		nodes.append(super.getNode(entity.getXtbh(), "13", restype, gldlist));
+		nodes.append(super.getNode(entity.getXtbh(), "15", restype, gldlylist));
+		return nodes.toString();
+	}
+	
+	/**
+	 * 杆路系统的批量逻辑删除
+	 * @param xtbhs 杆路系统的系统编号
+	 * @return true删除成功 false删除失败
+	 */
+	@Transactional
+	public boolean batchDelete(String xtbhs){
+		String[] xtbh = xtbhs.split(",");
+		try{
+			for(int i=0; i<xtbh.length; i++){
+				gldxtMapper.deleteGldxt(xtbh[i]);
+				gldMapper.deleteGldBySsglxt(xtbh[i]);
+			}
+			return true;
+		}catch (Exception e) {
+			logger.error("删除杆路系统：",e);
+			return false;
+		}
+	}	
+	
+	/**
+	 * 杆路系统批量编辑
+	 * @param map 表单值
+	 * @return
+	 */
+	public boolean batchEdit(Map<String, Object> map){
+		try{
+			gldxtMapper.batchEdit(map);
+			return true;
+		}catch (Exception e) {
+			logger.error("编辑杆路系统：",e);
+			return false;
+		}
+	}	
+}

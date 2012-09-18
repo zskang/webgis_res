@@ -1,0 +1,9 @@
+[
+	{name:"基站",url:"/ResWebGIS/legendIcons/A24.bmp"},
+	{name:"铁塔",url:"/ResWebGIS/legendIcons/A25.bmp"},
+	{name:"电杆",url:"/ResWebGIS/legendIcons/A20.bmp"},
+	{name:"集客",url:"/ResWebGIS/legendIcons/A20.bmp"},
+	{name:"家客",url:"/ResWebGIS/legendIcons/A20.bmp"},
+	{name:"车辆",url:"/ResWebGIS/legendIcons/A20.bmp"},
+	{name:"巡检人",url:"/ResWebGIS/legendIcons/A20.bmp"}
+]

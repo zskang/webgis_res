@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BASEINFOCLIENT 统一属性配置 -->
+<items> 
+ <!-- EXCEL导出配置 按模块分组 -->
+ <!-- 公共资源模块         -->
+ <include file="baseinfoclient-export-public.xml"></include>
+</items>

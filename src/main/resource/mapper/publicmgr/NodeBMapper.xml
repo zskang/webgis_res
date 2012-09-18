@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.NodeBMapper">
+	<!-- 单个实体查看 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.NodeBEntity"
+		parameterType="string" flushCache="true">
+		select t.node_id nodeid,t.site_id
+		siteid,t.room_id roomid,t.irms_id irmsid,t.ne_name nename,t.cn_name
+		cnname,
+		t.rnc_id rncid,t.transfer_type transfertype,
+		FN_GETNAMEBYCODE(t.band, 'NODEB_BAND') band,
+		t.bs_type
+		bstype,t.bs_level bslevel,t.device_model devicemodel,
+		t.state,t.producer,to_char(t.opening_time,'yyyy-MM-dd HH24:mi:ss')
+		openingtime,j.zymc jfmc,d.zymc zdmc
+		from res_nodeb t left join res_zdxx
+		d on t.site_id = d.xtbh
+		left join res_jf j on t.room_id = j.xtbh
+		where
+		node_id=#{nodeid,jdbcType=VARCHAR}
+		and ( state is null or state != '9'
+		)
+	</select>
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.NodeBEntity">
+		UPDATE res_nodeb SET
+		site_id=#{siteid,jdbcType=VARCHAR},room_id=#{roomid,jdbcType=VARCHAR},irms_id=#{irmsid,jdbcType=VARCHAR},
+		ne_name=#{nename,jdbcType=VARCHAR},cn_name=#{cnname,jdbcType=VARCHAR},rnc_id=#{rncid,jdbcType=VARCHAR},
+		transfer_type=#{transfertype,jdbcType=VARCHAR},band=#{band,jdbcType=VARCHAR},bs_type=#{bstype,jdbcType=VARCHAR},
+		bs_level=#{bslevel,jdbcType=VARCHAR},device_model=#{devicemodel,jdbcType=VARCHAR},producer=#{producer,jdbcType=VARCHAR},
+		opening_time=to_date(#{openingtime,jdbcType=VARCHAR},'yyyy-MM-dd
+		HH24:mi:ss')
+		WHERE node_id=#{nodeid,jdbcType=VARCHAR}
+	</update>
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.NodeBEntity"
+		flushCache="true">
+		insert into
+		res_nodeb(node_id,site_id,room_id,irms_id,ne_name,cn_name,rnc_id,transfer_type,band,bs_type,bs_level,device_model,producer,
+		opening_time)
+		values(#{nodeid,jdbcType=VARCHAR}
+		,#{siteid,jdbcType=VARCHAR},#{roomid,jdbcType=VARCHAR}
+		,#{irmsid,jdbcType=VARCHAR},#{nename,jdbcType=VARCHAR},#{cnname,jdbcType=VARCHAR}
+		,#{rncid,jdbcType=VARCHAR},#{transfertype,jdbcType=VARCHAR},#{band,jdbcType=VARCHAR}
+		,#{bstype,jdbcType=VARCHAR},#{bslevel,jdbcType=VARCHAR},#{devicemodel,jdbcType=VARCHAR},#{producer,jdbcType=VARCHAR}
+		,to_date(#{openingtime,jdbcType=VARCHAR},'yyyy-MM-dd HH24:mi:ss'))
+	</insert>
+	<select id="queryNodeBList" parameterType="hashmap" resultType="hashmap"
+		flushCache="true">
+		select d.zdbh,
+		d.zymc zdmc,
+		n.ne_name,
+		n.cn_name,
+		n.bs_level,
+		fn_getnamebycode(n.bs_level, 'BS_LEVEL') bs_levelname,
+		n.room_id,
+		j.zymc jfmc,
+		d.regionid,
+		g.regionname,
+		to_char(n.opening_time, 'yyyy-MM-dd hh24:mi:ss') openingtime,
+		m.maintenance_id,
+		n.node_id nodeb_id,
+       o.ORGNAME orgname,
+       p.NAME PATROLGROUP
+		from res_nodeb n
+		left join res_zdxx d on n.site_id = d.xtbh
+		left join res_jf j on n.room_id = j.xtbh
+		left join res_maintenance m on d.xtbh = m.rs_id
+		and m.rs_type = 'C31'
+		left join view_org o on m.maintenance_id = o.ID
+		left join view_patrolgroup p on p.ID = m.patrol_group_id
+		left join view_region g on d.regionid = g.regionid
+		where 1 = 1
+		and (n.state != '9' or n.state is null)
+		<if test="roomid != null and roomid != ''">
+			and j.zymc like '%' ||#{roomid,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="bslevel != null and bslevel != ''">
+			and n.bs_level = #{bslevel,jdbcType=VARCHAR}
+		</if>
+		<if test="bstype != null and bstype != ''">
+			and n.bs_type=#{bstype,jdbcType=VARCHAR}
+		</if>
+		<if test="nename != null and nename != ''">
+			and n.ne_name like '%' || #{nename,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		
+	   <if test="orgid != null and orgid != ''">
+			and o.ID = #{orgid,jdbcType=VARCHAR}
+		</if>
+		<if test="cnname != null and cnname != ''">
+			and n.cn_name like '%' || #{cnname,jdbcType=VARCHAR} ||
+			'%'
+		</if>
+		<if test="zdbh != null and zdbh != ''">
+			and d.zdbh like '%' || #{zdbh,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="regionids != null">
+			and d.regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid,jdbcType=VARCHAR}
+			</foreach>
+		</if>
+		<if test="orgids != null">
+			and m.maintenance_id in
+			<foreach collection="orgids" item="orgid" open="(" separator=","
+				close=")">
+				#{orgid,jdbcType=VARCHAR}
+			</foreach>
+			and m.rs_id=n.site_id and m.rs_type='C31'
+		</if>
+		<if test="patrolgroupid != null and patrolgroupid != ''">
+			and m.patrol_group_id =
+			#{patrolgroupid,jdbcType=VARCHAR}
+		</if>
+	</select>
+	<update id="delete" parameterType="String">
+		UPDATE res_nodeb SET state='9'
+		where node_id=#{nodeid,jdbcType=VARCHAR}
+	</update>
+
+</mapper>

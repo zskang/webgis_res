@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cabletech.res.mapper.publicmgr.OdmMapper">
+<!-- 批量编辑 -->
+	<update id="batchEdit" parameterType="hashmap" flushCache="true">
+		update res_odm set wyzt=#{wyzt,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},regionid=#{regionid,jdbcType=VARCHAR} where xtbh in 
+		<foreach collection="xtbhlist" item="xtbh" open="("
+			separator="," close=")">
+			#{xtbh}
+		</foreach>		
+	</update>	
+<!-- 逻辑删除odm成端根据站点编号 -->
+	<update id="deleteOdfConnByOdmXtbh" parameterType="String" flushCache="true">
+		update res_odf_conn set status='9' where ssodm in(select xtbh from res_odm where xtbh=#{xtbh,jdbcType=VARCHAR})
+	</update>
+	<!-- 插入ODM信息 -->
+	<insert id="save" parameterType="com.cabletech.res.entity.publicmgr.OdmEntity">
+		INSERT INTO RES_ODM(
+		xtbh, zymc, odmbm, sssb, gh,
+		dybs, bplfs, dzplfs, splx, kxh,
+		cqxz, regionid, wyzt,whfs,
+		sssblx, sssbm, bdzs, dzqsbh, sccj,bz,cjsj)
+		VALUES(
+		#{xtbh,jdbcType=VARCHAR},
+		#{zymc,jdbcType=VARCHAR},#{odmbm,jdbcType=VARCHAR},#{sssb,jdbcType=VARCHAR},
+		#{gh,jdbcType=VARCHAR},#{dybs,jdbcType=VARCHAR},#{bplfs,jdbcType=VARCHAR},
+		#{dzplfs,jdbcType=VARCHAR},#{splx,jdbcType=VARCHAR},#{kxh,jdbcType=VARCHAR},#{cqxz,jdbcType=VARCHAR},
+		#{regionid,jdbcType=VARCHAR},#{wyzt,jdbcType=VARCHAR},#{whfs,jdbcType=VARCHAR},
+		#{sssblx,jdbcType=VARCHAR},#{sssbm,jdbcType=VARCHAR},#{bdzs,jdbcType=VARCHAR},
+		#{dzqsbh,jdbcType=VARCHAR},#{sccj,jdbcType=VARCHAR},#{bz,jdbcType=VARCHAR},sysdate)
+	</insert>
+	<!-- 更新odm -->
+	<update id="update" parameterType="com.cabletech.res.entity.publicmgr.OdmEntity">
+		UPDATE RES_ODM SET
+		zymc=#{zymc,jdbcType=VARCHAR}, odmbm=#{odmbm,jdbcType=VARCHAR}, sssb=#{sssb,jdbcType=VARCHAR}, gh=#{gh,jdbcType=VARCHAR},
+		dybs=#{dybs,jdbcType=VARCHAR}, bplfs=#{bplfs,jdbcType=VARCHAR}, dzplfs=#{dzplfs,jdbcType=VARCHAR}, splx=#{splx,jdbcType=VARCHAR}, kxh=#{kxh,jdbcType=VARCHAR},
+		cqxz=#{cqxz,jdbcType=VARCHAR}, regionid=#{regionid,jdbcType=VARCHAR}, wyzt=#{wyzt,jdbcType=VARCHAR},whfs=#{whfs,jdbcType=VARCHAR},
+		sssblx=#{sssblx,jdbcType=VARCHAR}, sssbm=#{sssbm,jdbcType=VARCHAR}, bdzs=#{bdzs,jdbcType=VARCHAR}, dzqsbh=#{dzqsbh,jdbcType=VARCHAR}, sccj=#{sccj,jdbcType=VARCHAR},bz=#{bz,jdbcType=VARCHAR},
+		twwidth=#{twwidth,jdbcType=VARCHAR},twheight=#{twheight,jdbcType=VARCHAR},twx=#{twx,jdbcType=VARCHAR},
+		twy=#{twy,jdbcType=VARCHAR},twplfs=#{twplfs,jdbcType=VARCHAR}
+		WHERE
+		XTBH=#{xtbh,jdbcType=VARCHAR}
+	</update>
+
+	<!-- 查看odm信息 -->
+	<select id="getbyid" resultType="com.cabletech.res.entity.publicmgr.OdmEntity"
+		parameterType="string" flushCache="true">
+		select * from RES_ODM where
+		xtbh=#{xtbh,jdbcType=VARCHAR}
+	</select>
+
+	<!-- 查询odm -->
+	<select id="queryOdm" resultType="hashmap" parameterType="hashmap"
+		flushCache="true">
+		select * from RES_ODM
+		where ( status is null or status != '9' )
+		<if test="zymc != null and zymc != ''">
+			and zymc like '%' || #{zymc,jdbcType=VARCHAR} || '%'
+		</if>
+		<if test="cqxz != null and cqxz != ''">
+			and cqxz = #{cqxz,jdbcType=VARCHAR}
+		</if>
+		<if test="wyzt != null and wyzt != ''">
+			and wyzt = #{wyzt,jdbcType=VARCHAR}
+		</if>
+		<if test="regionids != null and regionids != ''">
+			and regionid in
+			<foreach collection="regionids" item="regionid" open="("
+				separator="," close=")">
+				#{regionid}
+			</foreach>
+		</if>
+		ORDER BY cjsj desc
+	</select>
+	
+	<!-- 删除odm -->
+	<update id="deleteOdm" parameterType="String">
+		UPDATE res_odm SET status='9' where xtbh=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<!-- 逻辑删除odm根据站点系统编号 -->
+	<update id="deleteOdmByZdxxXtbh" parameterType="String" flushCache="true">
+		update res_odm set status='9' where sssb in(select xtbh from res_odf where ssjf in (select xtbh from res_jf where sszd=#{xtbh,jdbcType=VARCHAR}))
+	</update>
+	
+	<!-- 逻辑删除odm根据odf系统编号 -->	
+	<update id="deleteOdmByOdfXtbh" parameterType="String" flushCache="true">
+		update res_odm set status='9' where sssb=#{xtbh,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="getByParentId" resultType="com.cabletech.res.entity.publicmgr.OdmEntity" parameterType="hashmap" flushCache="true">
+		select * from res_odm where sssb = #{xtbh,jdbcType=VARCHAR} and sssblx= #{zylx,jdbcType=VARCHAR}
+	</select>
+	<!--查詢 框號是否存在  -->
+	<select id="getOdmByGh" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select * from res_odm  where sssblx=#{sssblx,jdbcType=VARCHAR} AND sssb=#{sssb,jdbcType=VARCHAR} AND gh=#{gh,jdbcType=VARCHAR} AND sssbm=#{sssbm,jdbcType=VARCHAR}
+	</select>
+	<select id="getOdfByGhOdm" resultType="hashmap" parameterType="hashmap" flushCache="true">
+		select * from res_odf  where xtbh=#{sssb,jdbcType=VARCHAR}
+	</select> 
+</mapper>

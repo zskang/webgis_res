@@ -1,0 +1,298 @@
+<%@ page language="java" pageEncoding="UTF-8"%>
+<%@ include file="/common/header.jsp"%>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<%@ taglib uri="http://www.cabletech.com.cn/resinfo" prefix="resinfo"%>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title></title>
+<script type="text/javascript">
+	In
+			.add(
+					'ctcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ct-ui-custom_nbsp.css'
+					});
+	In
+			.add(
+					'jggridlocalejs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/grid.locale-cn.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.add(
+					'autocompleteJs',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'autocompleteCss' ]
+					});
+	In
+			.add(
+					'autocompleteCss',
+					{
+						path : 'http://${config.webliburl}/cabletech/autocomplete/jquery.autocomplete.css'
+					});
+	In.add('ztreecss', {
+		path : 'http://${config.webliburl}/cabletech/ui/css/zTreeStyle.css'
+	});
+	In
+			.add(
+					'jqgridcss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/css/ui.jqgrid.css'
+					});
+	In
+			.add(
+					'uicss',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/css/jquery-ui-1.8.19.custom.css'
+					});
+	In
+			.add(
+					'jggridjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/jqgrid/js/jquery.jqGrid.min.js',
+						type : 'js',
+						charset : 'utf-8',
+						rely : [ 'jqgridcss', 'uicss' ]
+					});
+	In
+			.add(
+					'commonjs',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/js/jquery.ct.common.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In.add('wresize', {
+		path : 'http://${config.webliburl}/cabletech/ui/js/jquery.wresize.js',
+		type : 'js',
+		charset : 'utf-8'
+	});
+	In
+			.add(
+					'wdatepicker',
+					{
+						path : 'http://${config.webliburl}/cabletech/ui/wdatepicker/WdatePicker.js',
+						type : 'js',
+						charset : 'utf-8'
+					});
+	In
+			.css('.ui-form-input-box{width:100%} .ui-form-input {width:210px} .ui-form-input-title {width:100px}');
+</script>
+<script type="text/javascript">
+	In
+			.ready(
+					'autocompleteJs',
+					'autocompleteCss',
+					'wdatepicker',
+					'ztreecss',
+					'ctcss',
+					'jqgridcss',
+					'jggridjs',
+					'jggridlocalejs',
+					'commonjs',
+					'wresize',
+					'wdatepicker',
+					function() {
+						jQuery(function() {
+							//使用层布局
+							var jqgrid = $("#btssitegrid")
+									.jqGrid(
+											{
+												url : "${ctx}/res/publicmgr/btssite!listdata.action",
+												datatype : "json",
+												mtype : 'GET',
+												rownumbers : true,
+												colNames : [ '站点编号', '站点名称',
+														'网元名称', '中文名称',
+														'VIP基站', '所属机房', '区域',
+														'入网时间', '代维公司', '操作' ],
+												colModel : [ {
+													name : 'ZDBH',
+													id : 'ZDBH',
+													sortable : false
+												}, {
+													name : 'ZDMC',
+													id : 'ZDMC',
+													sortable : false
+												}, {
+													name : 'NE_NAME',
+													id : 'NE_NAME',
+													sortable : false
+												}, {
+													name : 'CN_NAME',
+													id : 'CN_NAME',
+													sortable : false
+												}, {
+													name : 'BS_LEVELE',
+													id : 'BS_LEVELE',
+													sortable : false
+												}, {
+													name : 'JFMC',
+													id : 'JFMC',
+													sortable : false
+												}, {
+													name : 'REGIONNAME',
+													id : 'REGIONNAME',
+													sortable : false
+												}, {
+													name : 'OPENINGTIME',
+													id : 'OPENINGTIME',
+													sortable : false
+												}, {
+													name : 'MAINTENCE_ID',
+													id : 'MAINTENCE_ID',
+													sortable : false
+												}, {
+													name : 'BTSSITE_ID',
+													id : 'BTSSITE_ID',
+													sortable : false,
+													formatter : operateFmatter
+												} ],
+												rowNum : 15,
+												autowidth : true,
+												rowList : [ 15, 30, 50 ],
+												pager : '#btssitepager',
+												shrinkToFit : true,
+												viewrecords : true,
+												hidegrid : false,
+												prmNames : {
+													page : "pageNo",
+													rows : "rows",
+													sort : "sidx",
+													order : "sord"
+												},
+												jsonReader : {
+													root : "root", // 数据行（默认为：rows） 
+													page : "pageNo", // 当前页 
+													total : "totalPages", // 总页数 
+													records : "total", // 总记录数 
+													repeatitems : false,
+													id : "btssite_ID"
+												}
+											}).navGrid('#btssitepager', {
+										edit : false,
+										add : false,
+										del : false,
+										search : false,
+										sortable : false
+									});
+							In
+									.css('#form1 label.error {margin-left: 10px;width: auto;display: inline;}');
+							In
+									.css('.ui-form-input {width:210px} .ui-form-input-title{width:100px}');
+							initRegionTree_001();
+							getAutoCompleteValue(false, 'jfmc', 'roomid',
+									'res_jf');
+							$(window).wresize(function() {
+								grid_resize(jqgrid);
+							});
+							grid_resize(jqgrid);
+						});
+					});
+	var regionCallBackId = function(id) {
+		$('#regionid').val(id);
+	}
+
+	//操作按钮
+	function operateFmatter(cellvalue, options, rowObjec) {
+		var view = '<a href="#" style="color: blue;text-decoration: underline;" onclick="view(\''
+				+ rowObjec.BTSSITE_ID + '\')">查看</a>';
+		view += '&nbsp;&nbsp;<a href="#" style="color: blue;text-decoration: underline;" onclick="deleteit(\''
+				+ rowObjec.BTSSITE_ID + '\')">删除</a>';
+		return view;
+	}
+
+	//编辑
+	function view(btssiteid) {
+		window.parent.openResourcetreediv('查看btssite',
+				'${ctx}/res/publicmgr/btssite.action?btssiteid=' + btssiteid);
+	}
+	//删除
+	function deleteit(btssiteid) {
+		window.location.href = '${ctx}/res/publicmgr/btssite!delete.action?btssiteid='
+				+ btssiteid;
+	}
+	//查询
+	function query() {
+		jQuery("#btssitegrid").jqGrid().setGridParam({
+			postData : {
+				regionid : jQuery("#regionid").val(),
+				orgid : jQuery("#orgid").val(),
+				patrolgroupid : jQuery("#patrolgroupid").val(),
+				roomid : jQuery("#roomid").val(),
+				bslevel : jQuery("#bslevel").val(),
+				bstype : jQuery("#bstype").val(),
+				nename : jQuery("#nename").val(),
+				cnname : jQuery("#cnname").val(),
+				zdbh : jQuery("#zdbh").val()
+			}
+		}).trigger("reloadGrid");
+
+	}
+
+	function add() {
+		window.location.href = '${ctx}/res/publicmgr/btssite!input4nbsp.action';
+	}
+</script>
+</head>
+<body>
+	<div class="ui-form-container">
+		<form id="form1" method="post">
+			<input type="hidden" id="serializeQueryCondition"
+				name="serializeQueryCondition" />
+			<div class="ui-form-input-box">
+				<input type="hidden" class="required" name="regionid"
+					value="${searchCondition.regionid}"> <span
+					class="ui-form-input-title">代维公司:</span> <input id="orgid"
+					name="orgid" style="width: 198px" class="ui-form-input" /> <span
+					class="ui-form-input-title">维护组:</span> <input id="patrolgroupid"
+					name="patrolgroupid" style="width: 198px" class="ui-form-input" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">所属机房:</span> <span
+					class="ui-form-value"> <input id="jfmc" name="jfmc"
+					class="required ui-form-input" type="text"
+					onblur="judgeHiddenValue(this,'roomid')"
+					value='<resinfo:resCommon keyValue="${searchCondition.roomid}" 
+					tableName="res_jf"></resinfo:resCommon>' />
+					<input size="30" type="hidden" readonly name="roomid" id="roomid"
+					value="${searchCondition.roomid}" />
+				</span> <span class="ui-form-input-title">VIP标志:</span>
+				<baseinfo:dicselector name="bslevel" columntype="BS_LEVEL"
+					type="select" cssClass="ui-form-input" isQuery="query"></baseinfo:dicselector>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">网元名称:</span> <input type="text"
+					class="ui-form-input" name="nename" id="nename" /> <span
+					class="ui-form-input-title">中文名称:</span> <input type="text"
+					class="ui-form-input" name="cnname" id="cnname" />
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">基站编号:</span> <input type="text"
+					class="ui-form-input" name="zdbh" id="zdbh" /> <span
+					class="ui-form-input-title">所属区域：</span>
+				<baseinfo:regiontree widgetId="001" width="220" height="120"
+					defaultValue="${searchCondition.regionid}" cls="ui-form-input"
+					callBackId="regionCallBackId" regionId="${user.regionId}"></baseinfo:regiontree>
+			</div>
+			<div class="ui-form-input-box">
+				<span class="ui-form-input-title">&nbsp;&nbsp;&nbsp;&nbsp;</span> <input
+					type="button" value="新增" onclick="add();" style="width: 80px;" />
+				<input type="button" value="查询" style="width: 80px;"
+					onclick="query();">
+				<baseinfo:expexcel cls="exprotButton" businessId="btssitelist"
+					name="导出excel"></baseinfo:expexcel>
+			</div>
+		</form>
+	</div>
+	<div id="content" align="center">
+		<table id="btssitegrid"></table>
+		<div id="btssitepager"></div>
+	</div>
+</body>
+</html>
